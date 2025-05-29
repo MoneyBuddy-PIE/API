@@ -10,6 +10,8 @@ import java.time.LocalDateTime;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Document(collection = "subAccounts")
 @Data
 @Builder
@@ -19,9 +21,15 @@ public class SubAccount {
     @Id
     private String id;
     private String accountId;
+
     private String name;
     private SubAccountRole role;
+    private boolean isActive;
+
+    @JsonIgnore
+    private String pin;
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private boolean isActive;
+    private LocalDateTime lastConnexion;
 }

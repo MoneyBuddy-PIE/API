@@ -22,7 +22,7 @@ import moneybuddy.fr.moneybuddy.model.Task;
 import moneybuddy.fr.moneybuddy.service.TaskService;
 
 @RestController
-@RequestMapping("/api/tasks")
+@RequestMapping("/tasks")
 @RequiredArgsConstructor
 public class TaskController {
     

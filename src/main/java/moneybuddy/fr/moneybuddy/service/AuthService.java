@@ -1,6 +1,7 @@
 package moneybuddy.fr.moneybuddy.service;
 
 import moneybuddy.fr.moneybuddy.dtos.AuthRequest;
+import moneybuddy.fr.moneybuddy.dtos.AuthResetPassword;
 import moneybuddy.fr.moneybuddy.dtos.AuthResponse;
 import moneybuddy.fr.moneybuddy.dtos.AuthSubAccountRequest;
 import moneybuddy.fr.moneybuddy.dtos.RegisterRequest;
@@ -12,13 +13,14 @@ import moneybuddy.fr.moneybuddy.model.PlanType;
 import moneybuddy.fr.moneybuddy.repository.AccountRepository;
 import moneybuddy.fr.moneybuddy.repository.SubAccountRepository;
 import moneybuddy.fr.moneybuddy.utils.CheckByRegex;
-import moneybuddy.fr.moneybuddy.utils.CreateDefaultSubAccounts;
+import moneybuddy.fr.moneybuddy.utils.EmailService;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
@@ -32,7 +34,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final CheckByRegex checkByRegex;
-    private final CreateDefaultSubAccounts createDefaultSubAccounts;
+    private final EmailService emailService;
 
     private static final String EMAIL_REGEX = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
     private static final String PIN_REGEX = "^\\d{4}$";
@@ -70,26 +72,31 @@ public class AuthService {
         Account account = Account.builder()
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .pin(request.getPin())
                 .role(Role.USER)
                 .createdAt(LocalDateTime.now())
                 .subscriptionStatus(false)
                 .planType(PlanType.FREE)
                 .build();
-
         repository.save(account);
 
-        List<SubAccount> subAccounts = createDefaultSubAccounts.createDefaultSubAccounts();
-        for (SubAccount subAccount : subAccounts) {
-            subAccount.setAccountId(account.getId());
-        }
+        SubAccount subAccount = SubAccount.builder()
+                                .name(request.getName())
+                                .pin(request.getPin())
+                                .accountId(account.getId())
+                                .role(SubAccountRole.OWNER)
+                                .isActive(true)
+                                .createdAt(LocalDateTime.now())
+                                .build();
 
-        subAccountRepository.saveAll(subAccounts);
+        subAccountRepository.save(subAccount);
 
+        List<SubAccount> subAccounts = Arrays.asList(subAccount);
         account.setSubAccounts(subAccounts);
         repository.save(account);
         
         String jwtToken = jwtService.generateToken(account);
+
+        emailService.welcomeEmail(account.getEmail());
 
         return ResponseEntity
             .status(HttpStatus.CREATED)
@@ -98,10 +105,16 @@ public class AuthService {
                 .build());
     }
 
-    public ResponseEntity<AuthResponse> authenticate(AuthRequest request) {        
+    public ResponseEntity<AuthResponse> authenticate(AuthRequest request) {   
         Account account = repository.findByEmail(request.getEmail()).orElseThrow();
 
+        if (!passwordEncoder.matches(request.getPassword(), account.getPassword())) {
+            return response("Mot de passe incorrect", HttpStatus.UNAUTHORIZED);
+        }
+
         String jwtToken = jwtService.generateToken(account);
+        account.setLastConnexion(LocalDateTime.now());
+        repository.save(account);
 
         return ResponseEntity
             .status(HttpStatus.ACCEPTED)
@@ -125,13 +138,15 @@ public class AuthService {
         String email = jwtService.extractUsername(token);
 
         SubAccount subAccount = subAccountRepository.findById(subAccountId).orElseThrow();
-        Account account = repository.findByEmail(email).orElseThrow();
 
-        if (SubAccountRole.PARENT.equals(subAccount.getRole()) && !pin.equals(account.getPin())) {
+        if (!SubAccountRole.CHILD.equals(subAccount.getRole()) && !pin.equals(subAccount.getPin())) {
             return response("Mauvais pin pour le compte parent", HttpStatus.BAD_REQUEST);
         }        
 
-        var jwtToken = jwtService.generateSubAccountToken(subAccountId, account.getId(), email, subAccount.getRole());
+        var jwtToken = jwtService.generateSubAccountToken(subAccountId, subAccount.getAccountId(), email, subAccount.getRole());
+        subAccount.setLastConnexion(LocalDateTime.now());
+        subAccountRepository.save(subAccount);
+
         return ResponseEntity
             .status(HttpStatus.ACCEPTED)
             .body(AuthResponse.builder()
@@ -146,5 +161,35 @@ public class AuthService {
         return ResponseEntity
             .status(HttpStatus.ACCEPTED)
             .body(subAccount);
+    }
+
+    public ResponseEntity<Void> resetPassword(AuthRequest request) {
+        Account account = repository.findByEmail(request.getEmail()).orElseThrow();
+
+        String token = jwtService.generateToken(account);
+
+        emailService.resetPasswordEmail(request.getEmail(), token);
+
+        return ResponseEntity.status(HttpStatus.OK).body(null);
+    } 
+
+    public ResponseEntity<AuthResponse> restPasswordConfirm(AuthResetPassword request, String token) {
+        String accountId = jwtService.extractUsername(token);
+        Account account = repository.findByEmail(accountId).orElseThrow();
+
+        SubAccount subAccount = subAccountRepository.findByAccountIdAndRole(account.getId(), SubAccountRole.OWNER);
+
+        if (!subAccount.getPin().equals(request.getPin())) {
+            return response("UNAUTHORIZED not same pin as the ower", HttpStatus.UNAUTHORIZED);
+        }
+
+        if (!request.getPassword().equals(request.getConfirmPassword())) {
+            return response("Not same password", HttpStatus.BAD_REQUEST);
+        }
+
+        account.setPassword(passwordEncoder.encode(request.getPassword()));
+        account.setUpdatedAt(LocalDateTime.now());
+        repository.save(account);
+        return ResponseEntity.status(HttpStatus.OK).body(null);
     }
 }

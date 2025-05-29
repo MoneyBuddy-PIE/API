@@ -1,48 +1,71 @@
 package moneybuddy.fr.moneybuddy.service;
 
+import moneybuddy.fr.moneybuddy.dtos.AuthResponse;
 import moneybuddy.fr.moneybuddy.dtos.SubAccountDto;
 import moneybuddy.fr.moneybuddy.model.Account;
 import moneybuddy.fr.moneybuddy.model.SubAccount;
+import moneybuddy.fr.moneybuddy.model.SubAccountRole;
 import moneybuddy.fr.moneybuddy.repository.AccountRepository;
+import moneybuddy.fr.moneybuddy.repository.SubAccountRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class SubAccountService {
     private final AccountRepository accountRepository;
+    private final SubAccountRepository subAccountRepository;
+    private final JwtService jwtService;
 
-    public List<SubAccount> getSubAccounts() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
-        
-        Account account = accountRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Account not found"));
-        
-        return account.getSubAccounts();
+    public ResponseEntity<AuthResponse> response(String message, HttpStatus status) {
+        return ResponseEntity
+                .status(status)
+                .body(AuthResponse.builder()
+                    .error(message)
+                    .build());
     }
 
-    public void addSubAccount(SubAccountDto subAccountDto, String pin) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
+    public ResponseEntity<AuthResponse> addSubAccount(SubAccountDto subAccountDto, String token) {
+        SubAccountRole subAccountRole = jwtService.extractSubAccountRole(token);
+        String accountId = jwtService.extractSubAccountAccountId(token);
+
+        Optional<Account> optinalaccount = accountRepository.findById(accountId);
         
-        Account account = accountRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Account not found"));
-        
-        if (!account.getPin().equals(pin)) {
-            throw new RuntimeException("Invalid PIN");
+        if (!SubAccountRole.OWNER.equals(subAccountRole)) {
+            return response("Pas autorisé", HttpStatus.UNAUTHORIZED);
         }
-        
+
         SubAccount subAccount = SubAccount.builder()
                 .name(subAccountDto.getName())
+                .accountId(accountId)
+                .isActive(false)
                 .role(subAccountDto.getRole())
+                .createdAt(LocalDateTime.now())
                 .build();
-        
-        account.getSubAccounts().add(subAccount);
-        accountRepository.save(account);
+
+        if (SubAccountRole.PARENT.equals(subAccountDto.getRole())) {
+            subAccount.setPin(subAccountDto.getPin());
+        }
+
+        subAccountRepository.save(subAccount);
+        List<SubAccount> subAccounts = Arrays.asList(subAccount);
+
+        if (optinalaccount.isPresent()) {
+            Account account = optinalaccount.get();
+            account.setSubAccounts(subAccounts);
+            accountRepository.save(account);
+
+            response("SubAccount created", HttpStatus.OK);
+        }
+
+        return response("Error", HttpStatus.NOT_FOUND);
     }
 }
