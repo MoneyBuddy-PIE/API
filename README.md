@@ -41,7 +41,7 @@ mvn clean install -DskipTests
 ##### Register
 
 ```http
-  POST /api/auth/register
+  POST /auth/register
 ```
 
 | Parameter         | Type     | Description   |
@@ -54,7 +54,7 @@ mvn clean install -DskipTests
 ##### Login
 
 ```http
-  POST /api/auth/login
+  POST /auth/login
 ```
 
 | Parameter  | Type     | Description   |
@@ -65,7 +65,7 @@ mvn clean install -DskipTests
 ##### Get Me
 
 ```http
-  GET /api/auth/me
+  GET /auth/me
 ```
 
 | Parameter  | Type     | Description                          |
@@ -75,7 +75,7 @@ mvn clean install -DskipTests
 ##### SubAccount Login
 
 ```http
-  POST /api/auth/subAccount/login
+  POST /auth/subAccount/login
 ```
 
 | Parameter  | Type     | Description                         |
@@ -87,7 +87,7 @@ mvn clean install -DskipTests
 ##### Get SubAccount Me
 
 ```http
-  GET /api/auth/subAccount/me
+  GET /auth/subAccount/me
 ```
 
 | Parameter  | Type     | Description                          |
@@ -101,7 +101,7 @@ mvn clean install -DskipTests
 Only parents can create tasks.
 
 ```http
-  POST /api/tasks
+  POST /tasks
 ```
 
 | Parameter      | Type     | Description                          |
@@ -116,7 +116,7 @@ Only parents can create tasks.
 #### Get Tasks
 
 ```http
-  GET /api/tasks
+  GET /tasks
 ```
 
 | Parameter  | Type              | Description                          |
@@ -127,7 +127,7 @@ Only parents can create tasks.
 #### Get Task
 
 ```http
-  GET /api/tasks/id
+  GET /tasks/id
 ```
 
 | Parameter  | Type     | Description                          |
@@ -140,7 +140,7 @@ Only parents can create tasks.
 Only parents can delete tasks.
 
 ```http
-  DELETE /api/tasks/id
+  DELETE /tasks/id
 ```
 
 | Parameter  | Type     | Description                          |
@@ -153,7 +153,7 @@ Only parents can delete tasks.
 Only parents can modify tasks.
 
 ```http
-  PUT /api/tasks/id
+  PUT /tasks/id
 ```
 
 | Parameter      | Type     | Description                          |
@@ -171,7 +171,7 @@ Only parents can modify tasks.
 Only parents can sent a task as complete.
 
 ```http
-  PUT /api/tasks/complete/id
+  PUT /tasks/complete/id
 ```
 
 | Parameter  | Type     | Description                          |

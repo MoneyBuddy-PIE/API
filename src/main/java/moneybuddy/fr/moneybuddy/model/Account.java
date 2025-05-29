@@ -29,14 +29,13 @@ public class Account implements UserDetails {
 
     @JsonIgnore
     private String password;
-    @JsonIgnore
-    private String pin;
     
     private PlanType planType;
     private boolean subscriptionStatus;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private LocalDateTime lastConnexion;
     
     @DBRef
     private List<SubAccount> subAccounts;

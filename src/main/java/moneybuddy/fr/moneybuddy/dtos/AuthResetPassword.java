@@ -1,7 +1,5 @@
 package moneybuddy.fr.moneybuddy.dtos;
 
-
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -13,11 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class RegisterRequest {
-    @NotBlank
-    @Email
-    private String email;
-    
+public class AuthResetPassword {
     @NotBlank
     @Size(min = 8)
     private String password;
@@ -29,8 +23,4 @@ public class RegisterRequest {
     @NotBlank
     @Size(min = 4, max = 4)
     private String pin;
-
-    @NotBlank
-    private String name;
 }
-
