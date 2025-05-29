@@ -50,6 +50,7 @@ mvn clean install -DskipTests
 | `password`        | `string` | **Required**. |
 | `confirmPassword` | `string` | **Required**. |
 | `pin`             | `string` | **Required**. |
+| `name`            | `string` | **Required**. |
 
 ##### Login
 
