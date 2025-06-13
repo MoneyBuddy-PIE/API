@@ -26,6 +26,8 @@ public class SubAccount {
     private SubAccountRole role;
     private boolean isActive;
 
+    private String money;
+
     @JsonIgnore
     private String pin;
 
