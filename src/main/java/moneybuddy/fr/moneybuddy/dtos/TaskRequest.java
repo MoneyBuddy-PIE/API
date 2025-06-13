@@ -13,18 +13,18 @@ import jakarta.validation.constraints.NotBlank;
 @AllArgsConstructor
 public class TaskRequest {
 
-    @NotBlank(message = "La description est obligatoire")
+    @NotBlank(message = "Description is mandatory")
     private String description;
     
-    @NotBlank(message = "La category est obligatoire")
+    @NotBlank(message = "Category is mandatory")
     private String category;
 
-    @NotBlank(message = "Le subAccountId est obligatoire")
+    @NotBlank(message = "SubAccountId is mandatory")
     private String subAccountId;
 
-    @NotBlank(message = "Le reward est obligatoire")
+    @NotBlank(message = "Reward is mandatory")
     private String reward;
 
-    @NotBlank(message = "Le dateLimit est obligatoire")
+    @NotBlank(message = "DateLimit is mandatory")
     private String dateLimit;
 }

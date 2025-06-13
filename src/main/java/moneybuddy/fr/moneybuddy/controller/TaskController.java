@@ -3,6 +3,7 @@ package moneybuddy.fr.moneybuddy.controller;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,6 +21,7 @@ import moneybuddy.fr.moneybuddy.dtos.AuthResponse;
 import moneybuddy.fr.moneybuddy.dtos.TaskRequest;
 import moneybuddy.fr.moneybuddy.model.Task;
 import moneybuddy.fr.moneybuddy.service.TaskService;
+import moneybuddy.fr.moneybuddy.utils.ValidatorResult;
 
 @RestController
 @RequestMapping("/tasks")
@@ -27,12 +29,19 @@ import moneybuddy.fr.moneybuddy.service.TaskService;
 public class TaskController {
     
     private final TaskService service;
+    private final ValidatorResult validatorResult;
 
     @PostMapping("")
     public ResponseEntity<AuthResponse> createTask(
         @Valid @RequestBody TaskRequest request,
-        @RequestHeader("Authorization") String authHeader
+        @RequestHeader("Authorization") String authHeader,
+         BindingResult bindingResult
     ) {
+
+        if (bindingResult.hasErrors()) {
+            return validatorResult.returnErrorMessage(bindingResult);
+        }
+
         String token = authHeader.substring(7);
         return service.createTask(request, token);
     }

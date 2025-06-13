@@ -1,5 +1,6 @@
 package moneybuddy.fr.moneybuddy.dtos;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,6 +11,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AuthSubAccountRequest {
+    @NotBlank(message = "Id is mandatory")
     private String id;
+
+    @NotBlank(message = "Pin is mandatory")
     private String pin;
 }
