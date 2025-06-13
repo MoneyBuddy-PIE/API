@@ -1,6 +1,7 @@
 package moneybuddy.fr.moneybuddy.dtos;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,15 +13,16 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AuthResetPassword {
-    @NotBlank
-    @Size(min = 8)
+    @NotBlank(message = "Password is mandatory")
+    @Size(min = 8, message = "Password has to have length 8")
+    @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}$", message = "Password has to be 1 Capital letter and 1 number at least")
     private String password;
     
-    @NotBlank
-    @Size(min = 8)
+    @NotBlank(message = "ConfirmPassword is mandatory")
     private String confirmPassword;
     
-    @NotBlank
-    @Size(min = 4, max = 4)
+    @NotBlank(message = "Pin is mandatory")
+    @Size(min = 4, max = 4, message = "Pin has to have length 4")
+    @Pattern(regexp =  "^\\d{4}$", message = "Wrong format for Pin")
     private String pin;
 }

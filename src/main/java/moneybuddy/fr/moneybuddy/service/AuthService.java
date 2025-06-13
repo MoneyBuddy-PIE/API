@@ -33,12 +33,7 @@ public class AuthService {
     private final SubAccountRepository subAccountRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
-    private final CheckByRegex checkByRegex;
     private final EmailService emailService;
-
-    private static final String EMAIL_REGEX = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
-    private static final String PIN_REGEX = "^\\d{4}$";
-    private static final String PASSWORD_REGEX = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}$";
 
     public ResponseEntity<AuthResponse> response(String message, HttpStatus status) {
         return ResponseEntity
@@ -49,24 +44,12 @@ public class AuthService {
     }
 
     public ResponseEntity<AuthResponse> register(RegisterRequest request) {
-        if (!checkByRegex.validate(request.getEmail(), EMAIL_REGEX)) {
-            return response("Mauvais format d'email" ,HttpStatus.BAD_REQUEST);
-        }
-
-        if (!checkByRegex.validate(request.getPassword(), PASSWORD_REGEX)) {
-            return response("Mauvais format de mot de passe" ,HttpStatus.BAD_REQUEST);
-        }
-
         if (!request.getPassword().equals(request.getConfirmPassword())) {
-            return response("Les mots de passe ne correspondent pas" ,HttpStatus.BAD_REQUEST);
+            return response("Not same password" ,HttpStatus.BAD_REQUEST);
         }
         
         if (repository.findByEmail(request.getEmail()).isPresent()){
             return response("L'email est déjà utilisé" ,HttpStatus.BAD_REQUEST);
-        }
-
-        if (!checkByRegex.validate(request.getPin(), PIN_REGEX)) {
-            return response("Pin doit avoir 4 chiffres" ,HttpStatus.BAD_REQUEST);
         }
 
         Account account = Account.builder()

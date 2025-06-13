@@ -8,8 +8,10 @@ import moneybuddy.fr.moneybuddy.dtos.RegisterRequest;
 import moneybuddy.fr.moneybuddy.model.Account;
 import moneybuddy.fr.moneybuddy.model.SubAccount;
 import moneybuddy.fr.moneybuddy.service.AuthService;
+import moneybuddy.fr.moneybuddy.utils.ValidatorResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,23 +19,37 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
 public class AuthController {
     private final AuthService service;
+    private final ValidatorResult validatorResult;
 
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(
-            @RequestBody RegisterRequest request
+        @Valid @RequestBody RegisterRequest request,
+        BindingResult bindingResult
     ) {
+        if (bindingResult.hasErrors()) {
+            return validatorResult.returnErrorMessage(bindingResult);
+        }
+
         return service.register(request);
     }
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> authenticate(
-            @RequestBody AuthRequest request
+            @Valid @RequestBody AuthRequest request,
+            BindingResult bindingResult
     ) {
+
+        if (bindingResult.hasErrors()) {
+            return validatorResult.returnErrorMessage(bindingResult);
+        }
+        
         return service.authenticate(request);
     }
 
@@ -47,9 +63,15 @@ public class AuthController {
 
     @PostMapping("/subAccount/login")
     public ResponseEntity<AuthResponse> authenticateSubAccount(
-        @RequestBody AuthSubAccountRequest request,
-        @RequestHeader("Authorization") String authHeader
+        @Valid @RequestBody AuthSubAccountRequest request,
+        @RequestHeader("Authorization") String authHeader,
+        BindingResult bindingResult
     ) {
+
+        if (bindingResult.hasErrors()) {
+            return validatorResult.returnErrorMessage(bindingResult);
+        }
+
         String token = authHeader.substring(7);
         return service.authenticateSubAccount(request, token);
     }
@@ -64,7 +86,7 @@ public class AuthController {
 
     @PostMapping("/reset-password")
     public ResponseEntity<Void> resetPassword(
-    @RequestBody AuthRequest request
+        @Valid @RequestBody AuthRequest request
     ) {
         return service.resetPassword(request);
     }
@@ -72,8 +94,14 @@ public class AuthController {
     @PostMapping("/reset-password/confirm")
     public ResponseEntity<AuthResponse> resetPasswordConfirm(
     @RequestBody AuthResetPassword request,
-    @RequestHeader("Authorization") String authHeader
+    @RequestHeader("Authorization") String authHeader,
+    BindingResult bindingResult
     ) {
+
+        if (bindingResult.hasErrors()) {
+            return validatorResult.returnErrorMessage(bindingResult);
+        }
+        
         String token = authHeader.substring(7);
         return service.restPasswordConfirm(request, token);
     }
