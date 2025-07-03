@@ -3,6 +3,7 @@ package moneybuddy.fr.moneybuddy.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,6 +13,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import moneybuddy.fr.moneybuddy.dtos.AuthResponse;
 import moneybuddy.fr.moneybuddy.dtos.Money.AddMoney;
+import moneybuddy.fr.moneybuddy.dtos.Money.WithdrawlMoney;
 import moneybuddy.fr.moneybuddy.service.MoneyService;
 import moneybuddy.fr.moneybuddy.utils.ValidatorResult;
 
@@ -34,5 +36,19 @@ public class MoneyController {
 
         String token = authHeader.substring(7);
         return moneyService.addMoney(request, token);
-    } 
+    }
+
+    @PutMapping("")
+    public ResponseEntity<AuthResponse> withdrawMoney(
+        @Valid @RequestBody WithdrawlMoney request,
+        @RequestHeader("Authorization") String authHeader,
+        BindingResult bindingResult
+    ) {
+        if (bindingResult.hasErrors()) {
+            return validatorResult.returnErrorMessage(bindingResult);
+        }
+
+        String token = authHeader.substring(7);
+        return moneyService.withdrawMoney(request, token);
+    }
 }

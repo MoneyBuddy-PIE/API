@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import moneybuddy.fr.moneybuddy.dtos.AuthResponse;
 import moneybuddy.fr.moneybuddy.dtos.Money.AddMoney;
+import moneybuddy.fr.moneybuddy.dtos.Money.WithdrawlMoney;
 import moneybuddy.fr.moneybuddy.model.SubAccount;
 import moneybuddy.fr.moneybuddy.model.Transaction;
 import moneybuddy.fr.moneybuddy.repository.SubAccountRepository;
@@ -39,6 +40,23 @@ public class MoneyService {
         transactionRepository.save(transaction);
 
         subAccount.setMoney(subAccount.getMoney() + request.getAmount());
+        subAccountRepository.save(subAccount);
+
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(null);
+    }
+
+        public ResponseEntity<AuthResponse> withdrawMoney (WithdrawlMoney request, String token) {
+        SubAccount subAccount = subAccountRepository.findById(request.getSubAccountId()).orElseThrow();
+        String parentId = jwtService.extractSubAccountAccountId(token);
+
+        Transaction transaction = Transaction.builder()
+            .amount(request.getAmount())
+            .childId(request.getSubAccountId())
+            .parentId(parentId)
+            .build();
+        transactionRepository.save(transaction);
+
+        subAccount.setMoney(subAccount.getMoney() - request.getAmount());
         subAccountRepository.save(subAccount);
 
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(null);

@@ -26,7 +26,7 @@ public class SubAccount {
     private SubAccountRole role;
     private boolean isActive;
 
-    private String money;
+    private Float money;
 
     @JsonIgnore
     private String pin;
@@ -34,4 +34,8 @@ public class SubAccount {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private LocalDateTime lastConnexion;
+    public Float getBalance() {
+      // TODO Auto-generated method stub
+      throw new UnsupportedOperationException("Unimplemented method 'getBalance'");
+    }
 }

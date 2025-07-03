@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Transaction {
-    
+
     @Id
     private String id;
     private String childId;
@@ -25,7 +25,7 @@ public class Transaction {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    private String amount;
+    private Float amount;
     private String description;
 
 }

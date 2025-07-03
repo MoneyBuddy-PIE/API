@@ -30,4 +30,12 @@ public class SubAccountController {
         String token = authHeader.substring(7);
         return subAccountService.addSubAccount(subAccount, token);
     }
+
+    @GetMapping("/money-childs")
+    public ResponseEntity<AuthResponse> getSubAccount(
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        String token = authHeader.substring(7);
+        return subAccountService.getSubAccount(token);
+    }
 }

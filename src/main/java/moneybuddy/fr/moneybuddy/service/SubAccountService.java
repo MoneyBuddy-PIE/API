@@ -7,6 +7,7 @@ import moneybuddy.fr.moneybuddy.model.SubAccount;
 import moneybuddy.fr.moneybuddy.model.SubAccountRole;
 import moneybuddy.fr.moneybuddy.repository.AccountRepository;
 import moneybuddy.fr.moneybuddy.repository.SubAccountRepository;
+import moneybuddy.fr.moneybuddy.dtos.Money.ChildBalanceDto;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.HttpStatus;
@@ -38,7 +39,7 @@ public class SubAccountService {
         String accountId = jwtService.extractSubAccountAccountId(token);
 
         Optional<Account> optinalaccount = accountRepository.findById(accountId);
-        
+
         if (!SubAccountRole.OWNER.equals(subAccountRole)) {
             return response("Pas autorisé", HttpStatus.UNAUTHORIZED);
         }
@@ -68,4 +69,31 @@ public class SubAccountService {
 
         return response("Error", HttpStatus.NOT_FOUND);
     }
+
+    public ResponseEntity<AuthResponse> getSubAccount(String token) {
+        SubAccountRole subAccountRole = jwtService.extractSubAccountRole(token);
+        String accountId = jwtService.extractSubAccountAccountId(token);
+
+        if (!SubAccountRole.PARENT.equals(subAccountRole)) {
+            return response("Pas autorisé", HttpStatus.UNAUTHORIZED);
+        }
+
+        List<SubAccount> childrens = subAccountRepository.findAllByAccountIdAndRole(accountId, SubAccountRole.CHILD);
+
+        if (childrens.isEmpty()) {
+            return response("Aucun sous-compte enfant trouvé", HttpStatus.NOT_FOUND);
+        }
+
+        List<ChildBalanceDto> result = childrens.stream()
+            .map(child -> new ChildBalanceDto(child.getName(), child.getBalance()))
+            .toList();
+
+        return ResponseEntity.status(HttpStatus.OK).body(
+            AuthResponse.builder()
+                .data(result)
+                .build()
+        );
+    }
+
+
 }

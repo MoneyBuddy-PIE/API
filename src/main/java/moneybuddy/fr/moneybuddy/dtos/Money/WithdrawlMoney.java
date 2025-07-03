@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AddMoney {
+public class WithdrawlMoney {
 
     @NotBlank(message = "SubAccountid is mandatory")
     private String subAccountId;
