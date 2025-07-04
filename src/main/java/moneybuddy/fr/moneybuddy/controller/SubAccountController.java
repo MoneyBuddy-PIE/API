@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/sub-accounts")
 @RequiredArgsConstructor
@@ -18,9 +20,9 @@ public class SubAccountController {
 
     @PostMapping("")
     public ResponseEntity<AuthResponse> addSubAccount(
-            @RequestBody SubAccountDto subAccount,
+            @Valid @RequestBody SubAccountDto subAccount,
             @RequestHeader("Authorization") String authHeader,
-             BindingResult bindingResult
+            BindingResult bindingResult
     ) {
 
         if (bindingResult.hasErrors()) {

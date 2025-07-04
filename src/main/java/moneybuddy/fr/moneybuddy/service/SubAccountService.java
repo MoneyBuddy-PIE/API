@@ -34,6 +34,7 @@ public class SubAccountService {
     }
 
     public ResponseEntity<AuthResponse> addSubAccount(SubAccountDto subAccountDto, String token) {
+        System.out.println(subAccountDto);
         SubAccountRole subAccountRole = jwtService.extractSubAccountRole(token);
         String accountId = jwtService.extractSubAccountAccountId(token);
 
