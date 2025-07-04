@@ -16,12 +16,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Transaction {
-    
+
     @Id
     private String id;
     private String childId;
     private String parentId;
-
+    private String type;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 

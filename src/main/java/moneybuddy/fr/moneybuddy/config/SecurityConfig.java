@@ -32,20 +32,21 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                            "/auth/login", 
+                            "/auth/login",
                             "/auth/register",
                             "/auth/reset-password",
                             "/swagger-ui/*",
                             "/swagger-ui.html",
                             "/v3/api-docs",
-                            "/v3/api-docs/swagger-config"
+                            "/v3/api-docs/swagger-config",
+                            "/money/balance/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
-        
+
         return http.build();
     }
 
