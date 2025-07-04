@@ -16,7 +16,7 @@ public class SubAccountController {
     private final SubAccountService subAccountService;
      private final ValidatorResult validatorResult;
 
-    @PostMapping
+    @PostMapping("")
     public ResponseEntity<AuthResponse> addSubAccount(
             @RequestBody SubAccountDto subAccount,
             @RequestHeader("Authorization") String authHeader,

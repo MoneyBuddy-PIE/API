@@ -36,7 +36,7 @@ public class TaskService {
         String subAccountIdParent = jwtService.extractSubAccountId(token);
         String accountId = jwtService.extractSubAccountAccountId(token);
 
-        if (!SubAccountRole.PARENT.equals(role)) {
+        if (SubAccountRole.CHILD.equals(role)) {
             return response("Vous n avez pas les droits", HttpStatus.FORBIDDEN);
         }
 
