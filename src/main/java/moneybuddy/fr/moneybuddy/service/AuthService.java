@@ -12,7 +12,6 @@ import moneybuddy.fr.moneybuddy.model.SubAccountRole;
 import moneybuddy.fr.moneybuddy.model.PlanType;
 import moneybuddy.fr.moneybuddy.repository.AccountRepository;
 import moneybuddy.fr.moneybuddy.repository.SubAccountRepository;
-import moneybuddy.fr.moneybuddy.utils.CheckByRegex;
 import moneybuddy.fr.moneybuddy.utils.EmailService;
 import lombok.RequiredArgsConstructor;
 

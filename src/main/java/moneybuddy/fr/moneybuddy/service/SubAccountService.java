@@ -14,7 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,7 +39,10 @@ public class SubAccountService {
 
         Optional<Account> optinalaccount = accountRepository.findById(accountId);
         
-        if (!SubAccountRole.OWNER.equals(subAccountRole)) {
+        if ( subAccountRole == null || 
+            (!SubAccountRole.OWNER.equals(subAccountRole) && 
+            !(SubAccountRole.PARENT.equals(subAccountRole) && SubAccountRole.CHILD.equals(subAccountDto.getRole())))) 
+        {
             return response("Pas autorisé", HttpStatus.UNAUTHORIZED);
         }
 
@@ -55,15 +58,26 @@ public class SubAccountService {
             subAccount.setPin(subAccountDto.getPin());
         }
 
-        subAccountRepository.save(subAccount);
-        List<SubAccount> subAccounts = Arrays.asList(subAccount);
+        if (SubAccountRole.CHILD.equals(subAccountDto.getRole())) {
+            subAccount.setMoney("0");
+        }
+
 
         if (optinalaccount.isPresent()) {
+            subAccountRepository.save(subAccount);
+
             Account account = optinalaccount.get();
+            List<SubAccount> subAccounts = account.getSubAccounts();
+
+            if (subAccounts == null) {
+                subAccounts = new ArrayList<>();
+            }
+
+            subAccounts.add(subAccount);
             account.setSubAccounts(subAccounts);
             accountRepository.save(account);
 
-            response("SubAccount created", HttpStatus.OK);
+            return response("SubAccount created", HttpStatus.OK);
         }
 
         return response("Error", HttpStatus.NOT_FOUND);
