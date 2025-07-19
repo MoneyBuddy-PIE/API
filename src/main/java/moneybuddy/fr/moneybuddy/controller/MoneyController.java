@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
@@ -23,16 +24,17 @@ public class MoneyController {
     private final MoneyService moneyService;
 
     @PostMapping("")
-    public ResponseEntity<AuthResponse> addMoney(
+    public ResponseEntity<AuthResponse> updateMoney(
         @Valid @RequestBody AddMoney request,
         @RequestHeader("Authorization") String authHeader,
-        BindingResult bindingResult
+        BindingResult bindingResult,
+        @RequestParam(required = true) Boolean isAdd
     ) {
         if (bindingResult.hasErrors()) {
             return validatorResult.returnErrorMessage(bindingResult);
         }
 
         String token = authHeader.substring(7);
-        return moneyService.addMoney(request, token);
-    } 
+        return moneyService.updateMoney(request, token, isAdd);
+    }
 }
