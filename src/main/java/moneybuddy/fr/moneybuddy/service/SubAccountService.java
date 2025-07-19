@@ -34,7 +34,6 @@ public class SubAccountService {
     }
 
     public ResponseEntity<AuthResponse> addSubAccount(SubAccountDto subAccountDto, String token) {
-        System.out.println(subAccountDto);
         SubAccountRole subAccountRole = jwtService.extractSubAccountRole(token);
         String accountId = jwtService.extractSubAccountAccountId(token);
 
@@ -52,6 +51,7 @@ public class SubAccountService {
                 .accountId(accountId)
                 .isActive(false)
                 .role(subAccountDto.getRole())
+                .money("0")
                 .createdAt(LocalDateTime.now())
                 .build();
 

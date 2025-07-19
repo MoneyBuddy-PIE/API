@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import moneybuddy.fr.moneybuddy.model.enums.TransactionType;
 
 @Document(collection = "transactions")
 @Data
@@ -21,11 +22,13 @@ public class Transaction {
     private String id;
     private String childId;
     private String parentId;
-    private String type;
+    private TransactionType type;
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
     private String amount;
+    private String oldAmount;
+    private String newAmount;
     private String description;
-
 }

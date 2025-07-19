@@ -1,5 +1,8 @@
 package moneybuddy.fr.moneybuddy.service;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -8,7 +11,9 @@ import lombok.RequiredArgsConstructor;
 import moneybuddy.fr.moneybuddy.dtos.AuthResponse;
 import moneybuddy.fr.moneybuddy.dtos.Money.AddMoney;
 import moneybuddy.fr.moneybuddy.model.SubAccount;
+import moneybuddy.fr.moneybuddy.model.SubAccountRole;
 import moneybuddy.fr.moneybuddy.model.Transaction;
+import moneybuddy.fr.moneybuddy.model.enums.TransactionType;
 import moneybuddy.fr.moneybuddy.repository.SubAccountRepository;
 import moneybuddy.fr.moneybuddy.repository.TransactionRepository;
 
@@ -31,6 +36,10 @@ public class MoneyService {
         SubAccount subAccount = subAccountRepository.findById(request.getSubAccountId())
                 .orElseThrow(() -> new IllegalArgumentException("SubAccount non trouvé"));
 
+        if (SubAccountRole.CHILD.equals(jwtService.extractSubAccountRole(token))) {
+            return response("Vous n etes pas un authorizé", HttpStatus.FORBIDDEN);
+        }
+
         String parentId = jwtService.extractSubAccountAccountId(token);
 
         double amount;
@@ -40,12 +49,9 @@ public class MoneyService {
             return response("Montant invalide", HttpStatus.BAD_REQUEST);
         }
 
-        double currentBalance;
-        try {
-            currentBalance = Double.parseDouble(subAccount.getMoney());
-        } catch (NumberFormatException e) {
-            return response("Solde du sous-compte invalide", HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        double currentBalance = subAccount.getMoney() == null 
+            ? 0.0 
+            : Double.parseDouble(subAccount.getMoney());
 
         if (!isAdd && currentBalance < amount) {
             return response("Fonds insuffisants", HttpStatus.BAD_REQUEST);
@@ -59,30 +65,23 @@ public class MoneyService {
         subAccountRepository.save(subAccount);
 
         Transaction transaction = Transaction.builder()
-                .amount(String.valueOf(amount))
                 .childId(request.getSubAccountId())
                 .parentId(parentId)
+                .amount(String.valueOf(amount))
+                .oldAmount(String.valueOf(currentBalance))
+                .newAmount(String.valueOf(newBalance))
                 .description(request.getDescription())
-                .type(isAdd ? "CREDIT" : "DEBIT")
+                .type(isAdd ? TransactionType.CREDIT : TransactionType.DEBIT)
+                .createdAt(LocalDateTime.now())
                 .build();
         transactionRepository.save(transaction);
 
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(null);
     }
 
-    public ResponseEntity<?> getSubAccountBalance(String subAccountId) {
-        return subAccountRepository.findById(subAccountId)
-            .<ResponseEntity<?>>map(subAccount -> ResponseEntity.ok().body(subAccount.getMoney()))
-            .orElseGet(() -> response("SubAccount non trouvé", HttpStatus.NOT_FOUND));
-    }
-
-    public ResponseEntity<?> getAllTransactions(String subAccountId) {
-        boolean exists = subAccountRepository.existsById(subAccountId);
-        if (!exists) {
-            return response("SubAccount non trouvé", HttpStatus.NOT_FOUND);
-        }
-
-        var transactions = transactionRepository.findByChildId(subAccountId);
-        return ResponseEntity.ok(transactions);
+    public ResponseEntity<List<Transaction>> getAllTransactions(String token, String subAccountId) {
+        
+        List<Transaction> transactions = transactionRepository.findByChildId(subAccountId);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(transactions);
     }
 }
