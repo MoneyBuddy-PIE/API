@@ -78,10 +78,4 @@ public class MoneyService {
 
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(null);
     }
-
-    public ResponseEntity<List<Transaction>> getAllTransactions(String token, String subAccountId) {
-        
-        List<Transaction> transactions = transactionRepository.findByChildId(subAccountId);
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(transactions);
-    }
 }
