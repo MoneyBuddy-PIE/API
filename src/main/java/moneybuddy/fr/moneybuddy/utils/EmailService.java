@@ -22,12 +22,12 @@ public class EmailService {
     @Value("${domain}")
     private String domain;
     
-    private String notReplyEmail;
+    private String noReplyEmail;
     private String contactEmail;
 
     @PostConstruct
     private void initEmails() {
-        this.notReplyEmail = "not-reply" + email;
+        this.noReplyEmail = "no-reply" + email;
         this.contactEmail = "hello" + email;
     }
 
@@ -67,7 +67,7 @@ public class EmailService {
             </div>
         """.formatted(link);
 
-        sendEmail(to, notReplyEmail, "Réinitialisation de votre mot de passe", htmlContent);
+        sendEmail(to, noReplyEmail, "Réinitialisation de votre mot de passe", htmlContent);
         return null;
     }
 

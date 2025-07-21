@@ -59,6 +59,10 @@ public class JwtService {
         return extractClaim(token, claims -> claims.get("subAccountId", String.class));
     }
 
+    public String extractSubAccountEmail(String token) {
+        return extractClaim(token, claims -> claims.get("email", String.class));
+    }
+
     public String extractSubAccountAccountId(String token) {
         return extractClaim(token, claims -> claims.get("id", String.class));
     }
