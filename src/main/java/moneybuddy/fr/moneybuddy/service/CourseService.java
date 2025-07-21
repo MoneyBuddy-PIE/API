@@ -61,7 +61,6 @@ public class CourseService {
                     .build();
                     
         courseRepository.save(course);
-        System.out.println(course);
         return response("Course created", HttpStatus.CREATED);
     }
 
