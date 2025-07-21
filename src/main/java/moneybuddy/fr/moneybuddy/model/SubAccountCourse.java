@@ -1,7 +1,6 @@
 package moneybuddy.fr.moneybuddy.model;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -11,21 +10,21 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Document(collection = "courses")
+@Document(collection = "subAccount_course")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Course {
+public class SubAccountCourse {
+    
     @Id
     private String id;
 
-    private String title;
-    private String description;
-    private String readTime;
-    private SubAccountRole subAccountRole;
-
-    private List<Question> questions;
+    private String subAccountid;
+    private String courseId;
+    
+    private String score;
+    private Boolean isCompleted;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

@@ -1,35 +1,32 @@
 package moneybuddy.fr.moneybuddy.service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
-import moneybuddy.fr.moneybuddy.dtos.AnswerRequest;
 import moneybuddy.fr.moneybuddy.dtos.AuthResponse;
 import moneybuddy.fr.moneybuddy.dtos.CourseRequest;
-import moneybuddy.fr.moneybuddy.dtos.QuestionRequest;
-import moneybuddy.fr.moneybuddy.model.Answer;
+import moneybuddy.fr.moneybuddy.dtos.subAccountCourse.SubAccountCourseComplete;
 import moneybuddy.fr.moneybuddy.model.Course;
-import moneybuddy.fr.moneybuddy.model.Question;
 import moneybuddy.fr.moneybuddy.model.Role;
+import moneybuddy.fr.moneybuddy.model.SubAccountCourse;
 import moneybuddy.fr.moneybuddy.model.SubAccountRole;
 import moneybuddy.fr.moneybuddy.model.Account;
-import moneybuddy.fr.moneybuddy.model.Task;
 import moneybuddy.fr.moneybuddy.repository.AccountRepository;
 import moneybuddy.fr.moneybuddy.repository.CourseRepository;
+import moneybuddy.fr.moneybuddy.repository.SubAccountCourseRepository;
 
 @Service
 @RequiredArgsConstructor
 public class CourseService {
 
     private final CourseRepository courseRepository;
+    private final AccountRepository accountRepository;
+    private final SubAccountCourseRepository subAccountCourseRepository;
     private final JwtService jwtService;
 
     public ResponseEntity<AuthResponse> response(String message, HttpStatus status) {
@@ -40,108 +37,89 @@ public class CourseService {
                     .build());
     }
 
-    // public List<Course> dataResponse(String message, HttpStatus status) {
-    //     return courseRepository.findAll();
-    // }
+    public Boolean isAdmin(String token) {
+        String email = jwtService.extractSubAccountEmail(token) != null ? 
+                    jwtService.extractSubAccountEmail(token) : 
+                    jwtService.extractUsername(token);
 
+        Account account = accountRepository.findByEmail(email).orElseThrow();
+        return Role.ADMIN.equals(account.getRole());
+    }
 
     public ResponseEntity<AuthResponse> createCourse (CourseRequest request, String token) {        
-        Role role = jwtService.extractAccountRole(token);
-
-        if (!Role.ADMIN.equals(role)) {
-            return response("Vous n'avez pas les droits", HttpStatus.FORBIDDEN);
+        if (!isAdmin(token)) {
+            return response("Not allowed", HttpStatus.FORBIDDEN);
         }
 
         Course course = Course.builder()
                     .title(request.getTitle())
                     .description(request.getDescription())
+                    .subAccountRole(request.getSubAccountRole())
                     .questions(request.getQuestions())
-                    .read_time(0)
+                    .readTime("5")
                     .createdAt(LocalDateTime.now())
                     .build();
                     
         courseRepository.save(course);
+        System.out.println(course);
         return response("Course created", HttpStatus.CREATED);
     }
 
-    // public ResponseEntity<List<Course>> getCourses (String token, String source) {
-    //     List<Course> courses = new ArrayList<>();
-    //     SubAccountRole role = jwtService.extractSubAccountRole(token);
-    //     // String id = (source != null && source.isEmpty()) ? 
-    //     //     jwtService.extractSubAccountAccountId(token) 
-    //     //     : jwtService.extractSubAccountId(token);
+    public ResponseEntity<List<Course>> getCourses(String token) {
+        SubAccountRole role = jwtService.extractSubAccountRole(token);
+
+        List<Course> courses = courseRepository.findAllBySubAccountRole(SubAccountRole.OWNER.equals(role) ? SubAccountRole.PARENT : role);
+        return ResponseEntity.status(HttpStatus.OK).body(courses);
+    }
+
+    public ResponseEntity<Course> getCourse(String courseId) {
+        Course course = courseRepository.findById(courseId).orElseThrow();
+
+        return ResponseEntity.status(HttpStatus.OK).body(course);
+    }
+
+    public ResponseEntity<AuthResponse> deleteCourse (String token, String courseId) {
+        if (!isAdmin(token)) {
+            return response("Not allowed", HttpStatus.FORBIDDEN);
+        }
+
+        courseRepository.deleteById(courseId);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    public ResponseEntity<AuthResponse> completeCourse (SubAccountCourseComplete req, String token, String courseId) {
+        Course course = courseRepository.findById(courseId).orElseThrow();
+        String subAccountId = jwtService.extractSubAccountId(token);
         
-    //     if ("PARENT".equals(source) && SubAccountRole.PARENT.equals(role)) {
-    //         courses = courseRepository.findAll();
-    //     } else if (SubAccountRole.PARENT.equals(role)) {
-    //         courses = courseRepository.findAll();
-    //     } else {
-    //         return dataResponse("Vous n'avez pas les droits", HttpStatus.FORBIDDEN);
-    //     }
+        int questions = course.getQuestions().size();
 
-    //     return ResponseEntity.status(HttpStatus.ACCEPTED).body(courses);
-    // }
+        SubAccountCourse subAccountCourse = SubAccountCourse.builder()
+        .subAccountid(subAccountId)
+        .courseId(courseId)
+        .createdAt(LocalDateTime.now())
+        .score(String.valueOf((req.getQuestionAnswered()*100)/questions))
+        .isCompleted(questions == req.getQuestionAnswered())
+        .build();
+        subAccountCourseRepository.save(subAccountCourse);
 
-    // public ResponseEntity<Course> getTask (String id) {
-    //     Optional<Course> task = taskRepository.findById(id);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).build();
+    }
 
-    //     return task.isPresent() ? 
-    //         ResponseEntity.status(HttpStatus.ACCEPTED).body(task.get())
-    //         : ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-    // }
+    public ResponseEntity<AuthResponse> modifyCourse (CourseRequest request, String token, String courseId) {
+        if (!isAdmin(token)) {
+            return response("Not allowed", HttpStatus.FORBIDDEN);
+        }
 
-    // public ResponseEntity<AuthResponse> deleteCourse (String token, String courseId) {
-    //     // String subAccountId = jwtService.extractSubAccountId(token);
-    //     Optional<Course> course = courseRepository.findById(courseId);
+        Course course = courseRepository.findById(courseId).orElseThrow();
 
-    //     if (course.isPresent()) {
-    //         courseRepository.deleteById(courseId);
-    //         return ResponseEntity.status(HttpStatus.ACCEPTED).build();
-    //     }
+        course.setTitle(request.getTitle());
+        course.setDescription(request.getDescription());
+        course.setReadTime(request.getRead_time());
+        course.setSubAccountRole(request.getSubAccountRole());
+        course.setUpdatedAt(LocalDateTime.now());
+        course.setQuestions(request.getQuestions());
 
-    //     return response("Erreur lors de la suppression", HttpStatus.BAD_REQUEST);
-    // }
-
-    // public ResponseEntity<AuthResponse> completeReadTimeAmount (String token, String courseId) {
-    //     SubAccountRole role = jwtService.extractSubAccountRole(token);
-        
-    //     if (!SubAccountRole.PARENT.equals(role)) {
-    //         return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-    //     }
-
-    //     Optional<Course> optionalCourse = courseRepository.findById(courseId);
-        
-    //     if (optionalCourse.isPresent()) {
-    //         Course course = optionalCourse.get();
-    //         course.setRead_time(course.getRead_time() + 1);
-    //         course.setUpdatedAt(LocalDateTime.now());
-    //         courseRepository.save(course);
-    //         return ResponseEntity.status(HttpStatus.ACCEPTED).build();
-    //     }
-
-    //     return response("Erreur lors de l'update", HttpStatus.BAD_REQUEST);
-    // }
-
-    // public ResponseEntity<Course> modifyCourse (CourseRequest request, String token, String courseId) {
-    //     SubAccountRole role = jwtService.extractSubAccountRole(token);
-
-    //     if (!SubAccountRole.PARENT.equals(role)) {
-    //         return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-    //     }
-
-    //     Optional<Course> optionalCourse = courseRepository.findById(courseId);
-    //     if (optionalCourse.isPresent()) {
-    //         Course course = optionalCourse.get();
-
-    //         course.setTitle(request.getTitle());
-    //         course.setDescription(request.getDescription());
-    //         course.setQuestions(request.getQuestions());
-    //         course.setUpdatedAt(LocalDateTime.now());
-
-    //         Course updatedCourse = courseRepository.save(course);
-    //         return ResponseEntity.status(HttpStatus.OK).body(updatedCourse);
-    //     }
-        
-    //     return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-    // }
+        courseRepository.save(course);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
 }

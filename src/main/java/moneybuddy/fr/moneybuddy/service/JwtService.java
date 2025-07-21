@@ -5,7 +5,6 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import moneybuddy.fr.moneybuddy.model.Role;
 import moneybuddy.fr.moneybuddy.model.SubAccountRole;
 
 import org.springframework.security.core.userdetails.UserDetails;
@@ -60,6 +59,10 @@ public class JwtService {
         return extractClaim(token, claims -> claims.get("subAccountId", String.class));
     }
 
+    public String extractSubAccountEmail(String token) {
+        return extractClaim(token, claims -> claims.get("email", String.class));
+    }
+
     public String extractSubAccountAccountId(String token) {
         return extractClaim(token, claims -> claims.get("id", String.class));
     }
@@ -67,12 +70,6 @@ public class JwtService {
     public SubAccountRole extractSubAccountRole(String token) {
         String roleString = extractClaim(token, claims -> claims.get("role", String.class));
         SubAccountRole role = SubAccountRole.valueOf(roleString);
-        return role;
-    }
-
-    public Role extractAccountRole(String token) {
-        String roleString = extractClaim(token, claims -> claims.get("role", String.class));
-        Role role = Role.valueOf(roleString);
         return role;
     }
 
