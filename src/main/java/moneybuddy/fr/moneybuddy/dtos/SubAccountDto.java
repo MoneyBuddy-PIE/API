@@ -1,5 +1,5 @@
 package moneybuddy.fr.moneybuddy.dtos;
-import moneybuddy.fr.moneybuddy.model.SubAccountRole;
+import moneybuddy.fr.moneybuddy.model.enums.SubAccountRole;
 import moneybuddy.fr.moneybuddy.utils.CheckByRegex;
 
 import jakarta.validation.constraints.AssertTrue;

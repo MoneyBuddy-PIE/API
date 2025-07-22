@@ -1,4 +1,4 @@
-package moneybuddy.fr.moneybuddy.model;
+package moneybuddy.fr.moneybuddy.model.enums;
 
 public enum PlanType {
     FREE,

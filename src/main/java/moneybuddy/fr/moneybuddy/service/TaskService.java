@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import moneybuddy.fr.moneybuddy.dtos.AuthResponse;
 import moneybuddy.fr.moneybuddy.dtos.TaskRequest;
-import moneybuddy.fr.moneybuddy.model.SubAccountRole;
+import moneybuddy.fr.moneybuddy.model.enums.SubAccountRole;
 import moneybuddy.fr.moneybuddy.model.Task;
 import moneybuddy.fr.moneybuddy.repository.TaskRepository;
 

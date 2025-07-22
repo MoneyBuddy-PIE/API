@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import moneybuddy.fr.moneybuddy.model.Question;
-import moneybuddy.fr.moneybuddy.model.SubAccountRole;
+import moneybuddy.fr.moneybuddy.model.enums.SubAccountRole;
 
 import java.util.List;
 

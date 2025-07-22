@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 import moneybuddy.fr.moneybuddy.model.SubAccount;
-import moneybuddy.fr.moneybuddy.model.SubAccountRole;
+import moneybuddy.fr.moneybuddy.model.enums.SubAccountRole;
 
 @Component
 public class CreateDefaultSubAccounts {
