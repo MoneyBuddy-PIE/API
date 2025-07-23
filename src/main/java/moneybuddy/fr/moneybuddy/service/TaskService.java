@@ -56,18 +56,19 @@ public class TaskService {
         return response("Task created", HttpStatus.CREATED);
     }
 
-    public ResponseEntity<List<Task>> getTasks (String token, String source) {
+    public ResponseEntity<List<Task>> getTasks (String token, SubAccountRole source) {
         List<Task> tasks = new ArrayList<>();
         SubAccountRole role = jwtService.extractSubAccountRole(token);
-        String id = (source != null && source.isEmpty()) ? 
-            jwtService.extractSubAccountAccountId(token) 
-            : jwtService.extractSubAccountId(token);
+        String id = (source != null) ?
+            jwtService.extractSubAccountId(token)
+            : jwtService.extractSubAccountAccountId(token);
         
-        if ("PARENT".equals(source) && SubAccountRole.PARENT.equals(role)) {
+        if (SubAccountRole.PARENT.equals(source) && (SubAccountRole.PARENT.equals(role) || SubAccountRole.OWNER.equals(role))) {
+            System.out.println("ici");
             tasks = taskRepository.findBySubaccountIdParent(id);
-        } else if ("CHILD".equals(source) && SubAccountRole.CHILD.equals(role)) {
+        } else if (SubAccountRole.CHILD.equals(source) && SubAccountRole.CHILD.equals(role)) {
             tasks = taskRepository.findBySubaccountIdChild(id);
-        } else if (SubAccountRole.PARENT.equals(role)) {
+        } else if (SubAccountRole.PARENT.equals(role) || SubAccountRole.OWNER.equals(role)) {
             tasks = taskRepository.findByAccountId(id);
         }
 
