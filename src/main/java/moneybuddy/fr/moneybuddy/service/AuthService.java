@@ -125,6 +125,10 @@ public class AuthService {
             return response("Mauvais pin pour le compte parent", HttpStatus.BAD_REQUEST);
         }        
 
+        if (SubAccountRole.PARENT.equals(subAccount.getRole()) && request.getPin() != null) {
+            return response("Pin mandatory for Parent", HttpStatus.BAD_REQUEST);
+        }
+
         var jwtToken = jwtService.generateSubAccountToken(subAccountId, subAccount.getAccountId(), email, subAccount.getRole());
         subAccount.setLastConnexion(LocalDateTime.now());
         subAccountRepository.save(subAccount);

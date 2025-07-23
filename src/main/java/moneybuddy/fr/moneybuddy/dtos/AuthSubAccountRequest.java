@@ -14,6 +14,5 @@ public class AuthSubAccountRequest {
     @NotBlank(message = "Id is mandatory")
     private String id;
 
-    @NotBlank(message = "Pin is mandatory")
     private String pin;
 }
