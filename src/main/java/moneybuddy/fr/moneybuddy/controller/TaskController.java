@@ -20,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import moneybuddy.fr.moneybuddy.dtos.AuthResponse;
 import moneybuddy.fr.moneybuddy.dtos.TaskRequest;
 import moneybuddy.fr.moneybuddy.model.Task;
+import moneybuddy.fr.moneybuddy.model.enums.SubAccountRole;
 import moneybuddy.fr.moneybuddy.service.TaskService;
 import moneybuddy.fr.moneybuddy.utils.ValidatorResult;
 
@@ -49,7 +50,7 @@ public class TaskController {
     @GetMapping("")
     public ResponseEntity<List<Task>> getTasks(
         @RequestHeader("Authorization") String authHeader,
-        @RequestParam(required = false) String source
+        @RequestParam(required = false) SubAccountRole source
     ) {
         String token = authHeader.substring(7);
         return service.getTasks(token, source);

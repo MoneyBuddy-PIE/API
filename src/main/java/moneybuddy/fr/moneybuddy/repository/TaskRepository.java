@@ -11,9 +11,9 @@ import moneybuddy.fr.moneybuddy.model.Task;
 @Repository
 public interface TaskRepository extends MongoRepository<Task, String> {
  
-     List<Task> findBySubaccountIdChild(String id);
-     List<Task> findBySubaccountIdParent(String id);
-     List<Task> findByAccountId(String id);
+     List<Task> findBySubaccountIdChild(String SubaccountIdChild);
+     List<Task> findBySubaccountIdParent(String subaccountIdParent);
+     List<Task> findByAccountId(String accountId);
 
     Optional<Task> findByIdAndSubaccountIdParent(String id, String subAccountId);
 }
