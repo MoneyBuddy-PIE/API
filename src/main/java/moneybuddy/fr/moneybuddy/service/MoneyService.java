@@ -35,7 +35,11 @@ public class MoneyService {
         SubAccount subAccount = subAccountRepository.findById(request.getSubAccountId())
                 .orElseThrow(() -> new IllegalArgumentException("SubAccount non trouvé"));
 
-        if (SubAccountRole.CHILD.equals(jwtService.extractSubAccountRole(token))) {
+        if (
+            SubAccountRole.CHILD.equals(jwtService.extractSubAccountRole(token)) 
+            && isAdd
+            && !request.getSubAccountId().equals(subAccount.getId())
+        ) {
             return response("Vous n etes pas un authorizé", HttpStatus.FORBIDDEN);
         }
 
