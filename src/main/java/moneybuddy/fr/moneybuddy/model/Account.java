@@ -36,7 +36,8 @@ public class Account implements UserDetails {
     private PlanType planType;
     private boolean subscriptionStatus;
 
-    private LocalDateTime createdAt;
+    @Builder.Default
+    private LocalDateTime createdAt = LocalDateTime.now();
     private LocalDateTime updatedAt;
     private LocalDateTime lastConnexion;
     
