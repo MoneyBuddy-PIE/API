@@ -125,7 +125,7 @@ public class AuthService {
             return response("Mauvais pin pour le compte parent", HttpStatus.BAD_REQUEST);
         }        
 
-        if (SubAccountRole.PARENT.equals(subAccount.getRole()) && request.getPin() != null) {
+        if (SubAccountRole.PARENT.equals(subAccount.getRole()) && request.getPin().isEmpty()) {
             return response("Pin mandatory for Parent", HttpStatus.BAD_REQUEST);
         }
 
