@@ -24,7 +24,8 @@ public class Transaction {
     private String parentId;
     private TransactionType type;
 
-    private LocalDateTime createdAt;
+    @Builder.Default
+    private LocalDateTime createdAt = LocalDateTime.now();
     private LocalDateTime updatedAt;
 
     private String amount;

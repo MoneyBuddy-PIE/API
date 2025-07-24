@@ -24,15 +24,21 @@ public class SubAccount {
     private String accountId;
 
     private String name;
-    private SubAccountRole role;
-    private boolean isActive;
 
-    private String money;
+    @Builder.Default
+    private SubAccountRole role = SubAccountRole.CHILD;
+    
+    @Builder.Default
+    private boolean isActive = false;
+
+    @Builder.Default
+    private String money = "0";
 
     @JsonIgnore
     private String pin;
 
-    private LocalDateTime createdAt;
+    @Builder.Default
+    private LocalDateTime createdAt = LocalDateTime.now();
     private LocalDateTime updatedAt;
     private LocalDateTime lastConnexion;
 }

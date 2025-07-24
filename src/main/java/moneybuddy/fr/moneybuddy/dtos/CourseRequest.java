@@ -4,10 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import moneybuddy.fr.moneybuddy.model.Question;
 import moneybuddy.fr.moneybuddy.model.enums.SubAccountRole;
-
-import java.util.List;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -29,6 +26,4 @@ public class CourseRequest {
 
     @NotNull(message = "Role is mandatory")
     private SubAccountRole subAccountRole;
-
-    private List<Question> questions;
 }
