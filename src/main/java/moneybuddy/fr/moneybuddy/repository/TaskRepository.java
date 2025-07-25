@@ -15,4 +15,5 @@ public interface TaskRepository extends MongoRepository<Task, String> {
     List<Task> findByAccountId(String accountId);
 
     Task findByIdAndSubaccountIdParent(String id, String subAccountId);
+    Task findByIdAndSubaccountIdChild(String id, String subAccountId);
 }
