@@ -84,36 +84,18 @@ public class TaskService {
     }
 
     public ResponseEntity<AuthResponse> deleteTask (String token, String taskId) {
-        String subAccountId = jwtService.extractSubAccountId(token);
-        Optional<Task> task = taskRepository.findByIdAndSubaccountIdParent(taskId, subAccountId);
-
-        if (task.isPresent()) {
-            taskRepository.deleteById(taskId);
-            return ResponseEntity.status(HttpStatus.ACCEPTED).build();
-        }
-
-        return response("Erreur lors de la suppression", HttpStatus.BAD_REQUEST);
+        taskRepository.deleteById(taskId);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).build();
     }
 
     public ResponseEntity<AuthResponse> completeTask (String token, String taskId) {
         String subAccountId = jwtService.extractSubAccountId(token);
-        SubAccountRole role = jwtService.extractSubAccountRole(token);
+        Task task = taskRepository.findByIdAndSubaccountIdParent(taskId, subAccountId);
         
-        if (!SubAccountRole.PARENT.equals(role)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-
-        Optional<Task> optionalTask = taskRepository.findByIdAndSubaccountIdParent(taskId, subAccountId);
-        
-        if (optionalTask.isPresent()) {
-            Task task = optionalTask.get();
-            task.setDone(true);
-            task.setUpdatedAt(LocalDateTime.now());
-            taskRepository.save(task);
-            return ResponseEntity.status(HttpStatus.ACCEPTED).build();
-        }
-
-        return response("Erreur lors de l update", HttpStatus.BAD_REQUEST);
+        task.setDone(true);
+        task.setUpdatedAt(LocalDateTime.now());
+        taskRepository.save(task);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).build();
     }
 
     public ResponseEntity<Task> modifyTask (TaskRequest request, String token, String taskId) {
@@ -124,21 +106,16 @@ public class TaskService {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
-        Optional<Task> optionalTask = taskRepository.findByIdAndSubaccountIdParent(taskId, subAccountIdParent);
-        if (optionalTask.isPresent()) {
-            Task task = optionalTask.get();
+        Task task = taskRepository.findByIdAndSubaccountIdParent(taskId, subAccountIdParent);
 
-            task.setDescription(request.getDescription());
-            task.setCategory(request.getCategory());
-            task.setSubaccountIdChild(request.getSubAccountId());
-            task.setReward(request.getReward());
-            task.setDateLimit(request.getDateLimit());
-            task.setUpdatedAt(LocalDateTime.now());
+        task.setDescription(request.getDescription());
+        task.setCategory(request.getCategory());
+        task.setSubaccountIdChild(request.getSubAccountId());
+        task.setReward(request.getReward());
+        task.setDateLimit(request.getDateLimit());
+        task.setUpdatedAt(LocalDateTime.now());
 
-            Task updatedTask = taskRepository.save(task);
-            return ResponseEntity.status(HttpStatus.OK).body(updatedTask);
-        }
-        
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        Task updatedTask = taskRepository.save(task);
+        return ResponseEntity.status(HttpStatus.OK).body(updatedTask);
     }
 }

@@ -30,6 +30,8 @@ public class UserProgress {
     @Builder.Default
     private LocalDateTime updatedAt = LocalDateTime.now();
 
+    private String subAccountId;
+
     @Data
     @Builder
     @NoArgsConstructor
@@ -38,7 +40,7 @@ public class UserProgress {
         @Builder.Default
         private boolean completed = false;
         
-        private Integer quizScore;
+        private int quizScore;
         
         @Builder.Default
         private boolean unlocked = false;

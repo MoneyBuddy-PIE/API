@@ -4,16 +4,15 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
 
 import moneybuddy.fr.moneybuddy.model.Task;
 
 @Repository
 public interface TaskRepository extends MongoRepository<Task, String> {
  
-     List<Task> findBySubaccountIdChild(String SubaccountIdChild);
-     List<Task> findBySubaccountIdParent(String subaccountIdParent);
-     List<Task> findByAccountId(String accountId);
+    List<Task> findBySubaccountIdChild(String SubaccountIdChild);
+    List<Task> findBySubaccountIdParent(String subaccountIdParent);
+    List<Task> findByAccountId(String accountId);
 
-    Optional<Task> findByIdAndSubaccountIdParent(String id, String subAccountId);
+    Task findByIdAndSubaccountIdParent(String id, String subAccountId);
 }
