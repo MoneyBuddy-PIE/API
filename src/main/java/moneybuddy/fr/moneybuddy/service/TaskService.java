@@ -89,8 +89,7 @@ public class TaskService {
     }
 
     public ResponseEntity<AuthResponse> completeTask (String token, String taskId) {
-        String subAccountId = jwtService.extractSubAccountId(token);
-        Task task = taskRepository.findByIdAndSubaccountIdParent(taskId, subAccountId);
+        Task task = taskRepository.findById(taskId).orElseThrow();
         
         task.setDone(true);
         task.setUpdatedAt(LocalDateTime.now());
