@@ -13,7 +13,9 @@ import lombok.RequiredArgsConstructor;
 import moneybuddy.fr.moneybuddy.dtos.AuthResponse;
 import moneybuddy.fr.moneybuddy.dtos.TaskRequest;
 import moneybuddy.fr.moneybuddy.model.enums.SubAccountRole;
+import moneybuddy.fr.moneybuddy.model.SubAccount;
 import moneybuddy.fr.moneybuddy.model.Task;
+import moneybuddy.fr.moneybuddy.repository.SubAccountRepository;
 import moneybuddy.fr.moneybuddy.repository.TaskRepository;
 
 @Service
@@ -21,6 +23,7 @@ import moneybuddy.fr.moneybuddy.repository.TaskRepository;
 public class TaskService {
 
     private final TaskRepository taskRepository;
+    private final SubAccountRepository subAccountRepository;
     private final JwtService jwtService;
 
     public ResponseEntity<AuthResponse> response(String message, HttpStatus status) {
@@ -90,10 +93,16 @@ public class TaskService {
 
     public ResponseEntity<AuthResponse> completeTask (String token, String taskId) {
         Task task = taskRepository.findById(taskId).orElseThrow();
+        SubAccount subAccount = subAccountRepository.findById(task.getSubaccountIdChild()).orElseThrow();
         
         task.setDone(true);
         task.setUpdatedAt(LocalDateTime.now());
         taskRepository.save(task);
+
+        String newMoney = String.valueOf(Double.parseDouble(subAccount.getMoney()) + Double.parseDouble(task.getReward()));
+        subAccount.setMoney(newMoney);
+        subAccountRepository.save(subAccount);
+
         return ResponseEntity.status(HttpStatus.ACCEPTED).build();
     }
 
