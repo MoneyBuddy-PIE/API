@@ -1,0 +1,18 @@
+package moneybuddy.fr.moneybuddy.repository;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.mongodb.repository.Query;
+
+import moneybuddy.fr.moneybuddy.model.Course;
+
+public interface CourseRepository extends MongoRepository<Course, String> {
+
+    Optional<List<Course>> findAllByChapterId(String chapterId);
+
+    @Query(value = "{ 'chapterId': ?0, 'locked': false }")
+    Optional<List<Course>> findAllByChapterIdAndLockedFalse(String chapterId);
+}
+

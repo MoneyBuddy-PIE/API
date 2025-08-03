@@ -3,11 +3,12 @@ package moneybuddy.fr.moneybuddy.controller;
 import lombok.RequiredArgsConstructor;
 import moneybuddy.fr.moneybuddy.dtos.chapter.CreateChapterRequest;
 import moneybuddy.fr.moneybuddy.model.Chapter;
+import moneybuddy.fr.moneybuddy.model.ChapterWithCourses;
+import moneybuddy.fr.moneybuddy.model.ChapterWithoutCourses;
 import moneybuddy.fr.moneybuddy.service.ChapterService;
 
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
@@ -20,31 +21,30 @@ public class ChapterController {
     private final ChapterService chapterService;
 
     @GetMapping("")
-    public ResponseEntity<Page<Chapter>> getAllChapters (
+    public ResponseEntity<Page<ChapterWithoutCourses>> getAllChapters (
+        @RequestHeader("Authorization") String authHeader,
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "10") int size,
         @RequestParam(defaultValue = "order") String sortBy,
         @RequestParam(defaultValue = "asc") String sortDir
     ) {
-        return chapterService.getChapters(page, size, sortBy, sortDir);
+        String token = authHeader.substring(7);
+        return chapterService.getChapters(token, page, size, sortBy, sortDir);
     }
 
-    @GetMapping("/{chapterId}")
-    public ResponseEntity<Chapter> getChapterById (
-        @RequestHeader("Authorization") String authHeader,
-        @PathVariable String chapterId
+    @GetMapping("/{id}")
+    public ResponseEntity<ChapterWithCourses> getChapterById (
+        @PathVariable String id
     ) {
-        String token = authHeader.substring(7);
-        return chapterService.getChapter(token, chapterId);
+        return chapterService.getChapter(id);
     }
 
     @PostMapping("")
-    public ResponseEntity<Chapter> createChapter (
-        @RequestHeader("Authorization") String authHeader,
-        @Valid @RequestBody CreateChapterRequest req,
-        BindingResult bindingResult
+    public ResponseEntity<Chapter> createChapter(
+        @Valid @RequestBody CreateChapterRequest request,
+        @RequestHeader("Authorization") String authHeader
     ) {
         String token = authHeader.substring(7);
-        return chapterService.createChapter(token, req);
+        return chapterService.createChapter(token, request);
     }
 }

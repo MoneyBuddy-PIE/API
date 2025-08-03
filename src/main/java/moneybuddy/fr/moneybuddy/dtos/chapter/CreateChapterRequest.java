@@ -1,11 +1,9 @@
 package moneybuddy.fr.moneybuddy.dtos.chapter;
 
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.*;
-import moneybuddy.fr.moneybuddy.dtos.course.CourseDto;
+import moneybuddy.fr.moneybuddy.model.enums.SubAccountRole;
 
-import java.util.List;
 
 @Data
 @Builder
@@ -23,7 +21,9 @@ public class CreateChapterRequest {
     @PositiveOrZero(message = "Order must be positive or zero")
     private int order;
 
-    @Valid
-    @NotEmpty(message = "At least one course is required")
-    private List<CourseDto> courses;
+    @PositiveOrZero(message = "Level must be positive or zero")
+    private int level;
+
+    @NotNull(message = "Attach a subAccount role")
+    private SubAccountRole subAccountRole;
 }

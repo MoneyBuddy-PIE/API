@@ -1,7 +1,6 @@
 package moneybuddy.fr.moneybuddy.model;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -20,17 +19,17 @@ import moneybuddy.fr.moneybuddy.model.enums.SubAccountRole;
 public class Chapter {
     @Id
     private String id;
+    private String creator;
 
     private String title;
     private String description;
     private int level;
     private int order;
 
-    private SubAccountRole subAccountRole;
-    
-    private List<Course> courses;
+    @Builder.Default
+    private boolean locked = true;
 
-    private String creatorId;
+    private SubAccountRole subAccountRole;
 
     @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();

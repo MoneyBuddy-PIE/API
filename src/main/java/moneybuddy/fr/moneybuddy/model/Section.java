@@ -1,5 +1,7 @@
 package moneybuddy.fr.moneybuddy.model;
 
+import java.util.List;
+
 import lombok.*;
 
 @Data
@@ -7,8 +9,9 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Section {    
-    private String title;
-    private String content;
 
-    private Quiz quiz;
+    private String title;
+    private String markdownContent;
+
+    private List<Quiz> quiz;
 }
