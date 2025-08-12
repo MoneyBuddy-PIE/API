@@ -1,5 +1,7 @@
 package moneybuddy.fr.moneybuddy.dtos.chapter;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import jakarta.validation.constraints.*;
 import lombok.*;
 import moneybuddy.fr.moneybuddy.model.enums.SubAccountRole;
@@ -26,4 +28,7 @@ public class CreateChapterRequest {
 
     @NotNull(message = "Attach a subAccount role")
     private SubAccountRole subAccountRole;
+
+    @NotNull(message = "Image is mandatory")
+    private MultipartFile file;
 }
