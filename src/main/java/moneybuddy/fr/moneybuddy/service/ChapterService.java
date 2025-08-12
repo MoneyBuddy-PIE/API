@@ -12,6 +12,7 @@ import moneybuddy.fr.moneybuddy.repository.ChapterWithoutCoursesRepository;
 
 import java.time.LocalDateTime;
 
+import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
@@ -26,6 +27,7 @@ public class ChapterService {
     private final ChapterWithoutCoursesRepository chapterWithoutCoursesRepository;
     private final ChapterWithCoursesRepository chapterWithCoursesRepository;
     private final ChapterRepository chapterRepository;
+    private final CloudflareService cloudflareService;
 
     private final JwtService jwtService;
 
@@ -70,19 +72,23 @@ public class ChapterService {
         return ResponseEntity.status(200).body(chapter);
     }
          
-    public ResponseEntity<Chapter> createChapter(String token, CreateChapterRequest req) {
+    public ResponseEntity<Chapter> createChapter(String token, CreateChapterRequest req) throws FileUploadException {
         String creator = jwtService.extractUsername(token);
+
+        String image_url = cloudflareService.uploadImage(req.getFile());
 
         Chapter chapter = Chapter.builder()
                         .title(req.getTitle())
                         .description(req.getDescription())
                         .level(req.getLevel())
                         .order(req.getOrder())
+                        .image_url(image_url)
                         .locked(true)
                         .subAccountRole(req.getSubAccountRole())
                         .creator(creator)
                         .createdAt(LocalDateTime.now())
                         .build();
+                    
      
         Chapter saved = chapterRepository.save(chapter);
         return ResponseEntity.status(201).body(saved);

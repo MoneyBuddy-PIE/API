@@ -26,6 +26,8 @@ public class Chapter {
     private int level;
     private int order;
 
+    private String image_url;
+
     @Builder.Default
     private boolean locked = true;
 

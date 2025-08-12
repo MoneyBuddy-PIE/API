@@ -10,6 +10,7 @@ import moneybuddy.fr.moneybuddy.model.Course;
 import moneybuddy.fr.moneybuddy.service.ChapterService;
 import moneybuddy.fr.moneybuddy.service.CourseService;
 
+import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,7 +29,7 @@ public class AdminController {
     public ResponseEntity<Chapter> createChapter(
         @Valid @RequestBody CreateChapterRequest request,
         @RequestHeader("Authorization") String authHeader
-    ) {
+    ) throws FileUploadException {
         String token = authHeader.substring(7);
         return chapterService.createChapter(token, request);
     }
