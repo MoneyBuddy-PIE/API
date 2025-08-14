@@ -5,14 +5,6 @@ Welcome to moneybuddy's backend.
 ### First step
 
 ```bash
-cp .env.example .env
-```
-
-insert the right values to variables
-
-### Second step
-
-```bash
 docker build -t moneybuddy-app .
 ```
 
@@ -32,6 +24,12 @@ Skip test for now
 
 ```bash
 mvn clean install -DskipTests
+```
+
+### Run localy
+
+```bash
+mvn spring-boot:run -Dspring-boot.run.profiles=local -DskipTests
 ```
 
 ## API Reference
