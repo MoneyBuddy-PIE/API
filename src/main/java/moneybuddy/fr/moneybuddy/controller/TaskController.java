@@ -3,7 +3,6 @@ package moneybuddy.fr.moneybuddy.controller;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,11 +17,10 @@ import org.springframework.web.bind.annotation.RestController;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import moneybuddy.fr.moneybuddy.dtos.AuthResponse;
+import moneybuddy.fr.moneybuddy.dtos.TaskComplete;
 import moneybuddy.fr.moneybuddy.dtos.TaskRequest;
 import moneybuddy.fr.moneybuddy.model.Task;
-import moneybuddy.fr.moneybuddy.model.enums.SubAccountRole;
 import moneybuddy.fr.moneybuddy.service.TaskService;
-import moneybuddy.fr.moneybuddy.utils.ValidatorResult;
 
 @RestController
 @RequestMapping("/tasks")
@@ -30,18 +28,12 @@ import moneybuddy.fr.moneybuddy.utils.ValidatorResult;
 public class TaskController {
     
     private final TaskService service;
-    private final ValidatorResult validatorResult;
 
     @PostMapping("")
     public ResponseEntity<AuthResponse> createTask(
         @Valid @RequestBody TaskRequest request,
-        @RequestHeader("Authorization") String authHeader,
-         BindingResult bindingResult
+        @RequestHeader("Authorization") String authHeader
     ) {
-
-        if (bindingResult.hasErrors()) {
-            return validatorResult.returnErrorMessage(bindingResult);
-        }
 
         String token = authHeader.substring(7);
         return service.createTask(request, token);
@@ -50,10 +42,13 @@ public class TaskController {
     @GetMapping("")
     public ResponseEntity<List<Task>> getTasks(
         @RequestHeader("Authorization") String authHeader,
-        @RequestParam(required = false) SubAccountRole source
+        @RequestParam(required = false) String childId,
+        @RequestParam(required = false) Boolean prevalidation,
+        @RequestParam(required = false) Boolean refused,
+        @RequestParam(required = false) Boolean isDone
     ) {
         String token = authHeader.substring(7);
-        return service.getTasks(token, source);
+        return service.getTasks(token, childId, prevalidation, refused, isDone);
     }
 
     @GetMapping("/{id}")
@@ -85,9 +80,19 @@ public class TaskController {
     @PutMapping("/complete/{id}")
     public ResponseEntity<AuthResponse> completeTask(
         @RequestHeader("Authorization") String authHeader,
+        @PathVariable String id,
+        @Valid @RequestBody TaskComplete req
+    ) {
+        String token = authHeader.substring(7);
+        return service.completeTask(req, token, id);
+    }
+
+    @PutMapping("/prevalidation/{id}")
+    public ResponseEntity<AuthResponse> preValidationTask(
+        @RequestHeader("Authorization") String authHeader,
         @PathVariable String id
     ) {
         String token = authHeader.substring(7);
-        return service.completeTask(token, id);
+        return service.preValidationTask(token, id);
     }
 }
