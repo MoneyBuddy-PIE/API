@@ -27,4 +27,6 @@ public class TaskRequest {
 
     @NotBlank(message = "DateLimit is mandatory")
     private String dateLimit;
+
+    private boolean prevalidation;
 }

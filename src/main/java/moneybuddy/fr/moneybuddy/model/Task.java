@@ -26,6 +26,11 @@ public class Task {
 
     @Builder.Default
     private boolean isDone = false;
+    @Builder.Default
+    private boolean prevalidation = false;
+    @Builder.Default
+    private boolean refused = false;
+
 
     private String subaccountIdParent;
     private String subaccountIdChild;

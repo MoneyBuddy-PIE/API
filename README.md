@@ -32,6 +32,10 @@ mvn clean install -DskipTests
 mvn spring-boot:run -Dspring-boot.run.profiles=local -DskipTests
 ```
 
+```bash
+mvn clean install -DskipTests
+```
+
 ## API Reference
 
 Go to [Swagger] (http://localhost:8080/swagger-ui/index.html#/) for the documentation
