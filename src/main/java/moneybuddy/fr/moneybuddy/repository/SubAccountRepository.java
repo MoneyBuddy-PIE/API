@@ -16,4 +16,5 @@ public interface SubAccountRepository extends MongoRepository<SubAccount, String
 
     SubAccount findByAccountIdAndRole(String accountId, SubAccountRole role);
 
+    long deleteAllByAccountId(String accountId);
 }

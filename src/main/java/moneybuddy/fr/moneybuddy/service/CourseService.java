@@ -3,6 +3,9 @@ package moneybuddy.fr.moneybuddy.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.http.HttpStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +16,7 @@ import moneybuddy.fr.moneybuddy.model.ChapterWithCourses;
 import moneybuddy.fr.moneybuddy.model.Course;
 import moneybuddy.fr.moneybuddy.repository.ChapterWithCoursesRepository;
 import moneybuddy.fr.moneybuddy.repository.CourseRepository;
+import moneybuddy.fr.moneybuddy.utils.Utils;
 
 @Service
 @RequiredArgsConstructor
@@ -21,10 +25,23 @@ public class CourseService {
     private final CourseRepository courseRepository;
     private final ChapterWithCoursesRepository chapterWithCoursesRepository;
     private final JwtService jwtService;
+    private final Utils utils;
 
     public ResponseEntity<List<Course>> getCourses(String id) {
         List<Course> courses = courseRepository.findAllByChapterIdAndLockedFalse(id).orElseThrow();
         return ResponseEntity.status(200).body(courses);
+    }
+
+    public ResponseEntity<Page<Course>> getAllCourses(
+        int page, 
+        int size, 
+        String sortBy, 
+        String sortDir
+    ) { 
+        Pageable pageable = utils.pagination(page, size, sortBy, sortDir);
+        Page<Course> courses = courseRepository.findAll(pageable);
+
+        return ResponseEntity.status(HttpStatus.SC_OK).body(courses);
     }
  
     public ResponseEntity<Course> getCourse(String id) {

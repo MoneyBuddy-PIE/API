@@ -20,8 +20,10 @@ public class Transaction {
 
     @Id
     private String id;
+    private String accountId;
     private String childId;
     private String parentId;
+    
     private TransactionType type;
 
     @Builder.Default

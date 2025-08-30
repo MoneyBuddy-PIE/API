@@ -76,7 +76,7 @@ public class AuthService {
         account.setSubAccounts(subAccounts);
         repository.save(account);
         
-        String jwtToken = jwtService.generateToken(account);
+        String jwtToken = jwtService.generateToken(account, account.getRole());
 
         emailService.welcomeEmail(account.getEmail());
 
@@ -94,7 +94,7 @@ public class AuthService {
             return response("Mot de passe incorrect", HttpStatus.UNAUTHORIZED);
         }
 
-        String jwtToken = jwtService.generateToken(account);
+        String jwtToken = jwtService.generateToken(account, account.getRole());
         account.setLastConnexion(LocalDateTime.now());
         repository.save(account);
 
@@ -152,7 +152,7 @@ public class AuthService {
     public ResponseEntity<Void> resetPassword(AuthRequest request) {
         Account account = repository.findByEmail(request.getEmail()).orElseThrow();
 
-        String token = jwtService.generateToken(account);
+        String token = jwtService.generateToken(account, account.getRole());
 
         emailService.resetPasswordEmail(request.getEmail(), token);
 

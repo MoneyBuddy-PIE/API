@@ -32,9 +32,6 @@ public class CloudflareBucketConfig {
     
     @Bean
     public S3Client s3Client() {
-        System.out.println(endpoint);
-        System.out.println(access_key);
-        System.out.println(secret_key);
 
         S3Configuration serviceConfig = S3Configuration.builder()
                 // path-style is required for R2

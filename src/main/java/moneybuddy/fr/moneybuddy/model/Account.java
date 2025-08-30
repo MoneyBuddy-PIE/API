@@ -33,8 +33,14 @@ public class Account implements UserDetails {
     @JsonIgnore
     private String password;
     
-    private PlanType planType;
-    private boolean subscriptionStatus;
+    private Role role;
+
+    @Builder.Default
+    private PlanType planType = PlanType.FREE;
+    
+    @Builder.Default
+    private boolean subscriptionStatus = true;
+
 
     @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();
@@ -43,7 +49,14 @@ public class Account implements UserDetails {
     
     @DBRef
     private List<SubAccount> subAccounts;
-    private Role role;
+
+    @Builder.Default
+    private boolean activated = true;
+
+
+
+
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

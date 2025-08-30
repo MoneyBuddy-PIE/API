@@ -25,6 +25,6 @@ public class TransactionController {
         @PathVariable String subAccountId
     ) {
         String token = authHeader.substring(7);
-        return transactionService.getAllTransactions(token, subAccountId);
+        return transactionService.getTransactions(token, subAccountId);
     }
 }
