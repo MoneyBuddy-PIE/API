@@ -44,6 +44,7 @@ public class MoneyService {
         }
 
         String parentId = jwtService.extractSubAccountAccountId(token);
+        String accountId = jwtService.extractSubAccountAccountId(token);
 
         double amount;
         try {
@@ -70,6 +71,7 @@ public class MoneyService {
         Transaction transaction = Transaction.builder()
                 .childId(request.getSubAccountId())
                 .parentId(parentId)
+                .accountId(accountId)
                 .amount(String.valueOf(amount))
                 .oldAmount(String.valueOf(currentBalance))
                 .newAmount(String.valueOf(newBalance))

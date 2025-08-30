@@ -1,6 +1,7 @@
 package moneybuddy.fr.moneybuddy.service;
 
 import lombok.RequiredArgsConstructor;
+import moneybuddy.fr.moneybuddy.dtos.ResponseDto;
 import moneybuddy.fr.moneybuddy.dtos.chapter.CreateChapterRequest;
 import moneybuddy.fr.moneybuddy.model.Chapter;
 import moneybuddy.fr.moneybuddy.model.ChapterWithCourses;
@@ -9,14 +10,14 @@ import moneybuddy.fr.moneybuddy.model.enums.SubAccountRole;
 import moneybuddy.fr.moneybuddy.repository.ChapterRepository;
 import moneybuddy.fr.moneybuddy.repository.ChapterWithCoursesRepository;
 import moneybuddy.fr.moneybuddy.repository.ChapterWithoutCoursesRepository;
+import moneybuddy.fr.moneybuddy.utils.Utils;
 
 import java.time.LocalDateTime;
 
+import org.apache.http.HttpStatus;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -27,9 +28,10 @@ public class ChapterService {
     private final ChapterWithoutCoursesRepository chapterWithoutCoursesRepository;
     private final ChapterWithCoursesRepository chapterWithCoursesRepository;
     private final ChapterRepository chapterRepository;
-    private final CloudflareService cloudflareService;
 
+    private final CloudflareService cloudflareService;
     private final JwtService jwtService;
+    private final Utils utils;
 
     public ResponseEntity<Page<ChapterWithoutCourses>> getChapters(
         String token,
@@ -40,12 +42,8 @@ public class ChapterService {
     ) {
         SubAccountRole subAccountRole = jwtService.extractSubAccountRole(token);
         subAccountRole = SubAccountRole.OWNER.equals(subAccountRole) ? SubAccountRole.PARENT : subAccountRole;
-
-        Sort sort = sortDir.equalsIgnoreCase("desc") 
-            ? Sort.by(sortBy).descending() 
-            : Sort.by(sortBy).ascending();
         
-        Pageable pageable = PageRequest.of(page, size, sort);
+        Pageable pageable = utils.pagination(page, size, sortBy, sortDir);
         Page<ChapterWithoutCourses> chapters = chapterWithoutCoursesRepository.findAllBySubAccountRoleAndLockedFalse(subAccountRole, pageable);
 
         return ResponseEntity.status(200).body(chapters);
@@ -56,12 +54,8 @@ public class ChapterService {
         int size, 
         String sortBy, 
         String sortDir
-    ) {
-        Sort sort = sortDir.equalsIgnoreCase("desc") 
-            ? Sort.by(sortBy).descending() 
-            : Sort.by(sortBy).ascending();
-        
-        Pageable pageable = PageRequest.of(page, size, sort);
+    ) { 
+        Pageable pageable = utils.pagination(page, size, sortBy, sortDir);
         Page<ChapterWithoutCourses> chapters = chapterWithoutCoursesRepository.findAll(pageable);
 
         return ResponseEntity.status(200).body(chapters);
@@ -92,5 +86,10 @@ public class ChapterService {
      
         Chapter saved = chapterRepository.save(chapter);
         return ResponseEntity.status(201).body(saved);
+    }
+
+    public ResponseEntity<ResponseDto> deleteChapter (String id) {
+        chapterRepository.deleteById(id);
+        return ResponseEntity.status(HttpStatus.SC_OK).body(null);
     }
 }

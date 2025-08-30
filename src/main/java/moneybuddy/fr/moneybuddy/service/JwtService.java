@@ -5,6 +5,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import moneybuddy.fr.moneybuddy.model.enums.Role;
 import moneybuddy.fr.moneybuddy.model.enums.SubAccountRole;
 
 import org.springframework.security.core.userdetails.UserDetails;
@@ -35,15 +36,18 @@ public class JwtService {
         return claimsResolver.apply(claims);
     }
 
-    public String generateToken(UserDetails userDetails) {
-        return generateToken(new HashMap<>(), userDetails);
+    public String generateToken(UserDetails userDetails, Role role) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("role", role.name());
+
+        return generateToken(claims, userDetails);
     }
 
     public String generateSubAccountToken(String subAccountId, String id,String email, SubAccountRole role) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("subAccountId", subAccountId);
         claims.put("email", email);
-        claims.put("role", role.name());
+        claims.put("subAccountRole", role.name());
         claims.put("id", id);
 
         return Jwts.builder()
@@ -68,9 +72,13 @@ public class JwtService {
     }
 
     public SubAccountRole extractSubAccountRole(String token) {
-        String roleString = extractClaim(token, claims -> claims.get("role", String.class));
+        String roleString = extractClaim(token, claims -> claims.get("subAccountRole", String.class));
         SubAccountRole role = SubAccountRole.valueOf(roleString);
         return role;
+    }
+
+    public String extractAccountRole (String token) {
+        return extractClaim(token, claims -> claims.get("role", String.class));
     }
 
     public String generateToken(

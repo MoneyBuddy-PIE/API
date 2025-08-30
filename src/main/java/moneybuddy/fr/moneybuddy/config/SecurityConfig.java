@@ -40,6 +40,7 @@ public class SecurityConfig {
                             "/v3/api-docs",
                             "/v3/api-docs/swagger-config"
                         ).permitAll()
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
