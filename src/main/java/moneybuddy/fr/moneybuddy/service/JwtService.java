@@ -43,11 +43,12 @@ public class JwtService {
         return generateToken(claims, userDetails);
     }
 
-    public String generateSubAccountToken(String subAccountId, String id,String email, SubAccountRole role) {
+    public String generateSubAccountToken(String subAccountId, String id,String email, SubAccountRole subAccountRole, Role role) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("subAccountId", subAccountId);
         claims.put("email", email);
-        claims.put("subAccountRole", role.name());
+        claims.put("subAccountRole", subAccountRole.name());
+        claims.put("role", role.name());
         claims.put("id", id);
 
         return Jwts.builder()
@@ -77,8 +78,10 @@ public class JwtService {
         return role;
     }
 
-    public String extractAccountRole (String token) {
-        return extractClaim(token, claims -> claims.get("role", String.class));
+    public Role extractAccountRole (String token) {
+        String roleString = extractClaim(token, claims -> claims.get("role", String.class));
+        Role role = Role.valueOf(roleString);
+        return role;
     }
 
     public String generateToken(
