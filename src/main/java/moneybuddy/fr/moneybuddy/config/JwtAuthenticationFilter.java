@@ -49,7 +49,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
             
             if (jwtService.isTokenValid(jwt, userDetails)) {
-                role = jwtService.extractAccountRole(jwt);
+                role = jwtService.extractAccountRole(jwt).toString();
 
                 List<SimpleGrantedAuthority> authorities = Collections.singletonList(
                         new SimpleGrantedAuthority("ROLE_" + role.toUpperCase())

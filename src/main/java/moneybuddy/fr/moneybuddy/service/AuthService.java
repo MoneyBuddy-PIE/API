@@ -119,6 +119,7 @@ public class AuthService {
         String pin = request.getPin();
         String email = jwtService.extractUsername(token);
 
+        Role role = jwtService.extractAccountRole(token);
         SubAccount subAccount = subAccountRepository.findById(subAccountId).orElseThrow();
 
         if (!SubAccountRole.CHILD.equals(subAccount.getRole()) && !pin.equals(subAccount.getPin())) {
@@ -129,7 +130,7 @@ public class AuthService {
             return response("Pin mandatory for Parent", HttpStatus.BAD_REQUEST);
         }
 
-        var jwtToken = jwtService.generateSubAccountToken(subAccountId, subAccount.getAccountId(), email, subAccount.getRole());
+        var jwtToken = jwtService.generateSubAccountToken(subAccountId, subAccount.getAccountId(), email, subAccount.getRole(), role);
         subAccount.setLastConnexion(LocalDateTime.now());
         subAccountRepository.save(subAccount);
 
