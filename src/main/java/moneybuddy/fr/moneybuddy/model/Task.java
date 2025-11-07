@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import moneybuddy.fr.moneybuddy.model.enums.TaskStatus;
 
 @Document(collection = "tasks")
 @Data
@@ -25,12 +26,10 @@ public class Task {
     private String dateLimit;
 
     @Builder.Default
-    private boolean isDone = false;
-    @Builder.Default
-    private boolean prevalidation = false;
-    @Builder.Default
-    private boolean completed = false;
+    private TaskStatus status = TaskStatus.PENDING;
 
+    @Builder.Default
+    private boolean preValidate = false;
 
     private String subaccountIdParent;
     private String subaccountIdChild;

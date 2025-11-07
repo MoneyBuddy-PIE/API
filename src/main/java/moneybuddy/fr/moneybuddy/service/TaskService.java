@@ -17,6 +17,7 @@ import moneybuddy.fr.moneybuddy.dtos.TaskComplete;
 import moneybuddy.fr.moneybuddy.dtos.TaskRequest;
 import moneybuddy.fr.moneybuddy.dtos.Money.AddMoney;
 import moneybuddy.fr.moneybuddy.model.enums.SubAccountRole;
+import moneybuddy.fr.moneybuddy.model.enums.TaskStatus;
 import moneybuddy.fr.moneybuddy.model.Task;
 import moneybuddy.fr.moneybuddy.repository.TaskRepository;
 
@@ -46,17 +47,16 @@ public class TaskService {
             return response("Vous n avez pas les droits", HttpStatus.FORBIDDEN);
         }
 
-        boolean prevalidation = request.isPrevalidation() ? request.isPrevalidation() : false;
+        boolean preValidate = request.isPrevalidation() ? request.isPrevalidation() : false;
         Task task = Task.builder()
                     .description(request.getDescription())
                     .category(request.getCategory())
                     .subaccountIdParent(subAccountIdParent)
                     .subaccountIdChild(request.getSubAccountId())
                     .accountId(accountId)
+                    .preValidate(preValidate)
                     .reward(request.getReward())
                     .dateLimit(request.getDateLimit())
-                    .isDone(false)
-                    .prevalidation(prevalidation)
                     .createdAt(LocalDateTime.now())
                     .build();
                     
@@ -67,9 +67,7 @@ public class TaskService {
     public ResponseEntity<List<Task>> getTasks (
         String token, 
         String childId,
-        Boolean prevalidation,
-        Boolean completed,
-        Boolean isDone 
+        TaskStatus status
         ) {
         SubAccountRole role = jwtService.extractSubAccountRole(token);
         role = SubAccountRole.OWNER.equals(role) ? SubAccountRole.PARENT : role;
@@ -88,16 +86,8 @@ public class TaskService {
             criteria.and("subaccountIdChild").is(childId);
         }
 
-        if (prevalidation != null) {
-            criteria.and("prevalidation").is(prevalidation);
-        }
-        
-        if (completed != null) {
-            criteria.and("completed").is(completed);
-        }
-        
-        if (isDone != null) {
-            criteria.and("isDone").is(isDone);
+        if (status != null) {
+            criteria.and("status").is(status);
         }
 
         Query query = new Query(criteria);
@@ -121,7 +111,7 @@ public class TaskService {
 
     public ResponseEntity<AuthResponse> completeTask (TaskComplete req, String token, String taskId) {
         Task task = taskRepository.findById(taskId).orElseThrow();
-        if (SubAccountRole.CHILD.equals(jwtService.extractSubAccountRole(token)) && task.isPrevalidation()) {
+        if (SubAccountRole.CHILD.equals(jwtService.extractSubAccountRole(token)) && task.isPreValidate()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
@@ -132,22 +122,22 @@ public class TaskService {
                 .description("Reward")
                 .build();
             moneyService.updateMoney(addMoney, token, true);
+            task.setStatus(TaskStatus.COMPLETED);
         }
 
         if (!req.isDone()) {
-            task.setCompleted(false);
+            task.setStatus(TaskStatus.REFUSED);
         }
-        task.setCompleted(true);
-        task.setDone(req.isDone());
+
         task.setUpdatedAt(LocalDateTime.now());
         taskRepository.save(task);
         return ResponseEntity.status(HttpStatus.ACCEPTED).build();
     }
 
-    public ResponseEntity<AuthResponse> preValidateTAsk (String token, String taskId) {
+    public ResponseEntity<AuthResponse> preValidateTask (String token, String taskId) {
         Task task = taskRepository.findById(taskId).orElseThrow();
         
-        task.setDone(true);
+        task.setStatus(TaskStatus.PRE_VALIDATE);
         task.setUpdatedAt(LocalDateTime.now());
         taskRepository.save(task);
 
