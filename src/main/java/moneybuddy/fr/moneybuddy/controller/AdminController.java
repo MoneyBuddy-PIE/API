@@ -6,7 +6,6 @@ import moneybuddy.fr.moneybuddy.dtos.chapter.CreateChapterRequest;
 import moneybuddy.fr.moneybuddy.dtos.course.CreateCourseRequest;
 import moneybuddy.fr.moneybuddy.model.Account;
 import moneybuddy.fr.moneybuddy.model.Chapter;
-import moneybuddy.fr.moneybuddy.model.ChapterWithCourses;
 import moneybuddy.fr.moneybuddy.model.ChapterWithoutCourses;
 import moneybuddy.fr.moneybuddy.model.Course;
 import moneybuddy.fr.moneybuddy.model.Transaction;
@@ -15,6 +14,8 @@ import moneybuddy.fr.moneybuddy.service.AccountService;
 import moneybuddy.fr.moneybuddy.service.ChapterService;
 import moneybuddy.fr.moneybuddy.service.CourseService;
 import moneybuddy.fr.moneybuddy.service.TransactionService;
+
+import java.util.List;
 
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.springframework.data.domain.Page;
@@ -47,7 +48,7 @@ public class AdminController {
     //Chapters
     @PostMapping("/chapters")
     public ResponseEntity<Chapter> createChapter(
-        @Valid @RequestBody CreateChapterRequest request,
+        @Valid @ModelAttribute CreateChapterRequest request,
         @RequestHeader("Authorization") String authHeader
     ) throws FileUploadException {
         String token = authHeader.substring(7);
@@ -65,7 +66,7 @@ public class AdminController {
     }
 
     @GetMapping("/chapters/{id}")
-    public ResponseEntity<ChapterWithCourses> getChapter (
+    public ResponseEntity<List<Course>> getChapter (
         @PathVariable String id
     ) {
         return chapterService.getChapter(id);
