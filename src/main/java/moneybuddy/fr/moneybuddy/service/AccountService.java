@@ -13,6 +13,7 @@ import moneybuddy.fr.moneybuddy.utils.Utils;
 import moneybuddy.fr.moneybuddy.dtos.ResponseDto;
 import moneybuddy.fr.moneybuddy.model.Account;
 import moneybuddy.fr.moneybuddy.model.enums.PlanType;
+import moneybuddy.fr.moneybuddy.model.enums.Role;
 
 @Service
 @RequiredArgsConstructor
@@ -46,6 +47,17 @@ public class AccountService {
     public ResponseEntity<ResponseDto> deleteAccount (String id) {
         accountRepository.deleteById(id);
         subAccountRepository.deleteAllByAccountId(id);
+        return ResponseEntity.status(204).body(null); 
+    }
+
+    public ResponseEntity<ResponseDto> desableAccount (String id) {
+        Account account = accountRepository.findById(id).orElseThrow();
+        if (Role.ADMIN.equals(account.getRole())) {
+            return ResponseEntity.status(403).body(null); 
+        }
+        
+        account.setActivated(false);
+        accountRepository.save(account);
         return ResponseEntity.status(204).body(null); 
     }
 }

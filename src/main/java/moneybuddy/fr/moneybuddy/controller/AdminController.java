@@ -139,6 +139,13 @@ public class AdminController {
         return accountService.deleteAccount(id);
     }
 
+    @DeleteMapping("/accounts/{id}/desable")
+    public ResponseEntity<ResponseDto> desableAccount (
+        @PathVariable String id
+    ) {
+        return accountService.desableAccount(id);
+    }
+
     @GetMapping("/accounts/{id}/transactions")
     public ResponseEntity<Page<Transaction>> getAccountTransaction(
         @PathVariable String id,
