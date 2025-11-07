@@ -1,11 +1,9 @@
 package moneybuddy.fr.moneybuddy.controller;
 
 import lombok.RequiredArgsConstructor;
+import moneybuddy.fr.moneybuddy.model.ChapterWithCourses;
 import moneybuddy.fr.moneybuddy.model.ChapterWithoutCourses;
-import moneybuddy.fr.moneybuddy.model.Course;
 import moneybuddy.fr.moneybuddy.service.ChapterService;
-
-import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -31,7 +29,7 @@ public class ChapterController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<List<Course>> getChapterById (
+    public ResponseEntity<ChapterWithCourses> getChapterById (
         @PathVariable String id
     ) {
         return chapterService.getChapter(id);

@@ -6,6 +6,7 @@ import moneybuddy.fr.moneybuddy.dtos.chapter.CreateChapterRequest;
 import moneybuddy.fr.moneybuddy.dtos.course.CreateCourseRequest;
 import moneybuddy.fr.moneybuddy.model.Account;
 import moneybuddy.fr.moneybuddy.model.Chapter;
+import moneybuddy.fr.moneybuddy.model.ChapterWithCourses;
 import moneybuddy.fr.moneybuddy.model.ChapterWithoutCourses;
 import moneybuddy.fr.moneybuddy.model.Course;
 import moneybuddy.fr.moneybuddy.model.Transaction;
@@ -14,8 +15,6 @@ import moneybuddy.fr.moneybuddy.service.AccountService;
 import moneybuddy.fr.moneybuddy.service.ChapterService;
 import moneybuddy.fr.moneybuddy.service.CourseService;
 import moneybuddy.fr.moneybuddy.service.TransactionService;
-
-import java.util.List;
 
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.springframework.data.domain.Page;
@@ -66,7 +65,7 @@ public class AdminController {
     }
 
     @GetMapping("/chapters/{id}")
-    public ResponseEntity<List<Course>> getChapter (
+    public ResponseEntity<ChapterWithCourses> getChapter (
         @PathVariable String id
     ) {
         return chapterService.getChapter(id);

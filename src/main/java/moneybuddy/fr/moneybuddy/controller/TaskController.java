@@ -44,11 +44,11 @@ public class TaskController {
         @RequestHeader("Authorization") String authHeader,
         @RequestParam(required = false) String childId,
         @RequestParam(required = false) Boolean prevalidation,
-        @RequestParam(required = false) Boolean refused,
+        @RequestParam(required = false) Boolean completed,
         @RequestParam(required = false) Boolean isDone
     ) {
         String token = authHeader.substring(7);
-        return service.getTasks(token, childId, prevalidation, refused, isDone);
+        return service.getTasks(token, childId, prevalidation, completed, isDone);
     }
 
     @GetMapping("/{id}")
@@ -93,6 +93,6 @@ public class TaskController {
         @PathVariable String id
     ) {
         String token = authHeader.substring(7);
-        return service.preValidationTask(token, id);
+        return service.preValidateTAsk(token, id);
     }
 }

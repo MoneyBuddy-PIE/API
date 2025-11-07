@@ -15,10 +15,9 @@ import lombok.RequiredArgsConstructor;
 import moneybuddy.fr.moneybuddy.dtos.AuthResponse;
 import moneybuddy.fr.moneybuddy.dtos.TaskComplete;
 import moneybuddy.fr.moneybuddy.dtos.TaskRequest;
+import moneybuddy.fr.moneybuddy.dtos.Money.AddMoney;
 import moneybuddy.fr.moneybuddy.model.enums.SubAccountRole;
-import moneybuddy.fr.moneybuddy.model.SubAccount;
 import moneybuddy.fr.moneybuddy.model.Task;
-import moneybuddy.fr.moneybuddy.repository.SubAccountRepository;
 import moneybuddy.fr.moneybuddy.repository.TaskRepository;
 
 @Service
@@ -27,7 +26,7 @@ public class TaskService {
 
     private final MongoTemplate mongoTemplate;
     private final TaskRepository taskRepository;
-    private final SubAccountRepository subAccountRepository;
+    private final MoneyService moneyService;
     private final JwtService jwtService;
 
     public ResponseEntity<AuthResponse> response(String message, HttpStatus status) {
@@ -47,7 +46,7 @@ public class TaskService {
             return response("Vous n avez pas les droits", HttpStatus.FORBIDDEN);
         }
 
-        boolean prevalidation = request.isPrevalidation();
+        boolean prevalidation = request.isPrevalidation() ? request.isPrevalidation() : false;
         Task task = Task.builder()
                     .description(request.getDescription())
                     .category(request.getCategory())
@@ -69,7 +68,7 @@ public class TaskService {
         String token, 
         String childId,
         Boolean prevalidation,
-        Boolean refused,
+        Boolean completed,
         Boolean isDone 
         ) {
         SubAccountRole role = jwtService.extractSubAccountRole(token);
@@ -93,8 +92,8 @@ public class TaskService {
             criteria.and("prevalidation").is(prevalidation);
         }
         
-        if (refused != null) {
-            criteria.and("refused").is(refused);
+        if (completed != null) {
+            criteria.and("completed").is(completed);
         }
         
         if (isDone != null) {
@@ -121,35 +120,34 @@ public class TaskService {
     }
 
     public ResponseEntity<AuthResponse> completeTask (TaskComplete req, String token, String taskId) {
-        if (SubAccountRole.CHILD.equals(jwtService.extractSubAccountRole(token))) {
+        Task task = taskRepository.findById(taskId).orElseThrow();
+        if (SubAccountRole.CHILD.equals(jwtService.extractSubAccountRole(token)) && task.isPrevalidation()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        Task task = taskRepository.findById(taskId).orElseThrow();
-        SubAccount subAccount = subAccountRepository.findById(task.getSubaccountIdChild()).orElseThrow();
-
-        task.setDone(req.isDone());
-
         if (req.isDone()) {
-            String newMoney = String.valueOf(Double.parseDouble(subAccount.getMoney()) + Double.parseDouble(task.getReward()));
-            subAccount.setMoney(newMoney);
-            subAccount.setUpdatedAt(LocalDateTime.now());
-            subAccountRepository.save(subAccount);
+            AddMoney addMoney = AddMoney.builder()
+                .amount(task.getReward())
+                .subAccountId(task.getSubaccountIdChild())
+                .description("Reward")
+                .build();
+            moneyService.updateMoney(addMoney, token, true);
         }
 
         if (!req.isDone()) {
-            task.setRefused(true);
+            task.setCompleted(false);
         }
-
+        task.setCompleted(true);
+        task.setDone(req.isDone());
         task.setUpdatedAt(LocalDateTime.now());
         taskRepository.save(task);
         return ResponseEntity.status(HttpStatus.ACCEPTED).build();
     }
 
-    public ResponseEntity<AuthResponse> preValidationTask (String token, String taskId) {
+    public ResponseEntity<AuthResponse> preValidateTAsk (String token, String taskId) {
         Task task = taskRepository.findById(taskId).orElseThrow();
         
-        task.setPrevalidation(true);
+        task.setDone(true);
         task.setUpdatedAt(LocalDateTime.now());
         taskRepository.save(task);
 
