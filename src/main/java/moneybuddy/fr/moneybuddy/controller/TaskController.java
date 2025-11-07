@@ -20,6 +20,7 @@ import moneybuddy.fr.moneybuddy.dtos.AuthResponse;
 import moneybuddy.fr.moneybuddy.dtos.TaskComplete;
 import moneybuddy.fr.moneybuddy.dtos.TaskRequest;
 import moneybuddy.fr.moneybuddy.model.Task;
+import moneybuddy.fr.moneybuddy.model.enums.TaskStatus;
 import moneybuddy.fr.moneybuddy.service.TaskService;
 
 @RestController
@@ -43,12 +44,10 @@ public class TaskController {
     public ResponseEntity<List<Task>> getTasks(
         @RequestHeader("Authorization") String authHeader,
         @RequestParam(required = false) String childId,
-        @RequestParam(required = false) Boolean prevalidation,
-        @RequestParam(required = false) Boolean completed,
-        @RequestParam(required = false) Boolean isDone
+        @RequestParam(required = false) TaskStatus prevalidation
     ) {
         String token = authHeader.substring(7);
-        return service.getTasks(token, childId, prevalidation, completed, isDone);
+        return service.getTasks(token, childId, prevalidation);
     }
 
     @GetMapping("/{id}")
@@ -93,6 +92,6 @@ public class TaskController {
         @PathVariable String id
     ) {
         String token = authHeader.substring(7);
-        return service.preValidateTAsk(token, id);
+        return service.preValidateTask(token, id);
     }
 }

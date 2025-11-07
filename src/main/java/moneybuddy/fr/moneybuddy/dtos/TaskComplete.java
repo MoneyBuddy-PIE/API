@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 @Data
 @Builder
@@ -13,6 +13,6 @@ import jakarta.validation.constraints.NotBlank;
 @AllArgsConstructor
 public class TaskComplete {
 
-    @NotBlank(message = "isDone is mandatory")
-    private boolean isDone;
+    @NotNull(message = "done is mandatory")
+    private boolean done;
 }
