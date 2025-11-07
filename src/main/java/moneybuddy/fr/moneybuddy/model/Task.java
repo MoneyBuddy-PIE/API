@@ -29,7 +29,7 @@ public class Task {
     @Builder.Default
     private boolean prevalidation = false;
     @Builder.Default
-    private boolean refused = false;
+    private boolean completed = false;
 
 
     private String subaccountIdParent;

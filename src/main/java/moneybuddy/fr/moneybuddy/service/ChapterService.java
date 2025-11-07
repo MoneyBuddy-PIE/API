@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import moneybuddy.fr.moneybuddy.dtos.ResponseDto;
 import moneybuddy.fr.moneybuddy.dtos.chapter.CreateChapterRequest;
 import moneybuddy.fr.moneybuddy.model.Chapter;
+import moneybuddy.fr.moneybuddy.model.ChapterWithCourses;
 import moneybuddy.fr.moneybuddy.model.ChapterWithoutCourses;
 import moneybuddy.fr.moneybuddy.model.Course;
 import moneybuddy.fr.moneybuddy.model.enums.SubAccountRole;
@@ -21,6 +22,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.BeanUtils;
 
 @Service
 @RequiredArgsConstructor
@@ -62,9 +64,15 @@ public class ChapterService {
         return ResponseEntity.status(200).body(chapters);
     }    
 
-    public ResponseEntity<List<Course>> getChapter(String id) {
+    public ResponseEntity<ChapterWithCourses> getChapter(String id) {
         List<Course> courses = courseRepository.findAllByChapterId(id).orElseThrow();
-        return ResponseEntity.status(200).body(courses);
+        Chapter chapter = chapterRepository.findById(id).orElseThrow();
+
+        ChapterWithCourses completeChapter = new ChapterWithCourses();
+        BeanUtils.copyProperties(chapter, completeChapter);
+        completeChapter.setCourses(courses);
+        
+        return ResponseEntity.status(200).body(completeChapter);
     }
          
     public ResponseEntity<Chapter> createChapter(String token, CreateChapterRequest req) throws FileUploadException {
