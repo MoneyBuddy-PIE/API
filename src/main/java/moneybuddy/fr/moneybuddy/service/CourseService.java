@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.http.HttpStatus;
+import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +25,7 @@ public class CourseService {
     
     private final CourseRepository courseRepository;
     private final ChapterWithCoursesRepository chapterWithCoursesRepository;
+    private final CloudflareService cloudflareService;
     private final JwtService jwtService;
     private final Utils utils;
 
@@ -52,9 +54,11 @@ public class CourseService {
     public ResponseEntity<Course> createCourse(
         String token, 
         CreateCourseRequest req
-    ) {
+    ) throws FileUploadException {
         String creator= jwtService.extractUsername(token);
         ChapterWithCourses chapter = chapterWithCoursesRepository.findById(req.getChapterId()).orElseThrow();
+
+        String image_url = cloudflareService.uploadImage(req.getFile());
         
         Course course = Course.builder()
                         .creator(creator)
@@ -63,6 +67,7 @@ public class CourseService {
                         .readTime(req.getReadTime())
                         .order(req.getOrder())
                         .locked(true)
+                        .image_url(image_url)
                         .resources(req.getResources())
                         .sections(req.getSections())
                         .build();

@@ -83,7 +83,7 @@ public class AdminController {
     public ResponseEntity<Course> createCourse(
         @Valid @RequestBody CreateCourseRequest request,
         @RequestHeader("Authorization") String authHeader
-    ) {
+    ) throws FileUploadException {
         String token = authHeader.substring(7);
         return courseService.createCourse(token, request);
     }

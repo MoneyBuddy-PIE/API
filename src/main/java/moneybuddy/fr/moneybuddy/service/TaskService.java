@@ -119,7 +119,7 @@ public class TaskService {
             AddMoney addMoney = AddMoney.builder()
                 .amount(task.getReward())
                 .subAccountId(task.getSubaccountIdChild())
-                .description("Reward")
+                .description(task.getDescription())
                 .build();
             moneyService.updateMoney(addMoney, token, true);
             task.setStatus(TaskStatus.COMPLETED);
