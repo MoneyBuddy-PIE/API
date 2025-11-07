@@ -17,6 +17,7 @@ public class Course {
     private String chapterId;
     private String creator;
 
+    private String image_url; 
     private String title;
     private int readTime;
     private int order;

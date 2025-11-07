@@ -2,9 +2,12 @@ package moneybuddy.fr.moneybuddy.dtos.course;
 
 import java.util.List;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.AllArgsConstructor;
@@ -31,6 +34,9 @@ public class CreateCourseRequest {
 
     @PositiveOrZero(message = "Order has to be >= 0")
     private int order;
+
+    @NotNull(message = "Image is mandatory")
+    private MultipartFile file;
 
     @Valid
     @NotEmpty(message = "Resources is mandatory => Array of {title: string, url: string, type: RessourceType}")
