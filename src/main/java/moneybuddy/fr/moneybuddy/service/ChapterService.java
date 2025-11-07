@@ -4,15 +4,16 @@ import lombok.RequiredArgsConstructor;
 import moneybuddy.fr.moneybuddy.dtos.ResponseDto;
 import moneybuddy.fr.moneybuddy.dtos.chapter.CreateChapterRequest;
 import moneybuddy.fr.moneybuddy.model.Chapter;
-import moneybuddy.fr.moneybuddy.model.ChapterWithCourses;
 import moneybuddy.fr.moneybuddy.model.ChapterWithoutCourses;
+import moneybuddy.fr.moneybuddy.model.Course;
 import moneybuddy.fr.moneybuddy.model.enums.SubAccountRole;
 import moneybuddy.fr.moneybuddy.repository.ChapterRepository;
-import moneybuddy.fr.moneybuddy.repository.ChapterWithCoursesRepository;
 import moneybuddy.fr.moneybuddy.repository.ChapterWithoutCoursesRepository;
+import moneybuddy.fr.moneybuddy.repository.CourseRepository;
 import moneybuddy.fr.moneybuddy.utils.Utils;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.apache.http.HttpStatus;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
@@ -26,7 +27,7 @@ import org.springframework.stereotype.Service;
 public class ChapterService {
 
     private final ChapterWithoutCoursesRepository chapterWithoutCoursesRepository;
-    private final ChapterWithCoursesRepository chapterWithCoursesRepository;
+    private final CourseRepository courseRepository;
     private final ChapterRepository chapterRepository;
 
     private final CloudflareService cloudflareService;
@@ -61,14 +62,13 @@ public class ChapterService {
         return ResponseEntity.status(200).body(chapters);
     }    
 
-    public ResponseEntity<ChapterWithCourses> getChapter(String id) {
-        ChapterWithCourses chapter = chapterWithCoursesRepository.findById(id).orElseThrow();
-        return ResponseEntity.status(200).body(chapter);
+    public ResponseEntity<List<Course>> getChapter(String id) {
+        List<Course> courses = courseRepository.findAllByChapterId(id).orElseThrow();
+        return ResponseEntity.status(200).body(courses);
     }
          
     public ResponseEntity<Chapter> createChapter(String token, CreateChapterRequest req) throws FileUploadException {
         String creator = jwtService.extractUsername(token);
-
         String image_url = cloudflareService.uploadImage(req.getFile());
 
         Chapter chapter = Chapter.builder()
