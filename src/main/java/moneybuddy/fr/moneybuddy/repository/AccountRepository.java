@@ -11,6 +11,7 @@ import org.springframework.data.mongodb.repository.Query;
 import java.util.Optional;
 
 public interface AccountRepository extends MongoRepository<Account, String> {
+    @Query(value = "{ 'email': ?0, 'activated': true }")
     Optional<Account> findByEmail(String email);
 
     @Query(value = "{ 'planType': ?0 }")
