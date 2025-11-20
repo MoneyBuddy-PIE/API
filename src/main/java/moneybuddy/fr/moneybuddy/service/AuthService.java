@@ -33,6 +33,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final EmailService emailService;
+    private final DiscordNotificationService discordNotificationService;
 
     public ResponseEntity<AuthResponse> response(String message, HttpStatus status) {
         return ResponseEntity
@@ -46,7 +47,7 @@ public class AuthService {
         if (!request.getPassword().equals(request.getConfirmPassword())) {
             return response("Not same password" ,HttpStatus.BAD_REQUEST);
         }
-        
+
         if (repository.findByEmail(request.getEmail()).isPresent()){
             return response("L'email est déjà utilisé" ,HttpStatus.BAD_REQUEST);
         }
@@ -75,8 +76,19 @@ public class AuthService {
         List<SubAccount> subAccounts = Arrays.asList(subAccount);
         account.setSubAccounts(subAccounts);
         repository.save(account);
-        
+
         String jwtToken = jwtService.generateToken(account, account.getRole());
+
+        // Notification Discord pour la création de compte
+        try {
+            discordNotificationService.sendUserRegistrationNotification(
+                account.getEmail(),
+                request.getName()
+            );
+        } catch (Exception e) {
+            // On log l'erreur mais on ne fait pas échouer l'inscription
+            System.err.println("Erreur lors de l'envoi de la notification Discord: " + e.getMessage());
+        }
 
         emailService.welcomeEmail(account.getEmail());
 
@@ -87,7 +99,7 @@ public class AuthService {
                 .build());
     }
 
-    public ResponseEntity<AuthResponse> authenticate(AuthRequest request) {   
+    public ResponseEntity<AuthResponse> authenticate(AuthRequest request) {
         Account account = repository.findByEmail(request.getEmail()).orElseThrow();
 
         if (!passwordEncoder.matches(request.getPassword(), account.getPassword())) {
@@ -124,7 +136,7 @@ public class AuthService {
 
         if (!SubAccountRole.CHILD.equals(subAccount.getRole()) && !pin.equals(subAccount.getPin())) {
             return response("Mauvais pin pour le compte parent", HttpStatus.BAD_REQUEST);
-        }        
+        }
 
         if (SubAccountRole.PARENT.equals(subAccount.getRole()) && request.getPin().isEmpty()) {
             return response("Pin mandatory for Parent", HttpStatus.BAD_REQUEST);
@@ -158,7 +170,7 @@ public class AuthService {
         emailService.resetPasswordEmail(request.getEmail(), token);
 
         return ResponseEntity.status(HttpStatus.OK).body(null);
-    } 
+    }
 
     public ResponseEntity<AuthResponse> restPasswordConfirm(AuthResetPassword request, String token) {
         String accountId = jwtService.extractUsername(token);

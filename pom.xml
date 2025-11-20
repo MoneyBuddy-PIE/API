@@ -132,13 +132,20 @@
 			<scope>compile</scope>
 		</dependency>
 
-		<!-- AWS SDK’s Apache HTTP-client integration -->
+		<!-- AWS SDK's Apache HTTP-client integration -->
 		<dependency>
 			<groupId>software.amazon.awssdk</groupId>
 			<artifactId>apache-client</artifactId>
 			<version>${cloudflare-aws-sdk-version}</version>
 		</dependency>
-		
+
+		<!-- Discord4J - Bot Discord -->
+		<dependency>
+			<groupId>com.discord4j</groupId>
+			<artifactId>discord4j-core</artifactId>
+			<version>3.2.6</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>

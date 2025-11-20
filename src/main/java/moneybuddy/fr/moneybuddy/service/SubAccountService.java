@@ -24,6 +24,7 @@ public class SubAccountService {
     private final AccountRepository accountRepository;
     private final SubAccountRepository subAccountRepository;
     private final JwtService jwtService;
+    private final DiscordNotificationService discordNotificationService;
 
     public ResponseEntity<AuthResponse> response(String message, HttpStatus status) {
         return ResponseEntity
@@ -38,10 +39,10 @@ public class SubAccountService {
         String accountId = jwtService.extractSubAccountAccountId(token);
 
         Optional<Account> optinalaccount = accountRepository.findById(accountId);
-        
-        if ( subAccountRole == null || 
-            (!SubAccountRole.OWNER.equals(subAccountRole) && 
-            !(SubAccountRole.PARENT.equals(subAccountRole) && SubAccountRole.CHILD.equals(subAccountDto.getRole())))) 
+
+        if ( subAccountRole == null ||
+            (!SubAccountRole.OWNER.equals(subAccountRole) &&
+            !(SubAccountRole.PARENT.equals(subAccountRole) && SubAccountRole.CHILD.equals(subAccountDto.getRole()))))
         {
             return response("Pas autorisé", HttpStatus.UNAUTHORIZED);
         }
@@ -77,6 +78,18 @@ public class SubAccountService {
             subAccounts.add(subAccount);
             account.setSubAccounts(subAccounts);
             accountRepository.save(account);
+
+            // Notification Discord pour la création de sous-compte
+            try {
+                String parentEmail = jwtService.extractUsername(token);
+                discordNotificationService.sendSubAccountCreationNotification(
+                    parentEmail,
+                    subAccountDto.getName()
+                );
+            } catch (Exception e) {
+                // On log l'erreur mais on ne fait pas échouer la création
+                System.err.println("Erreur lors de l'envoi de la notification Discord: " + e.getMessage());
+            }
 
             return response("SubAccount created", HttpStatus.OK);
         }
