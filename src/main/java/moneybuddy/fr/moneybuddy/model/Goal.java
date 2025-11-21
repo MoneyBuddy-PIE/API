@@ -9,30 +9,34 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import moneybuddy.fr.moneybuddy.model.enums.TransactionType;
+import moneybuddy.fr.moneybuddy.model.enums.GoalStatus;
 
-@Document(collection = "transactions")
+@Document(collection = "goals")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Transaction {
-
+public class Goal {
     @Id
     private String id;
-    private String accountId;
-    private String childId;
-    private String parentId;
-    private String goalId;
+    
+    private String name;
+    private Float amount;
+    private String emoji;
 
-    private TransactionType type;
+    @Builder.Default
+    private Float depositStatement = new Float(0);
+
+    @Builder.Default
+    private GoalStatus goalStatus = GoalStatus.ACTIVATED;
+
+    @Builder.Default
+    private Number progression = 0;
+
+    private String subaccountIdChild;
+    private String accountId;
 
     @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();
     private LocalDateTime updatedAt;
-
-    private String amount;
-    private String oldAmount;
-    private String newAmount;
-    private String description;
 }

@@ -16,6 +16,8 @@ import moneybuddy.fr.moneybuddy.service.ChapterService;
 import moneybuddy.fr.moneybuddy.service.CourseService;
 import moneybuddy.fr.moneybuddy.service.TransactionService;
 
+import java.util.List;
+
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -36,12 +38,14 @@ public class AdminController {
     //Transactions
     @GetMapping("/transactions")
     public ResponseEntity<Page<Transaction>> getAllTransaction (
+        @RequestParam(required = false) String accountId,
+        @RequestParam(required = false) String subAccountId,
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "10") int size,
         @RequestParam(defaultValue = "order") String sortBy,
         @RequestParam(defaultValue = "asc") String sortDir
     ) {
-        return transactionService.getAllTransactions(page, size, sortBy, sortDir);
+        return transactionService.getAllTransactions(page, size, sortBy, sortDir, accountId, subAccountId);
     }
  
     //Chapters
@@ -154,6 +158,26 @@ public class AdminController {
         @RequestParam(defaultValue = "asc") String sortDir
     ) {
         return transactionService.getAllTransactionsByAccountId(id, page, size, sortBy, sortDir);
+    }
+
+    //Goals Transactions
+    @GetMapping("/goals/transactions")
+    public ResponseEntity<Page<Transaction>> getAllGoalTransactions (
+        @RequestParam(required = false) String accountId,
+        @RequestParam(required = false) String subAccountId,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size,
+        @RequestParam(defaultValue = "order") String sortBy,
+        @RequestParam(defaultValue = "asc") String sortDir
+    ) {
+        return transactionService.getAllTransactions(page, size, sortBy, sortDir, accountId, subAccountId);
+    }
+
+    @GetMapping("/goal/{goalId}/transactions")
+    public ResponseEntity<List<Transaction>> getSingleGoalTransactions(
+        @PathVariable String goalId
+    ) {
+        return transactionService.getTransactionByGoalId(goalId);
     }
 
 }
