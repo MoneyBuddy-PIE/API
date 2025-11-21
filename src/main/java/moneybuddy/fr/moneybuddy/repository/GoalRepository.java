@@ -11,9 +11,8 @@ import moneybuddy.fr.moneybuddy.model.Goal;
 public interface GoalRepository extends MongoRepository<Goal, String> {
 
     List<Goal> findBySubaccountIdChild(String SubaccountIdChild);
-    List<Goal> findBySubaccountIdParent(String subaccountIdParent);
     List<Goal> findByAccountId(String accountId);
 
-    Goal findByIdAndSubaccountIdParent(String id, String subaccountIdParent);
     Goal findByIdAndSubaccountIdChild(String id, String SubaccountIdChild);
+    void deleteByIdAndSubaccountIdChild(String id, String SubaccountIdChild);
 }

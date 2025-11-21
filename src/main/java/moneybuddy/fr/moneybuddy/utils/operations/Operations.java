@@ -1,46 +1,53 @@
 package moneybuddy.fr.moneybuddy.utils.operations;
 
+import java.time.LocalDateTime;
+
 import org.springframework.stereotype.Component;
 
 import moneybuddy.fr.moneybuddy.model.SubAccount;
-import moneybuddy.fr.moneybuddy.model.enums.DepositType;
-import moneybuddy.fr.moneybuddy.model.DepositDetails;
+import moneybuddy.fr.moneybuddy.model.Transaction;
+import moneybuddy.fr.moneybuddy.model.enums.GoalStatus;
+import moneybuddy.fr.moneybuddy.model.enums.TransactionType;
 import moneybuddy.fr.moneybuddy.model.Goal;
 
 import moneybuddy.fr.moneybuddy.dtos.Money.AddMoney;
 
-import moneybuddy.fr.moneybuddy.repository.GoalTransactionRepository;
-
+import moneybuddy.fr.moneybuddy.repository.TransactionRepository;
 import moneybuddy.fr.moneybuddy.service.MoneyService;
 
 @Component
 public class Operations {
 
-    private final GoalTransactionRepository goalTransactionRepository;
+    private final TransactionRepository transactionRepository;
     private final MoneyService moneyService;
 
-    public Operations(GoalTransactionRepository goalTransactionRepository, MoneyService moneyService) {
-        this.goalTransactionRepository = goalTransactionRepository;
+    public Operations(TransactionRepository transactionRepository, MoneyService moneyService) {
         this.moneyService = moneyService;
+        this.transactionRepository = transactionRepository;
     }
 
-    public void updateProgression(Goal goal) {
-        Number updateProgression = (goal.getDepositStatement().doubleValue()/goal.getAmount().doubleValue()) * 100;
+    public void updateProgression(Goal goal, Float depositStatement) {
+        Number updateProgression = depositStatement * 100 / goal.getAmount();
+        if (updateProgression.floatValue() == 100)
+            goal.setGoalStatus(GoalStatus.DONE);
+            
         goal.setProgression(updateProgression);
     }
 
-    public void updateGoalTransactionHistory(Goal goal, DepositType type, Number amount, Number updatedGoalAmount) {
-        DepositDetails depositDetails = DepositDetails.builder()
-                                                .goalId(goal.getId())
-                                                .parentId(goal.getSubaccountIdParent())
-                                                .childId(goal.getSubaccountIdChild())
-                                                .accountId(goal.getAccountId())
-                                                .type(type)
-                                                .amount(amount)
-                                                .previousAmount(goal.getDepositStatement())
-                                                .newAmount(updatedGoalAmount)
-                                                .build();
-        goalTransactionRepository.save(depositDetails);
+    public void updateGoalTransactionHistory(Goal goal, TransactionType type, Float amount, Float updatedGoalAmount) {
+        Transaction transaction = Transaction.builder()
+        .goalId(goal.getId())
+        .childId(goal.getSubaccountIdChild())
+        .accountId(goal.getAccountId())
+        .amount(String.valueOf(amount))
+        .oldAmount(String.valueOf(goal.getDepositStatement()))
+        .newAmount(String.valueOf(updatedGoalAmount))
+        .description(TransactionType.CREDIT.equals(type) ? "Add money to goal" : "Remove money from goal")
+        .type(type)
+        .createdAt(LocalDateTime.now())
+        .build();
+
+        transactionRepository.save(transaction);
     }
 
     public void updateAccountBalanceMoney(SubAccount subAccount, String token, String money, boolean transferAddMoney, String description) {

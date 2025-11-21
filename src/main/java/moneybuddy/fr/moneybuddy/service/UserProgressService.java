@@ -26,8 +26,6 @@ public class UserProgressService {
                 .completedAt(LocalDateTime.now())
                 .build();
 
-        System.out.println(courseProgress);
-
         UserProgress userProgress = UserProgress.builder()
         .subAccountId(subAccountId)
         .createdAt(LocalDateTime.now())

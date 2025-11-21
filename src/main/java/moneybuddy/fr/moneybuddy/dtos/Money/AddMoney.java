@@ -19,4 +19,5 @@ public class AddMoney {
     private String amount;
 
     private String description;
+    private String goalId;
 }

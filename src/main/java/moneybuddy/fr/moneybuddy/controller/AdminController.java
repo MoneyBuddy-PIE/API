@@ -15,8 +15,6 @@ import moneybuddy.fr.moneybuddy.service.AccountService;
 import moneybuddy.fr.moneybuddy.service.ChapterService;
 import moneybuddy.fr.moneybuddy.service.CourseService;
 import moneybuddy.fr.moneybuddy.service.TransactionService;
-import moneybuddy.fr.moneybuddy.model.DepositDetails;
-import moneybuddy.fr.moneybuddy.service.GoalTransactionService;
 
 import java.util.List;
 
@@ -36,17 +34,18 @@ public class AdminController {
     private final CourseService courseService;
     private final AccountService accountService;
     private final TransactionService transactionService;
-    private final GoalTransactionService goalTransactionService;
 
     //Transactions
     @GetMapping("/transactions")
     public ResponseEntity<Page<Transaction>> getAllTransaction (
+        @RequestParam(required = false) String accountId,
+        @RequestParam(required = false) String subAccountId,
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "10") int size,
         @RequestParam(defaultValue = "order") String sortBy,
         @RequestParam(defaultValue = "asc") String sortDir
     ) {
-        return transactionService.getAllTransactions(page, size, sortBy, sortDir);
+        return transactionService.getAllTransactions(page, size, sortBy, sortDir, accountId, subAccountId);
     }
  
     //Chapters
@@ -163,34 +162,22 @@ public class AdminController {
 
     //Goals Transactions
     @GetMapping("/goals/transactions")
-    public ResponseEntity<Page<DepositDetails>> getAllGoalTransactions (
+    public ResponseEntity<Page<Transaction>> getAllGoalTransactions (
         @RequestParam(required = false) String accountId,
-        @RequestParam(required = false) String type,
+        @RequestParam(required = false) String subAccountId,
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "10") int size,
         @RequestParam(defaultValue = "order") String sortBy,
         @RequestParam(defaultValue = "asc") String sortDir
     ) {
-        if(type.equals("account") && accountId != null) {
-            return goalTransactionService.getAllGoalTransactionsByAccountId(accountId, page, size, sortBy, sortDir);
-        }
-
-        if(type.equals( "parent") && accountId != null) {
-            return goalTransactionService.getAllGoalTransactionsByParentId(accountId, page, size, sortBy, sortDir);
-        }
-
-        if(type.equals("child") && accountId != null) {
-            return goalTransactionService.getAllGoalTransactionsByChildId(accountId, page, size, sortBy, sortDir);
-        }
-
-        return goalTransactionService.getAllGoalTransactions(page, size, sortBy, sortDir);
+        return transactionService.getAllTransactions(page, size, sortBy, sortDir, accountId, subAccountId);
     }
 
     @GetMapping("/goal/{goalId}/transactions")
-    public ResponseEntity<List<DepositDetails>> getSingleGoalTransactions(
+    public ResponseEntity<List<Transaction>> getSingleGoalTransactions(
         @PathVariable String goalId
     ) {
-        return goalTransactionService.getSingleGoalTransactions(goalId);
+        return transactionService.getTransactionByGoalId(goalId);
     }
 
 }

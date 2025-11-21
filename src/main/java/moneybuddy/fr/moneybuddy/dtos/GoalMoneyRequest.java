@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 @Data
 @Builder
@@ -13,7 +13,7 @@ import jakarta.validation.constraints.NotBlank;
 @AllArgsConstructor
 public class GoalMoneyRequest {
 
-    @NotBlank(message = "Money amount is mandatory")
-    private Number transferMoney;
+    @NotNull(message = "Money amount is mandatory")
+    private Float transferMoney;
 
 }

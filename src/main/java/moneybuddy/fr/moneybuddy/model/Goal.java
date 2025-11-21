@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import moneybuddy.fr.moneybuddy.model.enums.GoalStatus;
 
 @Document(collection = "goals")
 @Data
@@ -20,24 +21,18 @@ public class Goal {
     private String id;
     
     private String name;
-    private Number amount;
+    private Float amount;
     private String emoji;
-    private Number depositStatement;
 
     @Builder.Default
-    private boolean isActive = true;
+    private Float depositStatement = new Float(0);
+
     @Builder.Default
-    private boolean isDone = false;
-    @Builder.Default
-    private boolean useSavingMoney = false;
-    @Builder.Default
-    private boolean confirmsUseSavingMoney = false;
-    // @Builder.Default
-    // private boolean validate = false;
+    private GoalStatus goalStatus = GoalStatus.ACTIVATED;
+
     @Builder.Default
     private Number progression = 0;
 
-    private String subaccountIdParent;
     private String subaccountIdChild;
     private String accountId;
 

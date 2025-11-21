@@ -23,7 +23,8 @@ public class Transaction {
     private String accountId;
     private String childId;
     private String parentId;
-    
+    private String goalId;
+
     private TransactionType type;
 
     @Builder.Default

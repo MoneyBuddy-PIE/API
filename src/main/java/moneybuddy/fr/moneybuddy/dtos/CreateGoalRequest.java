@@ -17,10 +17,7 @@ public class CreateGoalRequest {
     private String name;
 
     @NotBlank(message = "Amount is mandatory")
-    private Number amount;
-
-    @NotBlank(message = "SubAccountId is mandatory")
-    private String subAccountId;
+    private Float amount;
 
     private String emoji;
 

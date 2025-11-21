@@ -23,17 +23,25 @@ public class TransactionService {
         int page, 
         int size, 
         String sortBy, 
-        String sortDir
+        String sortDir,
+        String accountId,
+        String subAccountId
     ) {
         Pageable pageable = utils.pagination(page, size, sortBy, sortDir);
 
-        Page<Transaction> transactions = transactionRepository.findAll(pageable);
+        Page<Transaction> transactions = accountId != null ? 
+            transactionRepository.findAllByAccountId(accountId, pageable) 
+            : subAccountId != null ? 
+                transactionRepository.findAllByChildId(pageable, subAccountId)
+                : transactionRepository.findAll(pageable);
+
         return ResponseEntity.status(HttpStatus.OK).body(transactions);
     }
 
-    public ResponseEntity<List<Transaction>> getTransactions(String token, String subAccountId) {
-        
-        List<Transaction> transactions = transactionRepository.findByChildId(subAccountId);
+    public ResponseEntity<List<Transaction>> getTransactions(String token, String subAccountId, boolean isGoal) {
+        List<Transaction> transactions = isGoal ? transactionRepository.findByChildAndGoal(subAccountId) 
+            : transactionRepository.findAllByChildId(subAccountId);
+
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(transactions);
     }
 
@@ -47,6 +55,14 @@ public class TransactionService {
         Pageable pageable = utils.pagination(page, size, sortBy, sortDir);
         
         Page<Transaction> transactions = transactionRepository.findAllByAccountId(accountId, pageable);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(transactions);
+    }
+
+    public ResponseEntity<List<Transaction>> getTransactionByGoalId(
+        String goalId
+    ) {
+        
+        List<Transaction> transactions = transactionRepository.findAllByGoalId(goalId);
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(transactions);
     }
 }

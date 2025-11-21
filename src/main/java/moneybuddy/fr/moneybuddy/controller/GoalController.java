@@ -17,10 +17,10 @@ import org.springframework.web.bind.annotation.RestController;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import moneybuddy.fr.moneybuddy.dtos.AuthResponse;
-// import moneybuddy.fr.moneybuddy.dtos.GoalComplete;
 import moneybuddy.fr.moneybuddy.dtos.CreateGoalRequest;
 import moneybuddy.fr.moneybuddy.dtos.GoalMoneyRequest;
 import moneybuddy.fr.moneybuddy.model.Goal;
+import moneybuddy.fr.moneybuddy.model.enums.GoalStatus;
 import moneybuddy.fr.moneybuddy.service.GoalService;
 
 @RestController
@@ -44,16 +44,12 @@ public class GoalController {
     public ResponseEntity<List<Goal>> getGoals(
         @RequestHeader("Authorization") String authHeader,
         @RequestParam(required = false) String childId,
-        @RequestParam(required = false) String parentId,
         @RequestParam(required = false) String accountId,
-        @RequestParam(required = false) Boolean isActive,
-        @RequestParam(required = false) Boolean isDone,
-        @RequestParam(required = false) Boolean useSavingMoney,
+        @RequestParam(required = false) GoalStatus goalStatus,
         @RequestParam(required = false) Number goalProgression
-
     ) {
         String token = authHeader.substring(7);
-        return service.getGoals(token, childId, parentId, accountId, isActive, isDone, useSavingMoney, goalProgression);
+        return service.getGoals(token, childId, goalStatus, goalProgression, accountId);
     }
 
     @GetMapping("/{id}")
@@ -102,16 +98,6 @@ public class GoalController {
         return service.removeGoalMoney(request, token, id);
     }
 
-    @PutMapping("/confirm/{id}")
-    public ResponseEntity<AuthResponse> confirmUseSavingMoneyOption(
-        @RequestHeader("Authorization") String authHeader,
-        @PathVariable String id
-    ) {
-
-        String token = authHeader.substring(7);
-        return service.confirmUseSavingMoneyOption(token, id);
-    }
-
     @PostMapping("/transfer/{id}")
     public ResponseEntity<String> transferGoalMoney(
         @RequestHeader("Authorization") String authHeader,
@@ -120,14 +106,4 @@ public class GoalController {
         String token = authHeader.substring(7);
         return service.confirmSavingMoneyTransfer(token, id);
     }
-
-    // @PutMapping("/complete/{id}")
-    // public ResponseEntity<AuthResponse> completeGoal(
-    //     @RequestHeader("Authorization") String authHeader,
-    //     @PathVariable String id,
-    //     @Valid @RequestBody GoalComplete req
-    // ) {
-    //     String token = authHeader.substring(7);
-    //     return service.validateGoal(req, token, id);
-    // }
 }
