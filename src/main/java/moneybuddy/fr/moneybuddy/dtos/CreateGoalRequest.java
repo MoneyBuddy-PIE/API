@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 @Data
 @Builder
@@ -16,7 +17,7 @@ public class CreateGoalRequest {
     @NotBlank(message = "Name is mandatory")
     private String name;
 
-    @NotBlank(message = "Amount is mandatory")
+    @NotNull(message = "Amount is mandatory")
     private Float amount;
 
     private String emoji;
