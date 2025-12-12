@@ -1,3 +1,6 @@
+/*
+								* Copyright moneybuddy.fr moneybuddy
+								*/
 package moneybuddy.fr.moneybuddy.dtos.Money;
 
 import jakarta.validation.constraints.NotBlank;
@@ -11,13 +14,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AddMoney {
-    
-    @NotBlank(message = "SubAccountid is mandatory")
-    private String subAccountId;
 
-    @NotBlank(message = "Amount is mandatory")
-    private String amount;
+  @NotBlank(message = "SubAccountid is mandatory")
+  private String subAccountId;
 
-    private String description;
-    private String goalId;
+  @NotBlank(message = "Amount is mandatory")
+  private String amount;
+
+  private String description;
+  private String goalId;
 }

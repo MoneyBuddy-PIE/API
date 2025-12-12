@@ -1,59 +1,61 @@
+/*
+								* Copyright moneybuddy.fr moneybuddy
+								*/
 package moneybuddy.fr.moneybuddy.utils;
 
 import com.resend.Resend;
 import com.resend.core.exception.ResendException;
 import com.resend.services.emails.model.CreateEmailOptions;
 import com.resend.services.emails.model.CreateEmailResponse;
-
 import jakarta.annotation.PostConstruct;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
 public class EmailService {
 
-    @Value("${resend.email}")
-    private String email;
+  @Value("${resend.email}")
+  private String email;
 
-    @Value("${resend.api_key}")
-    private String apiKey;
+  @Value("${resend.api_key}")
+  private String apiKey;
 
-    @Value("${domain}")
-    private String domain;
-    
-    private String noReplyEmail;
-    private String contactEmail;
+  @Value("${domain}")
+  private String domain;
 
-    @PostConstruct
-    private void initEmails() {
-        this.noReplyEmail = "no-reply" + email;
-        this.contactEmail = "hello" + email;
+  private String noReplyEmail;
+  private String contactEmail;
+
+  @PostConstruct
+  private void initEmails() {
+    this.noReplyEmail = "no-reply" + email;
+    this.contactEmail = "hello" + email;
+  }
+
+  public String sendEmail(String to, String fromEmail, String subject, String htmlContent) {
+    Resend resend = new Resend(apiKey);
+
+    CreateEmailOptions params =
+        CreateEmailOptions.builder()
+            .from(fromEmail)
+            .to(to)
+            .subject(subject)
+            .html(htmlContent)
+            .build();
+
+    try {
+      CreateEmailResponse response = resend.emails().send(params);
+      return "Email envoyé avec ID : " + response.getId();
+    } catch (ResendException e) {
+      throw new RuntimeException("Échec d'envoi de l'email : " + e.getMessage(), e);
     }
+  }
 
-    public String sendEmail(String to, String fromEmail, String subject, String htmlContent) {
-        Resend resend = new Resend(apiKey);
+  public Void resetPasswordEmail(String to, String token) {
+    String link = "https://" + domain + "?token=" + token;
 
-        CreateEmailOptions params = CreateEmailOptions.builder()
-                .from(fromEmail)
-                .to(to)
-                .subject(subject)
-                .html(htmlContent)
-                .build();
-
-        try {
-            CreateEmailResponse response = resend.emails().send(params);
-            return "Email envoyé avec ID : " + response.getId();
-        } catch (ResendException e) {
-            throw new RuntimeException("Échec d'envoi de l'email : " + e.getMessage(), e);
-        }
-    }
-
-
-    public Void resetPasswordEmail(String to, String token) {
-        String link = "https://"+ domain + "?token=" + token;
-
-        String htmlContent = """
+    String htmlContent =
+        """
             <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
                 <h2>Réinitialisation de votre mot de passe</h2>
                 <p>Bonjour,</p>
@@ -65,14 +67,16 @@ public class EmailService {
                 <p style="margin-top: 20px;">Si vous n'avez pas demandé cette réinitialisation, vous pouvez ignorer cet email.</p>
                 <p>Cordialement,<br>L'équipe MoneyBuddy</p>
             </div>
-        """.formatted(link);
+        """
+            .formatted(link);
 
-        sendEmail(to, noReplyEmail, "Réinitialisation de votre mot de passe", htmlContent);
-        return null;
-    }
+    sendEmail(to, noReplyEmail, "Réinitialisation de votre mot de passe", htmlContent);
+    return null;
+  }
 
-    public Void welcomeEmail(String to) {
-        String htmlContent = """
+  public Void welcomeEmail(String to) {
+    String htmlContent =
+        """
             <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
                 <h2>Bienvenue chez MoneyBuddy 🎉</h2>
                 <p>Bonjour,</p>
@@ -85,8 +89,7 @@ public class EmailService {
             </div>
         """;
 
-        sendEmail(to, contactEmail,"Bienvenue chez MoneyBuddy !", htmlContent);
-        return null;
-    }
-
+    sendEmail(to, contactEmail, "Bienvenue chez MoneyBuddy !", htmlContent);
+    return null;
+  }
 }

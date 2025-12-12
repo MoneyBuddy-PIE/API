@@ -1,8 +1,9 @@
+/*
+								* Copyright moneybuddy.fr moneybuddy
+								*/
 package moneybuddy.fr.moneybuddy.dtos.course;
 
 import java.util.List;
-
-import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -16,33 +17,36 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import moneybuddy.fr.moneybuddy.model.Resource;
 import moneybuddy.fr.moneybuddy.model.Section;
+import org.springframework.web.multipart.MultipartFile;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreateCourseRequest {
-    
-    @NotBlank(message = "ChapterId is mandatory")
-    private String chapterId;
 
-    @NotBlank(message = "Title is mandatory")
-    private String title;
+  @NotBlank(message = "ChapterId is mandatory")
+  private String chapterId;
 
-    @Positive(message = "Readtime has to be > 0")
-    private int readTime;
+  @NotBlank(message = "Title is mandatory")
+  private String title;
 
-    @PositiveOrZero(message = "Order has to be >= 0")
-    private int order;
+  @Positive(message = "Readtime has to be > 0")
+  private int readTime;
 
-    @NotNull(message = "Image is mandatory")
-    private MultipartFile file;
+  @PositiveOrZero(message = "Order has to be >= 0")
+  private int order;
 
-    @Valid
-    @NotEmpty(message = "Resources is mandatory => Array of {title: string, url: string, type: RessourceType}")
-    private List<Resource> resources;
+  @NotNull(message = "Image is mandatory")
+  private MultipartFile file;
 
-    @Valid
-    @NotEmpty(message = "Section is mandatory")
-    private List<Section> sections;
+  @Valid
+  @NotEmpty(
+      message =
+          "Resources is mandatory => Array of {title: string, url: string, type: RessourceType}")
+  private List<Resource> resources;
+
+  @Valid
+  @NotEmpty(message = "Section is mandatory")
+  private List<Section> sections;
 }

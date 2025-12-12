@@ -1,3 +1,6 @@
+/*
+								* Copyright moneybuddy.fr moneybuddy
+								*/
 package moneybuddy.fr.moneybuddy.model;
 
 import java.util.List;
@@ -8,10 +11,10 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Section {    
+public class Section {
 
-    private String title;
-    private String markdownContent;
+  private String title;
+  private String markdownContent;
 
-    private List<Quiz> quiz;
+  private List<Quiz> quiz;
 }

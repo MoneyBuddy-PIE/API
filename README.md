@@ -39,3 +39,17 @@ mvn clean install -DskipTests
 ## API Reference
 
 Go to [Swagger] (http://localhost:8080/swagger-ui/index.html#/) for the documentation
+
+## Lint
+
+TO check
+
+```bash
+mvn spotless:check
+```
+
+TO apply
+
+```bash
+mvn spotless:apply
+```
