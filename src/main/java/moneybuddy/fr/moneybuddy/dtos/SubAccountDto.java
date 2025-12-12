@@ -26,6 +26,9 @@ public class SubAccountDto {
   @NotNull(message = "Role is mandatory")
   private SubAccountRole role;
 
+  private String iconStyle;
+  private String iconName;
+
   private String pin;
 
   @AssertTrue(message = "PIN must be exactly 4 digits")

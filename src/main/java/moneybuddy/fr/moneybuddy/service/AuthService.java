@@ -140,8 +140,6 @@ public class AuthService {
     subAccount.setLastConnexion(LocalDateTime.now());
     subAccountRepository.save(subAccount);
 
-    discordService.sendNewAccountMessage(email, subAccount, false);
-
     return ResponseEntity.status(HttpStatus.ACCEPTED)
         .body(AuthResponse.builder().token(jwtToken).build());
   }

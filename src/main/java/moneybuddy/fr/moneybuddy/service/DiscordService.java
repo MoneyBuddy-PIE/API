@@ -13,6 +13,7 @@ import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.http.HttpStatus;
 
 @Service
 public class DiscordService {
@@ -21,8 +22,11 @@ public class DiscordService {
   @Value("${discord.application.token}")
   private String token;
 
-  @Value("${discord.channel.monitoring}")
-  private String monitoring_channel;
+  @Value("${discord.channel.monitoring.auth}")
+  private String monitoring_auth_channel;
+
+  @Value("${discord.channel.monitoring.errors}")
+  private String monitoring_errors_channel;
 
   @PostConstruct
   public void init() {
@@ -30,7 +34,7 @@ public class DiscordService {
   }
 
   public void sendNewAccountMessage(String email, SubAccount subAccount, Boolean isAccount) {
-    TextChannel channel = jda.getTextChannelById(monitoring_channel);
+    TextChannel channel = jda.getTextChannelById(monitoring_auth_channel);
 
     String text =
         isAccount ? "🆕 Nouveau compte créé par : " : "🆕 Nouveau sous-compte créé par : ";
@@ -48,5 +52,22 @@ public class DiscordService {
 
       channel.sendMessageEmbeds(embed.build()).queue();
     }
+  }
+
+  public void sendErroMessage (String errorMessaage, HttpStatus status) {
+    TextChannel channel = jda.getTextChannelById(monitoring_errors_channel);
+
+    if (channel != null) {
+      EmbedBuilder embed =
+          new EmbedBuilder()
+              .setTitle("🚨 ERROR")
+              .setColor(0xD3363F)
+              .setTimestamp(Instant.now())
+              .addField("Status", status.toString(), false)
+              .addField("Message", errorMessaage, false);
+
+      channel.sendMessageEmbeds(embed.build()).queue();
+    }
+    
   }
 }
