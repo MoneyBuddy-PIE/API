@@ -5,14 +5,15 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import jakarta.validation.constraints.NotBlank;
-
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class GoalComplete {
+public class GoalRequest {
 
-    @NotBlank(message = "\"Done\" status is mandatory")
-    private boolean isDone;
+    private String name;
+
+    private Float amount;
+
+    private String emoji;
 }
