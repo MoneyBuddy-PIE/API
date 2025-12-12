@@ -12,8 +12,8 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
 
 @Service
 public class DiscordService {
@@ -54,7 +54,7 @@ public class DiscordService {
     }
   }
 
-  public void sendErroMessage (String errorMessaage, HttpStatus status) {
+  public void sendErroMessage(String errorMessaage, HttpStatus status) {
     TextChannel channel = jda.getTextChannelById(monitoring_errors_channel);
 
     if (channel != null) {
@@ -68,6 +68,5 @@ public class DiscordService {
 
       channel.sendMessageEmbeds(embed.build()).queue();
     }
-    
   }
 }

@@ -64,8 +64,7 @@ public class SubAccountService {
     if (SubAccountRole.PARENT.equals(subAccountDto.getRole()))
       subAccount.setPin(subAccountDto.getPin());
 
-    if (SubAccountRole.CHILD.equals(subAccountDto.getRole()))
-      subAccount.setMoney("0");
+    if (SubAccountRole.CHILD.equals(subAccountDto.getRole())) subAccount.setMoney("0");
 
     if (optinalaccount.isPresent()) {
       subAccountRepository.save(subAccount);
