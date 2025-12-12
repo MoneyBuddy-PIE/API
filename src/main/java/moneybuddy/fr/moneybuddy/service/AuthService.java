@@ -5,6 +5,12 @@ import moneybuddy.fr.moneybuddy.dtos.AuthResetPassword;
 import moneybuddy.fr.moneybuddy.dtos.AuthResponse;
 import moneybuddy.fr.moneybuddy.dtos.AuthSubAccountRequest;
 import moneybuddy.fr.moneybuddy.dtos.RegisterRequest;
+import moneybuddy.fr.moneybuddy.exception.AccountNotFoundException;
+import moneybuddy.fr.moneybuddy.exception.EmailAlreadyExistsException;
+import moneybuddy.fr.moneybuddy.exception.InvalidCredentialsException;
+import moneybuddy.fr.moneybuddy.exception.InvalidPinException;
+import moneybuddy.fr.moneybuddy.exception.PasswordMismatchException;
+import moneybuddy.fr.moneybuddy.exception.SubAccountNotFoundException;
 import moneybuddy.fr.moneybuddy.model.Account;
 import moneybuddy.fr.moneybuddy.model.enums.Role;
 import moneybuddy.fr.moneybuddy.model.SubAccount;
@@ -34,21 +40,13 @@ public class AuthService {
     private final JwtService jwtService;
     private final EmailService emailService;
 
-    public ResponseEntity<AuthResponse> response(String message, HttpStatus status) {
-        return ResponseEntity
-                .status(status)
-                .body(AuthResponse.builder()
-                    .error(message)
-                    .build());
-    }
-
     public ResponseEntity<AuthResponse> register(RegisterRequest request) {
         if (!request.getPassword().equals(request.getConfirmPassword())) {
-            return response("Not same password" ,HttpStatus.BAD_REQUEST);
+            throw new PasswordMismatchException();
         }
-        
+
         if (repository.findByEmail(request.getEmail()).isPresent()){
-            return response("L'email est déjà utilisé" ,HttpStatus.BAD_REQUEST);
+            throw new EmailAlreadyExistsException(request.getEmail());
         }
 
         Account account = Account.builder()
@@ -87,11 +85,12 @@ public class AuthService {
                 .build());
     }
 
-    public ResponseEntity<AuthResponse> authenticate(AuthRequest request) {   
-        Account account = repository.findByEmail(request.getEmail()).orElseThrow();
+    public ResponseEntity<AuthResponse> authenticate(AuthRequest request) {
+        Account account = repository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new AccountNotFoundException(request.getEmail()));
 
         if (!passwordEncoder.matches(request.getPassword(), account.getPassword())) {
-            return response("Mot de passe incorrect", HttpStatus.UNAUTHORIZED);
+            throw new InvalidCredentialsException();
         }
 
         String jwtToken = jwtService.generateToken(account, account.getRole());
@@ -107,7 +106,8 @@ public class AuthService {
 
     public ResponseEntity<Account> getMe(String token) {
         String email = jwtService.extractUsername(token);
-        Account user = repository.findByEmail(email).orElseThrow();
+        Account user = repository.findByEmail(email)
+                .orElseThrow(() -> new AccountNotFoundException(email));
 
         return ResponseEntity
             .status(HttpStatus.ACCEPTED)
@@ -120,14 +120,15 @@ public class AuthService {
         String email = jwtService.extractUsername(token);
 
         Role role = jwtService.extractAccountRole(token);
-        SubAccount subAccount = subAccountRepository.findById(subAccountId).orElseThrow();
+        SubAccount subAccount = subAccountRepository.findById(subAccountId)
+                .orElseThrow(() -> new SubAccountNotFoundException(subAccountId));
 
         if (!SubAccountRole.CHILD.equals(subAccount.getRole()) && !pin.equals(subAccount.getPin())) {
-            return response("Mauvais pin pour le compte parent", HttpStatus.BAD_REQUEST);
-        }        
+            throw new InvalidPinException();
+        }
 
-        if (SubAccountRole.PARENT.equals(subAccount.getRole()) && request.getPin().isEmpty()) {
-            return response("Pin mandatory for Parent", HttpStatus.BAD_REQUEST);
+        if (SubAccountRole.PARENT.equals(subAccount.getRole()) && (request.getPin() == null || request.getPin().isEmpty())) {
+            throw new InvalidPinException("Le code PIN est obligatoire pour un compte parent");
         }
 
         var jwtToken = jwtService.generateSubAccountToken(subAccountId, subAccount.getAccountId(), email, subAccount.getRole(), role);
@@ -143,7 +144,8 @@ public class AuthService {
 
     public ResponseEntity<SubAccount> getSubAccountMe(String token) {
         String subAccountId = jwtService.extractSubAccountId(token);
-        SubAccount subAccount = subAccountRepository.findById(subAccountId).orElseThrow();
+        SubAccount subAccount = subAccountRepository.findById(subAccountId)
+                .orElseThrow(() -> new SubAccountNotFoundException(subAccountId));
 
         return ResponseEntity
             .status(HttpStatus.ACCEPTED)
@@ -151,7 +153,8 @@ public class AuthService {
     }
 
     public ResponseEntity<Void> resetPassword(AuthRequest request) {
-        Account account = repository.findByEmail(request.getEmail()).orElseThrow();
+        Account account = repository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new AccountNotFoundException(request.getEmail()));
 
         String token = jwtService.generateToken(account, account.getRole());
 
@@ -162,16 +165,21 @@ public class AuthService {
 
     public ResponseEntity<AuthResponse> restPasswordConfirm(AuthResetPassword request, String token) {
         String accountId = jwtService.extractUsername(token);
-        Account account = repository.findByEmail(accountId).orElseThrow();
+        Account account = repository.findByEmail(accountId)
+                .orElseThrow(() -> new AccountNotFoundException(accountId));
 
         SubAccount subAccount = subAccountRepository.findByAccountIdAndRole(account.getId(), SubAccountRole.OWNER);
 
+        if (subAccount == null) {
+            throw new SubAccountNotFoundException("Compte propriétaire introuvable");
+        }
+
         if (!subAccount.getPin().equals(request.getPin())) {
-            return response("UNAUTHORIZED not same pin as the ower", HttpStatus.UNAUTHORIZED);
+            throw new InvalidPinException();
         }
 
         if (!request.getPassword().equals(request.getConfirmPassword())) {
-            return response("Not same password", HttpStatus.BAD_REQUEST);
+            throw new PasswordMismatchException();
         }
 
         account.setPassword(passwordEncoder.encode(request.getPassword()));
