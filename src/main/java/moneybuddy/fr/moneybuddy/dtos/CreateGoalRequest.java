@@ -14,13 +14,11 @@ import jakarta.validation.constraints.NotNull;
 @AllArgsConstructor
 public class CreateGoalRequest {
 
-    @NotBlank(message = "Name is mandatory")
+    @NotNull(message = "Name is mandatory")
     private String name;
 
     @NotNull(message = "Amount is mandatory")
     private Float amount;
 
     private String emoji;
-
-    private Number transferMoney;
 }

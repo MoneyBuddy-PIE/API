@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import moneybuddy.fr.moneybuddy.dtos.AuthResponse;
 import moneybuddy.fr.moneybuddy.dtos.CreateGoalRequest;
+import moneybuddy.fr.moneybuddy.dtos.GoalRequest;
 import moneybuddy.fr.moneybuddy.dtos.GoalMoneyRequest;
 import moneybuddy.fr.moneybuddy.model.enums.GoalStatus;
 import moneybuddy.fr.moneybuddy.model.enums.Role;
@@ -47,6 +48,9 @@ public class GoalService {
         String subAccountId = jwtService.extractSubAccountId(token);
         String accountId = jwtService.extractSubAccountAccountId(token);
 
+        System.out.println("SubAccountId: " + subAccountId);
+        System.out.println("AccountId: " + accountId);
+
         Goal goal = Goal.builder()
                     .name(request.getName())
                     .amount(request.getAmount())
@@ -56,17 +60,34 @@ public class GoalService {
                     .createdAt(LocalDateTime.now())
                     .build();
 
+        System.out.println("Goal: " + goal);
+
         goalRepository.save(goal);
         return response("Goal has been created", HttpStatus.CREATED);
     }
 
-    public ResponseEntity<Goal> modifyGoal (CreateGoalRequest request, String token, String goalId) {
+    public ResponseEntity<Goal> modifyGoal (GoalRequest request, String token, String goalId) {
         String subAccountId = jwtService.extractSubAccountId(token);
         Goal goal = goalRepository.findByIdAndSubaccountIdChild(goalId, subAccountId);
 
-        goal.setName(request.getName());
-        goal.setAmount(request.getAmount());
-        goal.setEmoji(request.getEmoji());
+        goal.setName(
+            Optional.ofNullable(request.getName())
+            .filter(s -> !s.isEmpty())
+            .orElse(goal.getName())
+        );
+
+        goal.setAmount(
+            Optional.ofNullable(request.getAmount())
+            .orElse(goal.getAmount())
+        );
+
+        goal.setEmoji(
+            Optional.ofNullable(request.getEmoji())
+            .filter(s -> !s.isEmpty())
+            .orElse(goal.getEmoji())
+        );
+
+
         goal.setUpdatedAt(LocalDateTime.now());
 
         Goal updatedGoal = goalRepository.save(goal);
@@ -148,7 +169,6 @@ public class GoalService {
         if(goal.getProgression().intValue() >= 100) {
             goal.setGoalStatus(GoalStatus.DONE);
             goalRepository.save(goal);
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Goal finished");
         }
 
         Float newDepositMoney = goal.getDepositStatement() +  request.getTransferMoney();
@@ -157,7 +177,7 @@ public class GoalService {
 
         operations.updateGoalTransactionHistory(goal, TransactionType.CREDIT, request.getTransferMoney(), newDepositMoney);
         goal.setDepositStatement(newDepositMoney);
-        operations.updateAccountBalanceMoney(subAccount, token, request.getTransferMoney().toString(), false, "Dépôt pour l'objectif d'épargne: " + goal.getName());
+        operations.updateAccountBalanceMoney(subAccount, token, request.getTransferMoney().toString(), false, "Dépôt d'argent pour l'objectif d'épargne: " + goal.getName());
 
         goal.setUpdatedAt(LocalDateTime.now());
         goalRepository.save(goal);
@@ -172,7 +192,7 @@ public class GoalService {
         SubAccount subAccount = subAccountRepository.findById(goal.getSubaccountIdChild()).orElseThrow();
 
         if (GoalStatus.USED.equals(goal.getGoalStatus())) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Vous n'avez pas les droits");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No access");
         }
 
         if(goal.getProgression().intValue() >= 100)
@@ -187,7 +207,7 @@ public class GoalService {
         
         operations.updateGoalTransactionHistory(goal, TransactionType.DEBIT, request.getTransferMoney(), newDepositMoney);
         goal.setDepositStatement(newDepositMoney);
-        operations.updateAccountBalanceMoney(subAccount, token, request.getTransferMoney().toString(), true, "Retrait pour l'objectif d'épargne: " + goal.getName());
+        operations.updateAccountBalanceMoney(subAccount, token, request.getTransferMoney().toString(), true, "Retrait d'argent de l'objectif d'épargne: " + goal.getName());
 
         goal.setUpdatedAt(LocalDateTime.now());
         goalRepository.save(goal);
@@ -212,6 +232,9 @@ public class GoalService {
         
         if(!GoalStatus.DONE.equals(goal.getGoalStatus()))
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("L'objectif n'est pas encore atteint");
+
+        if(GoalStatus.USED.equals(goal.getGoalStatus()))
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("L'argent de cet objectif a déjà été transféré");
 
         goal.setGoalStatus(GoalStatus.USED);
         goal.setUpdatedAt(LocalDateTime.now());

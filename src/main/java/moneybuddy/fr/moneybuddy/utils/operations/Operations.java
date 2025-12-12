@@ -42,7 +42,7 @@ public class Operations {
         .amount(String.valueOf(amount))
         .oldAmount(String.valueOf(goal.getDepositStatement()))
         .newAmount(String.valueOf(updatedGoalAmount))
-        .description(TransactionType.CREDIT.equals(type) ? "Add money to goal" : "Remove money from goal")
+        .description(TransactionType.CREDIT.equals(type) ? "Add money to goal: " + goal.getName() : "Remove money from goal: " + goal.getName())
         .type(type)
         .createdAt(LocalDateTime.now())
         .build();
