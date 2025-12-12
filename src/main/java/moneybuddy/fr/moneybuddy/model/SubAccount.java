@@ -31,6 +31,9 @@ public class SubAccount {
 
   @Builder.Default private String money = "0";
 
+  @Builder.Default private String iconStyle = "bottts-neutral";
+  @Builder.Default private String iconName = "Mason";
+
   @JsonIgnore private String pin;
 
   @Builder.Default private LocalDateTime createdAt = LocalDateTime.now();

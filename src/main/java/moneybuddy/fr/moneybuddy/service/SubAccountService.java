@@ -23,9 +23,11 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class SubAccountService {
+
   private final AccountRepository accountRepository;
   private final SubAccountRepository subAccountRepository;
   private final JwtService jwtService;
+  private final DiscordService discordService;
 
   public ResponseEntity<AuthResponse> response(String message, HttpStatus status) {
     return ResponseEntity.status(status).body(AuthResponse.builder().error(message).build());
@@ -54,13 +56,15 @@ public class SubAccountService {
             .createdAt(LocalDateTime.now())
             .build();
 
-    if (SubAccountRole.PARENT.equals(subAccountDto.getRole())) {
-      subAccount.setPin(subAccountDto.getPin());
+    if (!subAccountDto.getIconName().isEmpty() && !subAccountDto.getIconStyle().isEmpty()) {
+      subAccount.setIconName(subAccountDto.getIconName());
+      subAccount.setIconStyle(subAccountDto.getIconStyle());
     }
 
-    if (SubAccountRole.CHILD.equals(subAccountDto.getRole())) {
-      subAccount.setMoney("0");
-    }
+    if (SubAccountRole.PARENT.equals(subAccountDto.getRole()))
+      subAccount.setPin(subAccountDto.getPin());
+
+    if (SubAccountRole.CHILD.equals(subAccountDto.getRole())) subAccount.setMoney("0");
 
     if (optinalaccount.isPresent()) {
       subAccountRepository.save(subAccount);
@@ -75,6 +79,8 @@ public class SubAccountService {
       subAccounts.add(subAccount);
       account.setSubAccounts(subAccounts);
       accountRepository.save(account);
+
+      discordService.sendNewAccountMessage(account.getEmail(), subAccount, false);
 
       return response("SubAccount created", HttpStatus.OK);
     }

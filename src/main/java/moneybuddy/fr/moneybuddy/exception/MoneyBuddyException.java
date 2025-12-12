@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 
 @Getter
 public class MoneyBuddyException extends RuntimeException {
+
   private final HttpStatus status;
   private final String errorCode;
 

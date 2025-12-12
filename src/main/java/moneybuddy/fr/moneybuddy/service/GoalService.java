@@ -49,9 +49,6 @@ public class GoalService {
     String subAccountId = jwtService.extractSubAccountId(token);
     String accountId = jwtService.extractSubAccountAccountId(token);
 
-    System.out.println("SubAccountId: " + subAccountId);
-    System.out.println("AccountId: " + accountId);
-
     Goal goal =
         Goal.builder()
             .name(request.getName())
@@ -61,8 +58,6 @@ public class GoalService {
             .accountId(accountId)
             .createdAt(LocalDateTime.now())
             .build();
-
-    System.out.println("Goal: " + goal);
 
     goalRepository.save(goal);
     return ResponseEntity.status(HttpStatus.CREATED)

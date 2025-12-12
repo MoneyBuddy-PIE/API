@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import moneybuddy.fr.moneybuddy.dtos.ErrorResponse;
+import moneybuddy.fr.moneybuddy.service.DiscordService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -18,9 +20,12 @@ import org.springframework.web.context.request.WebRequest;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+  @Autowired private DiscordService discordService;
+
   @ExceptionHandler(MoneyBuddyException.class)
   public ResponseEntity<ErrorResponse> handleMoneyBuddyException(
       MoneyBuddyException ex, WebRequest request) {
+    discordService.sendErroMessage(ex.getMessage(), ex.getStatus());
     ErrorResponse errorResponse =
         ErrorResponse.builder()
             .timestamp(LocalDateTime.now())
