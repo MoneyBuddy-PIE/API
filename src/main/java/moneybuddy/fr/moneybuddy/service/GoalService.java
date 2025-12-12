@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import moneybuddy.fr.moneybuddy.dtos.AuthResponse;
 import moneybuddy.fr.moneybuddy.dtos.CreateGoalRequest;
-import moneybuddy.fr.moneybuddy.dtos.GoalRequest;
 import moneybuddy.fr.moneybuddy.dtos.GoalMoneyRequest;
 import moneybuddy.fr.moneybuddy.exception.GoalAlreadyCompletedException;
 import moneybuddy.fr.moneybuddy.exception.GoalAlreadyUsedException;
@@ -70,7 +69,7 @@ public class GoalService {
                 .build());
     }
 
-    public ResponseEntity<Goal> modifyGoal (GoalRequest request, String token, String goalId) {
+    public ResponseEntity<Goal> modifyGoal (CreateGoalRequest request, String token, String goalId) {
         String subAccountId = jwtService.extractSubAccountId(token);
         Goal goal = goalRepository.findByIdAndSubaccountIdChild(goalId, subAccountId);
 
@@ -112,8 +111,7 @@ public class GoalService {
     public ResponseEntity<String> deleteGoal (String token, String goalId) {
         String subAccountId = jwtService.extractSubAccountAccountId(token);
 
-        // Vérifier que l'objectif existe avant de le supprimer
-        Goal goal = goalRepository.findById(goalId)
+        goalRepository.findById(goalId)
                 .orElseThrow(() -> new GoalNotFoundException(goalId));
 
         goalRepository.deleteByIdAndSubaccountIdChild(goalId, subAccountId);
