@@ -10,6 +10,7 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import moneybuddy.fr.moneybuddy.dtos.AuthResponse;
 import moneybuddy.fr.moneybuddy.dtos.CreateGoalRequest;
+import moneybuddy.fr.moneybuddy.dtos.GoalRequest;
 import moneybuddy.fr.moneybuddy.dtos.GoalMoneyRequest;
 import moneybuddy.fr.moneybuddy.exception.GoalAlreadyCompletedException;
 import moneybuddy.fr.moneybuddy.exception.GoalAlreadyUsedException;
@@ -64,7 +65,7 @@ public class GoalService {
         .body(AuthResponse.builder().error("Objectif d'épargne créé avec succès").build());
   }
 
-  public ResponseEntity<Goal> modifyGoal(CreateGoalRequest request, String token, String goalId) {
+  public ResponseEntity<Goal> modifyGoal(GoalRequest request, String token, String goalId) {
     String subAccountId = jwtService.extractSubAccountId(token);
     Goal goal = goalRepository.findByIdAndSubaccountIdChild(goalId, subAccountId);
 
