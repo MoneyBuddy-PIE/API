@@ -1,3 +1,6 @@
+/*
+								* Copyright moneybuddy.fr moneybuddy
+								*/
 package moneybuddy.fr.moneybuddy.dtos;
 
 import jakarta.validation.constraints.Email;
@@ -13,10 +16,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class AuthRequest {
 
-    @NotBlank(message = "L'email est obligatoire")
-    @Email(message = "Le format de l'email est invalide")
-    private String email;
+  @NotBlank(message = "L'email est obligatoire")
+  @Email(message = "Le format de l'email est invalide")
+  private String email;
 
-    @NotBlank(message = "Le mot de passe est obligatoire")
-    private String password;
+  @NotBlank(message = "Le mot de passe est obligatoire")
+  private String password;
 }

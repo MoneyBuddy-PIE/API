@@ -1,11 +1,13 @@
+/*
+								* Copyright moneybuddy.fr moneybuddy
+								*/
 package moneybuddy.fr.moneybuddy.dtos;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import jakarta.validation.constraints.NotNull;
 
 @Data
 @Builder
@@ -13,6 +15,6 @@ import jakarta.validation.constraints.NotNull;
 @AllArgsConstructor
 public class TaskComplete {
 
-    @NotNull(message = "done is mandatory")
-    private boolean done;
+  @NotNull(message = "done is mandatory")
+  private boolean done;
 }

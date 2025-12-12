@@ -1,6 +1,7 @@
+/*
+								* Copyright moneybuddy.fr moneybuddy
+								*/
 package moneybuddy.fr.moneybuddy.dtos;
-import moneybuddy.fr.moneybuddy.model.enums.SubAccountRole;
-import moneybuddy.fr.moneybuddy.utils.CheckByRegex;
 
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
@@ -9,27 +10,29 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import moneybuddy.fr.moneybuddy.model.enums.SubAccountRole;
+import moneybuddy.fr.moneybuddy.utils.CheckByRegex;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class SubAccountDto {
-    private final CheckByRegex checkByRegex = new CheckByRegex();
+  private final CheckByRegex checkByRegex = new CheckByRegex();
 
-    @NotBlank(message = "Name is mandatory")
-    private String name;
-    
-    @NotNull(message = "Role is mandatory")
-    private SubAccountRole role;
+  @NotBlank(message = "Name is mandatory")
+  private String name;
 
-    private String pin;
+  @NotNull(message = "Role is mandatory")
+  private SubAccountRole role;
 
-    @AssertTrue(message = "PIN must be exactly 4 digits")
-    private boolean isPinValid() {
-        if (SubAccountRole.PARENT.equals(role)){
-            return pin != null &&  pin.length() == 4 && checkByRegex.validate(pin, "^\\d{4}$");
-        }
-        return true; 
+  private String pin;
+
+  @AssertTrue(message = "PIN must be exactly 4 digits")
+  private boolean isPinValid() {
+    if (SubAccountRole.PARENT.equals(role)) {
+      return pin != null && pin.length() == 4 && checkByRegex.validate(pin, "^\\d{4}$");
     }
+    return true;
+  }
 }

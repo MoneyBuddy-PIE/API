@@ -1,3 +1,6 @@
+/*
+								* Copyright moneybuddy.fr moneybuddy
+								*/
 package moneybuddy.fr.moneybuddy.dtos;
 
 import lombok.AllArgsConstructor;
@@ -10,6 +13,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AuthResponse {
-    private String token;
-    private String error;
+  private String token;
+  private String error;
 }

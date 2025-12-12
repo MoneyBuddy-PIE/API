@@ -1,3 +1,6 @@
+/*
+								* Copyright moneybuddy.fr moneybuddy
+								*/
 package moneybuddy.fr.moneybuddy.dtos.section;
 
 import jakarta.validation.Valid;
@@ -10,12 +13,11 @@ import moneybuddy.fr.moneybuddy.dtos.quiz.QuizDto;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SectionDto {
-    @NotBlank(message = "Section title is mandatory")
-    private String title;
-    
-    @NotBlank(message = "Section content is mandatory")
-    private String content;
-    
-    @Valid
-    private QuizDto quiz;
+  @NotBlank(message = "Section title is mandatory")
+  private String title;
+
+  @NotBlank(message = "Section content is mandatory")
+  private String content;
+
+  @Valid private QuizDto quiz;
 }

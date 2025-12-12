@@ -1,7 +1,18 @@
+/*
+								* Copyright moneybuddy.fr moneybuddy
+								*/
 package moneybuddy.fr.moneybuddy.controller;
 
 import java.util.List;
 
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import moneybuddy.fr.moneybuddy.dtos.AuthResponse;
+import moneybuddy.fr.moneybuddy.dtos.TaskComplete;
+import moneybuddy.fr.moneybuddy.dtos.TaskRequest;
+import moneybuddy.fr.moneybuddy.model.Task;
+import moneybuddy.fr.moneybuddy.model.enums.TaskStatus;
+import moneybuddy.fr.moneybuddy.service.TaskService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,84 +25,64 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
-import moneybuddy.fr.moneybuddy.dtos.AuthResponse;
-import moneybuddy.fr.moneybuddy.dtos.TaskComplete;
-import moneybuddy.fr.moneybuddy.dtos.TaskRequest;
-import moneybuddy.fr.moneybuddy.model.Task;
-import moneybuddy.fr.moneybuddy.model.enums.TaskStatus;
-import moneybuddy.fr.moneybuddy.service.TaskService;
-
 @RestController
 @RequestMapping("/tasks")
 @RequiredArgsConstructor
 public class TaskController {
-    
-    private final TaskService service;
 
-    @PostMapping("")
-    public ResponseEntity<AuthResponse> createTask(
-        @Valid @RequestBody TaskRequest request,
-        @RequestHeader("Authorization") String authHeader
-    ) {
+  private final TaskService service;
 
-        String token = authHeader.substring(7);
-        return service.createTask(request, token);
-    }
+  @PostMapping("")
+  public ResponseEntity<AuthResponse> createTask(
+      @Valid @RequestBody TaskRequest request, @RequestHeader("Authorization") String authHeader) {
 
-    @GetMapping("")
-    public ResponseEntity<List<Task>> getTasks(
-        @RequestHeader("Authorization") String authHeader,
-        @RequestParam(required = false) String childId,
-        @RequestParam(required = false) TaskStatus prevalidation
-    ) {
-        String token = authHeader.substring(7);
-        return service.getTasks(token, childId, prevalidation);
-    }
+    String token = authHeader.substring(7);
+    return service.createTask(request, token);
+  }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Task> getTask(
-        @PathVariable String id
-    ) {
-        return service.getTask(id);
-    }
+  @GetMapping("")
+  public ResponseEntity<List<Task>> getTasks(
+      @RequestHeader("Authorization") String authHeader,
+      @RequestParam(required = false) String childId,
+      @RequestParam(required = false) TaskStatus prevalidation) {
+    String token = authHeader.substring(7);
+    return service.getTasks(token, childId, prevalidation);
+  }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<AuthResponse> deleteTask(
-        @RequestHeader("Authorization") String authHeader,
-        @PathVariable String id
-    ) {
-        String token = authHeader.substring(7);
-        return service.deleteTask(token, id);
-    }
+  @GetMapping("/{id}")
+  public ResponseEntity<Task> getTask(@PathVariable String id) {
+    return service.getTask(id);
+  }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Task> modifyTask(
-        @Valid @RequestBody TaskRequest request,
-        @RequestHeader("Authorization") String authHeader,
-        @PathVariable String id
-    ) {
-        String token = authHeader.substring(7);
-        return service.modifyTask(request, token, id);
-    }
+  @DeleteMapping("/{id}")
+  public ResponseEntity<AuthResponse> deleteTask(
+      @RequestHeader("Authorization") String authHeader, @PathVariable String id) {
+    String token = authHeader.substring(7);
+    return service.deleteTask(token, id);
+  }
 
-    @PutMapping("/complete/{id}")
-    public ResponseEntity<AuthResponse> completeTask(
-        @RequestHeader("Authorization") String authHeader,
-        @PathVariable String id,
-        @Valid @RequestBody TaskComplete req
-    ) {
-        String token = authHeader.substring(7);
-        return service.completeTask(req, token, id);
-    }
+  @PutMapping("/{id}")
+  public ResponseEntity<Task> modifyTask(
+      @Valid @RequestBody TaskRequest request,
+      @RequestHeader("Authorization") String authHeader,
+      @PathVariable String id) {
+    String token = authHeader.substring(7);
+    return service.modifyTask(request, token, id);
+  }
 
-    @PutMapping("/prevalidation/{id}")
-    public ResponseEntity<AuthResponse> preValidationTask(
-        @RequestHeader("Authorization") String authHeader,
-        @PathVariable String id
-    ) {
-        String token = authHeader.substring(7);
-        return service.preValidateTask(token, id);
-    }
+  @PutMapping("/complete/{id}")
+  public ResponseEntity<AuthResponse> completeTask(
+      @RequestHeader("Authorization") String authHeader,
+      @PathVariable String id,
+      @Valid @RequestBody TaskComplete req) {
+    String token = authHeader.substring(7);
+    return service.completeTask(req, token, id);
+  }
+
+  @PutMapping("/prevalidation/{id}")
+  public ResponseEntity<AuthResponse> preValidationTask(
+      @RequestHeader("Authorization") String authHeader, @PathVariable String id) {
+    String token = authHeader.substring(7);
+    return service.preValidateTask(token, id);
+  }
 }
