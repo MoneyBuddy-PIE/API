@@ -15,24 +15,25 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RegisterRequest {
-    @NotBlank(message = "Email is mandatory")
-    @Email(message = "Wrong format for email")
+    @NotBlank(message = "L'email est obligatoire")
+    @Email(message = "Le format de l'email est invalide")
     private String email;
-    
-    @NotBlank(message = "Password is mandatory")
-    @Size(min = 8, message = "Password has to have length 8")
-    @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}$", message = "Password has to be 1 Capital letter and 1 number at least")
+
+    @NotBlank(message = "Le mot de passe est obligatoire")
+    @Size(min = 8, message = "Le mot de passe doit contenir au moins 8 caractères")
+    @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}$", message = "Le mot de passe doit contenir au moins une majuscule, une minuscule et un chiffre")
     private String password;
-    
-    @NotBlank(message = "ConfirmPassword is mandatory")
+
+    @NotBlank(message = "La confirmation du mot de passe est obligatoire")
     private String confirmPassword;
-    
-    @NotBlank(message = "Pin is mandatory")
-    @Size(min = 4, max = 4, message = "Pin has to have length 4")
-    @Pattern(regexp =  "^\\d{4}$", message = "Wrong format for Pin")
+
+    @NotBlank(message = "Le code PIN est obligatoire")
+    @Size(min = 4, max = 4, message = "Le code PIN doit contenir exactement 4 chiffres")
+    @Pattern(regexp =  "^\\d{4}$", message = "Le code PIN doit être composé uniquement de chiffres")
     private String pin;
 
-    @NotBlank(message = "Name is mandatory")
+    @NotBlank(message = "Le nom est obligatoire")
+    @Size(min = 2, max = 50, message = "Le nom doit contenir entre 2 et 50 caractères")
     private String name;
 }
 
