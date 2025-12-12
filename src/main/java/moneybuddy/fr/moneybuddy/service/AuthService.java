@@ -39,6 +39,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final EmailService emailService;
+    private final DiscordService discordService;
 
     public ResponseEntity<AuthResponse> register(RegisterRequest request) {
         if (!request.getPassword().equals(request.getConfirmPassword())) {
@@ -77,6 +78,7 @@ public class AuthService {
         String jwtToken = jwtService.generateToken(account, account.getRole());
 
         emailService.welcomeEmail(account.getEmail());
+        discordService.sendNewAccountMessage(account.getEmail(), subAccount, true);
 
         return ResponseEntity
             .status(HttpStatus.CREATED)
@@ -134,6 +136,8 @@ public class AuthService {
         var jwtToken = jwtService.generateSubAccountToken(subAccountId, subAccount.getAccountId(), email, subAccount.getRole(), role);
         subAccount.setLastConnexion(LocalDateTime.now());
         subAccountRepository.save(subAccount);
+
+        discordService.sendNewAccountMessage(email, subAccount, false);
 
         return ResponseEntity
             .status(HttpStatus.ACCEPTED)

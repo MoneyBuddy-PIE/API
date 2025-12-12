@@ -32,31 +32,25 @@ public class Account implements UserDetails {
 
     @JsonIgnore
     private String password;
-    
+
     private Role role;
 
     @Builder.Default
     private PlanType planType = PlanType.FREE;
-    
+
     @Builder.Default
     private boolean subscriptionStatus = true;
-
 
     @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();
     private LocalDateTime updatedAt;
     private LocalDateTime lastConnexion;
-    
+
     @DBRef
     private List<SubAccount> subAccounts;
 
     @Builder.Default
     private boolean activated = true;
-
-
-
-
-
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -69,22 +63,14 @@ public class Account implements UserDetails {
     }
 
     @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
+    public boolean isAccountNonExpired() { return true; }
 
     @Override
-    public boolean isAccountNonLocked() {
-        return true;
-    }
+    public boolean isAccountNonLocked() { return true; }
 
     @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
+    public boolean isCredentialsNonExpired() { return true; }
 
     @Override
-    public boolean isEnabled() {
-        return true;
-    }
+    public boolean isEnabled() { return activated; }
 }
