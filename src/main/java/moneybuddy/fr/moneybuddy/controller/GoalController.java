@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import moneybuddy.fr.moneybuddy.dtos.AuthResponse;
 import moneybuddy.fr.moneybuddy.dtos.CreateGoalRequest;
+import moneybuddy.fr.moneybuddy.dtos.GoalRequest;
 import moneybuddy.fr.moneybuddy.dtos.GoalMoneyRequest;
 import moneybuddy.fr.moneybuddy.model.Goal;
 import moneybuddy.fr.moneybuddy.model.enums.GoalStatus;
@@ -66,7 +67,7 @@ public class GoalController {
 
   @PutMapping("/{id}")
   public ResponseEntity<Goal> modifyGoal(
-      @Valid @RequestBody CreateGoalRequest request,
+      @Valid @RequestBody GoalRequest request,
       @RequestHeader("Authorization") String authHeader,
       @PathVariable String id) {
     String token = authHeader.substring(7);
