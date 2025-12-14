@@ -33,8 +33,7 @@ public class MoneyService {
 
     if (SubAccountRole.CHILD.equals(jwtService.extractSubAccountRole(token))
         && isAdd
-        && !request.getSubAccountId().equals(subAccount.getId()))
-      throw new NoRight();
+        && !request.getSubAccountId().equals(subAccount.getId())) throw new NoRight();
 
     String parentId = jwtService.extractSubAccountAccountId(token);
     String accountId = jwtService.extractSubAccountAccountId(token);

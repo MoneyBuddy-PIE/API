@@ -3,6 +3,8 @@
 								*/
 package moneybuddy.fr.moneybuddy.service;
 
+import java.time.LocalDateTime;
+
 import lombok.RequiredArgsConstructor;
 import moneybuddy.fr.moneybuddy.dtos.coin.UpdateCoin;
 import moneybuddy.fr.moneybuddy.exception.SubAccountNotFoundException;
@@ -13,9 +15,6 @@ import moneybuddy.fr.moneybuddy.model.enums.TransactionCategory;
 import moneybuddy.fr.moneybuddy.model.enums.TransactionType;
 import moneybuddy.fr.moneybuddy.repository.SubAccountRepository;
 import moneybuddy.fr.moneybuddy.repository.TransactionRepository;
-
-import java.time.LocalDateTime;
-
 import org.springframework.stereotype.Service;
 
 @Service
@@ -34,7 +33,7 @@ public class CoinService {
         subAccountRepository
             .findById(req.getSubAccountId())
             .orElseThrow(() -> new SubAccountNotFoundException(req.getSubAccountId()));
-            
+
     int coin = subAccount.getCoin();
     int currentBalance = subAccount.getCoin();
 
