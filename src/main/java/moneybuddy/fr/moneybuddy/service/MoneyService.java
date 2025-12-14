@@ -6,16 +6,16 @@ package moneybuddy.fr.moneybuddy.service;
 import java.time.LocalDateTime;
 
 import lombok.RequiredArgsConstructor;
-import moneybuddy.fr.moneybuddy.dtos.AuthResponse;
 import moneybuddy.fr.moneybuddy.dtos.Money.AddMoney;
+import moneybuddy.fr.moneybuddy.exception.NoRight;
+import moneybuddy.fr.moneybuddy.exception.UpdateMoneyError;
 import moneybuddy.fr.moneybuddy.model.SubAccount;
 import moneybuddy.fr.moneybuddy.model.Transaction;
 import moneybuddy.fr.moneybuddy.model.enums.SubAccountRole;
+import moneybuddy.fr.moneybuddy.model.enums.TransactionCategory;
 import moneybuddy.fr.moneybuddy.model.enums.TransactionType;
 import moneybuddy.fr.moneybuddy.repository.SubAccountRepository;
 import moneybuddy.fr.moneybuddy.repository.TransactionRepository;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -25,11 +25,7 @@ public class MoneyService {
   private final TransactionRepository transactionRepository;
   private final JwtService jwtService;
 
-  public ResponseEntity<AuthResponse> response(String message, HttpStatus status) {
-    return ResponseEntity.status(status).body(AuthResponse.builder().error(message).build());
-  }
-
-  public ResponseEntity<AuthResponse> updateMoney(AddMoney request, String token, boolean isAdd) {
+  public void updateMoney(AddMoney request, String token, boolean isAdd) {
     SubAccount subAccount =
         subAccountRepository
             .findById(request.getSubAccountId())
@@ -37,9 +33,8 @@ public class MoneyService {
 
     if (SubAccountRole.CHILD.equals(jwtService.extractSubAccountRole(token))
         && isAdd
-        && !request.getSubAccountId().equals(subAccount.getId())) {
-      return response("Vous n etes pas un authorizé", HttpStatus.FORBIDDEN);
-    }
+        && !request.getSubAccountId().equals(subAccount.getId()))
+      throw new NoRight();
 
     String parentId = jwtService.extractSubAccountAccountId(token);
     String accountId = jwtService.extractSubAccountAccountId(token);
@@ -48,14 +43,14 @@ public class MoneyService {
     try {
       amount = Double.parseDouble(request.getAmount());
     } catch (NumberFormatException e) {
-      return response("Montant invalide", HttpStatus.BAD_REQUEST);
+      throw new UpdateMoneyError(accountId, "Montant invalide");
     }
 
     double currentBalance =
         subAccount.getMoney() == null ? 0.0 : Double.parseDouble(subAccount.getMoney());
 
     if (!isAdd && currentBalance < amount) {
-      return response("Fonds insuffisants", HttpStatus.BAD_REQUEST);
+      throw new UpdateMoneyError(accountId, "Fonds insuffisant");
     }
 
     double newBalance = isAdd ? currentBalance + amount : currentBalance - amount;
@@ -73,10 +68,9 @@ public class MoneyService {
             .newAmount(String.valueOf(newBalance))
             .description(request.getDescription())
             .type(isAdd ? TransactionType.CREDIT : TransactionType.DEBIT)
+            .category(TransactionCategory.MONEY)
             .createdAt(LocalDateTime.now())
             .build();
     transactionRepository.save(transaction);
-
-    return ResponseEntity.status(HttpStatus.ACCEPTED).body(null);
   }
 }

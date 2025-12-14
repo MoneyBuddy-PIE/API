@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import moneybuddy.fr.moneybuddy.model.enums.TransactionCategory;
 import moneybuddy.fr.moneybuddy.model.enums.TransactionType;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -27,6 +28,7 @@ public class Transaction {
   private String goalId;
 
   private TransactionType type;
+  private TransactionCategory category;
 
   @Builder.Default private LocalDateTime createdAt = LocalDateTime.now();
   private LocalDateTime updatedAt;

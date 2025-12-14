@@ -1,5 +1,10 @@
+/*
+								* Copyright moneybuddy.fr moneybuddy
+								*/
 package moneybuddy.fr.moneybuddy.dtos;
 
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,9 +16,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class GoalRequest {
 
-    private String name;
+  @Size(min = 2, max = 100, message = "Le nom doit contenir entre 2 et 100 caractères")
+  private String name;
 
-    private Float amount;
+  @Positive(message = "Le montant doit être supérieur à zéro")
+  private Float amount;
 
-    private String emoji;
+  @Size(max = 10, message = "L'emoji ne peut pas dépasser 10 caractères")
+  private String emoji;
 }

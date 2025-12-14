@@ -3,11 +3,19 @@
 								*/
 package moneybuddy.fr.moneybuddy.dtos;
 
+import java.time.LocalDateTime;
+
+import jakarta.validation.constraints.AssertTrue;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import moneybuddy.fr.moneybuddy.model.enums.TaskType;
 
 @Data
 @Builder
@@ -16,19 +24,29 @@ import lombok.NoArgsConstructor;
 public class TaskRequest {
 
   @NotBlank(message = "Description is mandatory")
+  @Size(min = 2, max = 150)
   private String description;
 
-  @NotBlank(message = "Category is mandatory")
-  private String category;
+  @NotNull(message = "Type is mandatory")
+  private TaskType type;
 
   @NotBlank(message = "SubAccountId is mandatory")
   private String subAccountId;
 
-  @NotBlank(message = "Reward is mandatory")
-  private String reward;
+  @PositiveOrZero(message = "coinReward doit etre positif ou égale a 0")
+  @Max(message = "Doit pas exceder 50", value = 50)
+  private int coinReward;
 
-  @NotBlank(message = "DateLimit is mandatory")
-  private String dateLimit;
+  @PositiveOrZero(message = "moneyReward doit etre positif")
+  private Float moneyReward;
+
+  @NotNull(message = "DateLimit is mandatory")
+  private LocalDateTime dateLimit;
 
   private boolean prevalidation;
+
+  @AssertTrue(message = "Au moins une récompense (coinReward ou moneyReward) doit être fournie")
+  public boolean isRewardValid() {
+    return coinReward != 0 || moneyReward != null;
+  }
 }

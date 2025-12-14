@@ -9,6 +9,8 @@ import moneybuddy.fr.moneybuddy.dtos.AuthResponse;
 import moneybuddy.fr.moneybuddy.dtos.Money.AddMoney;
 import moneybuddy.fr.moneybuddy.service.MoneyService;
 import moneybuddy.fr.moneybuddy.utils.ValidatorResult;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -36,6 +38,7 @@ public class MoneyController {
     }
 
     String token = authHeader.substring(7);
-    return moneyService.updateMoney(request, token, isAdd);
+    moneyService.updateMoney(request, token, isAdd);
+    return ResponseEntity.status(HttpStatus.ACCEPTED).build();
   }
 }
