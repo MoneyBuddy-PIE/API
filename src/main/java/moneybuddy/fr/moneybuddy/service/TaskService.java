@@ -5,13 +5,15 @@ package moneybuddy.fr.moneybuddy.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 import lombok.RequiredArgsConstructor;
 import moneybuddy.fr.moneybuddy.dtos.AuthResponse;
 import moneybuddy.fr.moneybuddy.dtos.Money.AddMoney;
 import moneybuddy.fr.moneybuddy.dtos.TaskComplete;
 import moneybuddy.fr.moneybuddy.dtos.TaskRequest;
+import moneybuddy.fr.moneybuddy.dtos.coin.UpdateCoin;
+import moneybuddy.fr.moneybuddy.exception.NoRight;
+import moneybuddy.fr.moneybuddy.exception.TaskNotFoundException;
 import moneybuddy.fr.moneybuddy.model.Task;
 import moneybuddy.fr.moneybuddy.model.enums.SubAccountRole;
 import moneybuddy.fr.moneybuddy.model.enums.TaskStatus;
@@ -30,37 +32,34 @@ public class TaskService {
   private final MongoTemplate mongoTemplate;
   private final TaskRepository taskRepository;
   private final MoneyService moneyService;
+  private final CoinService coinService;
   private final JwtService jwtService;
-
-  public ResponseEntity<AuthResponse> response(String message, HttpStatus status) {
-    return ResponseEntity.status(status).body(AuthResponse.builder().error(message).build());
-  }
 
   public ResponseEntity<AuthResponse> createTask(TaskRequest request, String token) {
     SubAccountRole role = jwtService.extractSubAccountRole(token);
     String subAccountIdParent = jwtService.extractSubAccountId(token);
     String accountId = jwtService.extractSubAccountAccountId(token);
 
-    if (SubAccountRole.CHILD.equals(role)) {
-      return response("Vous n avez pas les droits", HttpStatus.FORBIDDEN);
-    }
+    if (SubAccountRole.CHILD.equals(role)) throw new NoRight();
 
     boolean preValidate = request.isPrevalidation() ? request.isPrevalidation() : false;
     Task task =
         Task.builder()
             .description(request.getDescription())
-            .category(request.getCategory())
+            .type(request.getType())
             .subaccountIdParent(subAccountIdParent)
             .subaccountIdChild(request.getSubAccountId())
             .accountId(accountId)
             .preValidate(preValidate)
-            .reward(request.getReward())
+            .moneyReward(request.getMoneyReward())
+            .coinReward(request.getCoinReward())
             .dateLimit(request.getDateLimit())
             .createdAt(LocalDateTime.now())
             .build();
 
     taskRepository.save(task);
-    return response("Task created", HttpStatus.CREATED);
+    return ResponseEntity.status(HttpStatus.CREATED)
+        .body(AuthResponse.builder().error("Tache crée avec succes").build());
   }
 
   public ResponseEntity<List<Task>> getTasks(String token, String childId, TaskStatus status) {
@@ -80,13 +79,10 @@ public class TaskService {
       criteria.and("subaccountIdChild").is(id);
     }
 
-    if (isParent && childId != null && !childId.isEmpty()) {
+    if (isParent && childId != null && !childId.isEmpty())
       criteria.and("subaccountIdChild").is(childId);
-    }
 
-    if (status != null) {
-      criteria.and("status").is(status);
-    }
+    if (status != null) criteria.and("status").is(status);
 
     Query query = new Query(criteria);
     List<Task> tasks = mongoTemplate.find(query, Task.class);
@@ -95,39 +91,43 @@ public class TaskService {
   }
 
   public ResponseEntity<Task> getTask(String id) {
-    Optional<Task> task = taskRepository.findById(id);
+    Task task = taskRepository.findById(id).orElseThrow(() -> new TaskNotFoundException(id));
 
-    return task.isPresent()
-        ? ResponseEntity.status(HttpStatus.ACCEPTED).body(task.get())
-        : ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    return ResponseEntity.status(HttpStatus.ACCEPTED).body(task);
   }
 
   public ResponseEntity<AuthResponse> deleteTask(String token, String taskId) {
+    taskRepository.findById(taskId).orElseThrow(() -> new TaskNotFoundException(taskId));
     taskRepository.deleteById(taskId);
     return ResponseEntity.status(HttpStatus.ACCEPTED).build();
   }
 
   public ResponseEntity<AuthResponse> completeTask(TaskComplete req, String token, String taskId) {
-    Task task = taskRepository.findById(taskId).orElseThrow();
+    Task task =
+        taskRepository.findById(taskId).orElseThrow(() -> new TaskNotFoundException(taskId));
+
     if (SubAccountRole.CHILD.equals(jwtService.extractSubAccountRole(token))
-        && task.isPreValidate()) {
-      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-    }
+        && task.isPreValidate()) throw new NoRight();
 
     if (req.isDone()) {
       AddMoney addMoney =
           AddMoney.builder()
-              .amount(task.getReward())
+              .amount(task.getMoneyReward().toString())
               .subAccountId(task.getSubaccountIdChild())
               .description(task.getDescription())
               .build();
+      UpdateCoin updateCoin =
+          UpdateCoin.builder()
+              .subAccountId(task.getSubaccountIdChild())
+              .coin(task.getCoinReward())
+              .description(task.getDescription())
+              .build();
       moneyService.updateMoney(addMoney, token, true);
+      coinService.updateCoin(updateCoin, token, true);
       task.setStatus(TaskStatus.COMPLETED);
     }
 
-    if (!req.isDone()) {
-      task.setStatus(TaskStatus.REFUSED);
-    }
+    if (!req.isDone()) task.setStatus(TaskStatus.REFUSED);
 
     task.setUpdatedAt(LocalDateTime.now());
     taskRepository.save(task);
@@ -135,7 +135,8 @@ public class TaskService {
   }
 
   public ResponseEntity<AuthResponse> preValidateTask(String token, String taskId) {
-    Task task = taskRepository.findById(taskId).orElseThrow();
+    Task task =
+        taskRepository.findById(taskId).orElseThrow(() -> new TaskNotFoundException(taskId));
 
     task.setStatus(TaskStatus.PRE_VALIDATE);
     task.setUpdatedAt(LocalDateTime.now());
@@ -148,16 +149,17 @@ public class TaskService {
     SubAccountRole role = jwtService.extractSubAccountRole(token);
     String subAccountIdParent = jwtService.extractSubAccountId(token);
 
-    if (!SubAccountRole.PARENT.equals(role)) {
-      return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-    }
+    if (!SubAccountRole.PARENT.equals(role)) throw new NoRight();
 
-    Task task = taskRepository.findByIdAndSubaccountIdParent(taskId, subAccountIdParent);
+    Task task =
+        taskRepository
+            .findByIdAndSubaccountIdParent(taskId, subAccountIdParent)
+            .orElseThrow(() -> new TaskNotFoundException(taskId));
 
     task.setDescription(request.getDescription());
-    task.setCategory(request.getCategory());
+    task.setType(request.getType());
     task.setSubaccountIdChild(request.getSubAccountId());
-    task.setReward(request.getReward());
+    task.setMoneyReward(request.getMoneyReward());
     task.setDateLimit(request.getDateLimit());
     task.setUpdatedAt(LocalDateTime.now());
 

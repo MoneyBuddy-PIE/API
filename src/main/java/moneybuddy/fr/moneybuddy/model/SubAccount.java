@@ -30,6 +30,7 @@ public class SubAccount {
   @Builder.Default private boolean isActive = false;
 
   @Builder.Default private String money = "0";
+  @Builder.Default private int coin = 0;
 
   @Builder.Default private String iconStyle = "bottts-neutral";
   @Builder.Default private String iconName = "Mason";

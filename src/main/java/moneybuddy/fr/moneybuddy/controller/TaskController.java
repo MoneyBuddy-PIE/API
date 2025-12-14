@@ -35,7 +35,6 @@ public class TaskController {
   @PostMapping("")
   public ResponseEntity<AuthResponse> createTask(
       @Valid @RequestBody TaskRequest request, @RequestHeader("Authorization") String authHeader) {
-
     String token = authHeader.substring(7);
     return service.createTask(request, token);
   }

@@ -25,7 +25,7 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(MoneyBuddyException.class)
   public ResponseEntity<ErrorResponse> handleMoneyBuddyException(
       MoneyBuddyException ex, WebRequest request) {
-    discordService.sendErroMessage(ex.getMessage(), ex.getStatus());
+    discordService.sendErroMessage(ex, request);
     ErrorResponse errorResponse =
         ErrorResponse.builder()
             .timestamp(LocalDateTime.now())

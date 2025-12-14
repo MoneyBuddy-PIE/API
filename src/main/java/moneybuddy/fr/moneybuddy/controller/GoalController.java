@@ -11,6 +11,7 @@ import moneybuddy.fr.moneybuddy.dtos.AuthResponse;
 import moneybuddy.fr.moneybuddy.dtos.CreateGoalRequest;
 import moneybuddy.fr.moneybuddy.dtos.GoalRequest;
 import moneybuddy.fr.moneybuddy.dtos.GoalMoneyRequest;
+import moneybuddy.fr.moneybuddy.dtos.GoalRequest;
 import moneybuddy.fr.moneybuddy.model.Goal;
 import moneybuddy.fr.moneybuddy.model.enums.GoalStatus;
 import moneybuddy.fr.moneybuddy.service.GoalService;
