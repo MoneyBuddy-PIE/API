@@ -5,6 +5,7 @@ package moneybuddy.fr.moneybuddy.service;
 
 import lombok.RequiredArgsConstructor;
 import moneybuddy.fr.moneybuddy.dtos.ResponseDto;
+import moneybuddy.fr.moneybuddy.exception.AccountNotFoundException;
 import moneybuddy.fr.moneybuddy.model.Account;
 import moneybuddy.fr.moneybuddy.model.enums.PlanType;
 import moneybuddy.fr.moneybuddy.model.enums.Role;
@@ -37,9 +38,8 @@ public class AccountService {
     return ResponseEntity.status(HttpStatus.SC_OK).body(accounts);
   }
 
-  public ResponseEntity<Account> getAccount(String id) {
-    Account account = accountRepository.findById(id).orElseThrow();
-    return ResponseEntity.status(HttpStatus.SC_OK).body(account);
+  public Account getAccount(String id) {
+    return accountRepository.findById(id).orElseThrow(() -> new AccountNotFoundException(id));
   }
 
   public ResponseEntity<ResponseDto> deleteAccount(String id) {

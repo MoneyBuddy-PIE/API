@@ -3,6 +3,8 @@
 								*/
 package moneybuddy.fr.moneybuddy.exception;
 
+import java.math.BigDecimal;
+
 import org.springframework.http.HttpStatus;
 
 public class GoalAmountExceededException extends MoneyBuddyException {
@@ -14,7 +16,7 @@ public class GoalAmountExceededException extends MoneyBuddyException {
   }
 
   public GoalAmountExceededException(
-      Float currentAmount, Float targetAmount, Float attemptedAmount) {
+      BigDecimal currentAmount, BigDecimal targetAmount, BigDecimal attemptedAmount) {
     super(
         String.format(
             "Le montant dépasse l'objectif. Actuel: %.2f€, Cible: %.2f€, Tentative d'ajout: %.2f€",

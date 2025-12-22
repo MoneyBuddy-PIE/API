@@ -9,6 +9,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import moneybuddy.fr.moneybuddy.dtos.ResponseDto;
 import moneybuddy.fr.moneybuddy.dtos.chapter.CreateChapterRequest;
+import moneybuddy.fr.moneybuddy.model.Account;
 import moneybuddy.fr.moneybuddy.model.Chapter;
 import moneybuddy.fr.moneybuddy.model.ChapterWithCourses;
 import moneybuddy.fr.moneybuddy.model.ChapterWithoutCourses;
@@ -33,7 +34,7 @@ public class ChapterService {
   private final ChapterWithoutCoursesRepository chapterWithoutCoursesRepository;
   private final CourseRepository courseRepository;
   private final ChapterRepository chapterRepository;
-
+  private final AccountService accountService;
   private final CloudflareService cloudflareService;
   private final JwtService jwtService;
   private final Utils utils;
@@ -73,8 +74,10 @@ public class ChapterService {
 
   public ResponseEntity<Chapter> createChapter(String token, CreateChapterRequest req)
       throws FileUploadException {
-    String creator = jwtService.extractUsername(token);
+    String accountId = jwtService.extractSubAccountAccountId(token);
     String image_url = cloudflareService.uploadImage(req.getFile());
+
+    Account account = accountService.getAccount(accountId);
 
     Chapter chapter =
         Chapter.builder()
@@ -85,7 +88,8 @@ public class ChapterService {
             .image_url(image_url)
             .locked(true)
             .subAccountRole(req.getSubAccountRole())
-            .creator(creator)
+            .accountId(accountId)
+            .account(account)
             .createdAt(LocalDateTime.now())
             .build();
 

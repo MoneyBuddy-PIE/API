@@ -23,6 +23,7 @@ import moneybuddy.fr.moneybuddy.service.CourseService;
 import moneybuddy.fr.moneybuddy.service.TransactionService;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -120,7 +121,8 @@ public class AdminController {
 
   @GetMapping("/accounts/{id}")
   public ResponseEntity<Account> getAccount(@PathVariable String id) {
-    return accountService.getAccount(id);
+    Account account = accountService.getAccount(id);
+    return ResponseEntity.status(HttpStatus.OK).body(account);
   }
 
   @DeleteMapping("/accounts/{id}")

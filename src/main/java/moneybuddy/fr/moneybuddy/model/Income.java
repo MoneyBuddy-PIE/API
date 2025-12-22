@@ -3,38 +3,34 @@
 								*/
 package moneybuddy.fr.moneybuddy.model;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import moneybuddy.fr.moneybuddy.model.enums.SubAccountRole;
+import moneybuddy.fr.moneybuddy.model.enums.IncomeStatus;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document(collection = "chapters")
+@Document(collection = "incomes")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Chapter {
+public class Income {
   @Id private String id;
   private String accountId;
+  private String subAccountId;
+  private String subAccountIdChild;
 
-  @DBRef private Account account;
+  @DBRef private SubAccount subAccount;
+  @DBRef private Task task;
 
-  private String title;
-  private String description;
-  private int level;
-  private int order;
-
-  private String image_url;
-
-  @Builder.Default private boolean locked = true;
-
-  private SubAccountRole subAccountRole;
+  private BigDecimal amount;
+  @Builder.Default private IncomeStatus status = IncomeStatus.PENDING;
 
   @Builder.Default private LocalDateTime createdAt = LocalDateTime.now();
   private LocalDateTime updatedAt;

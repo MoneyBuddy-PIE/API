@@ -29,9 +29,23 @@ public class DiscordService {
   @Value("${discord.channel.monitoring.errors}")
   private String monitoring_errors_channel;
 
+  @Value("${discord.channel.monitoring.basic}")
+  private String monitoring_basic_channel;
+
   @PostConstruct
   public void init() {
     this.jda = JDABuilder.createDefault(token).build();
+  }
+
+  public void SendMessage(String text) {
+    TextChannel channel = jda.getTextChannelById(monitoring_basic_channel);
+
+    if (channel != null) {
+      EmbedBuilder embed =
+          new EmbedBuilder().setTitle(text).setColor(0xD3363F).setTimestamp(Instant.now());
+
+      channel.sendMessageEmbeds(embed.build()).queue();
+    }
   }
 
   public void sendNewAccountMessage(String email, SubAccount subAccount, Boolean isAccount) {

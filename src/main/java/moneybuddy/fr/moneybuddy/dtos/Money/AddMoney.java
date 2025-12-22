@@ -3,6 +3,8 @@
 								*/
 package moneybuddy.fr.moneybuddy.dtos.Money;
 
+import java.math.BigDecimal;
+
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,7 +21,7 @@ public class AddMoney {
   private String subAccountId;
 
   @NotBlank(message = "Amount is mandatory")
-  private String amount;
+  private BigDecimal amount;
 
   private String description;
   private String goalId;

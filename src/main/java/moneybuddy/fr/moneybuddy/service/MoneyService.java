@@ -3,6 +3,7 @@
 								*/
 package moneybuddy.fr.moneybuddy.service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import lombok.RequiredArgsConstructor;
@@ -38,23 +39,23 @@ public class MoneyService {
     String parentId = jwtService.extractSubAccountAccountId(token);
     String accountId = jwtService.extractSubAccountAccountId(token);
 
-    double amount;
+    BigDecimal amount;
     try {
-      amount = Double.parseDouble(request.getAmount());
+      amount = request.getAmount();
     } catch (NumberFormatException e) {
       throw new UpdateMoneyError(accountId, "Montant invalide");
     }
 
-    double currentBalance =
-        subAccount.getMoney() == null ? 0.0 : Double.parseDouble(subAccount.getMoney());
+    BigDecimal currentBalance =
+        subAccount.getMoney() == null ? BigDecimal.ZERO.setScale(2) : subAccount.getMoney();
 
-    if (!isAdd && currentBalance < amount) {
+    if (!isAdd && currentBalance.compareTo(amount) < 0) {
       throw new UpdateMoneyError(accountId, "Fonds insuffisant");
     }
 
-    double newBalance = isAdd ? currentBalance + amount : currentBalance - amount;
+    BigDecimal newBalance = isAdd ? currentBalance.add(amount) : currentBalance.subtract(amount);
 
-    subAccount.setMoney(String.valueOf(newBalance));
+    subAccount.setMoney(newBalance);
     subAccountRepository.save(subAccount);
 
     Transaction transaction =

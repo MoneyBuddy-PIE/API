@@ -3,6 +3,7 @@
 								*/
 package moneybuddy.fr.moneybuddy.model;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import lombok.AllArgsConstructor;
@@ -22,10 +23,10 @@ public class Goal {
   @Id private String id;
 
   private String name;
-  private Float amount;
+  private BigDecimal amount;
   private String emoji;
 
-  @Builder.Default private Float depositStatement = new Float(0);
+  @Builder.Default private BigDecimal depositStatement = BigDecimal.ZERO.setScale(2);
 
   @Builder.Default private GoalStatus goalStatus = GoalStatus.ACTIVATED;
 

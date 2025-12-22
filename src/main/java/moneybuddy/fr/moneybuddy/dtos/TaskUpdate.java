@@ -11,8 +11,6 @@ import java.util.List;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -25,16 +23,12 @@ import moneybuddy.fr.moneybuddy.model.enums.TaskType;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class TaskRequest {
-
-  @NotBlank(message = "Description is mandatory")
+public class TaskUpdate {
   @Size(min = 2, max = 150)
   private String description;
 
-  @NotNull(message = "Type is mandatory")
   private TaskType type;
 
-  @NotBlank(message = "SubAccountId is mandatory")
   private String subAccountId;
 
   @PositiveOrZero(message = "coinReward doit etre positif ou égale a 0")
@@ -47,23 +41,26 @@ public class TaskRequest {
   private LocalDateTime dateLimit;
   private List<DayOfWeek> weeklyDays;
   private int monthlyDay;
-  private boolean prevalidation;
+  private boolean preValidate;
+  private boolean disable;
 
   @AssertTrue(message = "Au moins une récompense (coinReward ou moneyReward) doit être fournie")
   @Schema(hidden = true)
   public boolean isRewardValid() {
-    return coinReward != 0 || moneyReward != null;
+    return (coinReward == 0 && moneyReward == null) || coinReward != 0 || moneyReward != null;
   }
 
   @AssertTrue(
       message =
           "Si c'est hebdomadaire alors weeklyDays doit au moins avoir un jour de la semaine coché")
   public boolean isWeeklyDays() {
-    return !type.equals(TaskType.WEEKLY) || (weeklyDays != null && !weeklyDays.isEmpty());
+    return type == null
+        || !TaskType.WEEKLY.equals(type)
+        || (weeklyDays != null && !weeklyDays.isEmpty());
   }
 
   @AssertTrue(message = "Si c'est mensuel alors monthlyDay doit avoir une valeur")
   public boolean isMonthlyDay() {
-    return !type.equals(TaskType.MONTHLY) || (monthlyDay != 0);
+    return type == null || !TaskType.MONTHLY.equals(type) || monthlyDay != 0;
   }
 }

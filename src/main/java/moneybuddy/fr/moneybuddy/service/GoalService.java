@@ -3,6 +3,7 @@
 								*/
 package moneybuddy.fr.moneybuddy.service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -159,21 +160,21 @@ public class GoalService {
       throw new GoalAlreadyCompletedException(goal.getName());
     }
 
-    Float accountBalance = Float.parseFloat(subAccount.getMoney());
-    if (request.getTransferMoney() > accountBalance) {
+    BigDecimal accountBalance = subAccount.getMoney();
+    if (request.getTransferMoney().compareTo(accountBalance) > 0) {
       throw new InsufficientBalanceException(
           String.format(
               "Solde insuffisant. Disponible: %.2f€, Demandé: %.2f€",
               accountBalance, request.getTransferMoney()));
     }
 
-    Float newTotal = request.getTransferMoney() + goal.getDepositStatement();
-    if (newTotal > goal.getAmount()) {
+    BigDecimal newTotal = request.getTransferMoney().add(goal.getDepositStatement());
+    if (newTotal.compareTo(goal.getAmount()) > 0) {
       throw new GoalAmountExceededException(
           goal.getDepositStatement(), goal.getAmount(), request.getTransferMoney());
     }
 
-    Float newDepositMoney = goal.getDepositStatement() + request.getTransferMoney();
+    BigDecimal newDepositMoney = goal.getDepositStatement().add(request.getTransferMoney());
     operations.updateProgression(goal, newDepositMoney);
 
     operations.updateGoalTransactionHistory(
@@ -182,7 +183,7 @@ public class GoalService {
     operations.updateAccountBalanceMoney(
         subAccount,
         token,
-        request.getTransferMoney().toString(),
+        request.getTransferMoney(),
         false,
         "Dépôt d'argent pour l'objectif d'épargne: " + goal.getName());
 
@@ -214,14 +215,14 @@ public class GoalService {
       goal.setGoalStatus(GoalStatus.ACTIVATED);
     }
 
-    if (request.getTransferMoney() > goal.getDepositStatement()) {
+    if (request.getTransferMoney().compareTo(goal.getDepositStatement()) > 0) {
       throw new InsufficientBalanceException(
           String.format(
               "Montant insuffisant dans l'épargne. Disponible: %.2f€, Demandé: %.2f€",
               goal.getDepositStatement(), request.getTransferMoney()));
     }
 
-    Float newDepositMoney = goal.getDepositStatement() - request.getTransferMoney();
+    BigDecimal newDepositMoney = goal.getDepositStatement().subtract(request.getTransferMoney());
     operations.updateProgression(goal, newDepositMoney);
 
     operations.updateGoalTransactionHistory(
@@ -230,7 +231,7 @@ public class GoalService {
     operations.updateAccountBalanceMoney(
         subAccount,
         token,
-        request.getTransferMoney().toString(),
+        request.getTransferMoney(),
         true,
         "Retrait d'argent de l'objectif d'épargne: " + goal.getName());
 
@@ -279,7 +280,7 @@ public class GoalService {
       operations.updateAccountBalanceMoney(
           subAccount,
           token,
-          goal.getDepositStatement().toString(),
+          goal.getDepositStatement(),
           true,
           "Transfer du total de l'argent de l'objectif " + goal.getName() + " dans mon solde.");
     }
