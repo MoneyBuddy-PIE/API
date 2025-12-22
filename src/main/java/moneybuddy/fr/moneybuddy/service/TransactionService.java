@@ -58,4 +58,8 @@ public class TransactionService {
     List<Transaction> transactions = transactionRepository.findAllByGoalId(goalId);
     return ResponseEntity.status(HttpStatus.ACCEPTED).body(transactions);
   }
+
+  public void createTransaction(Transaction transaction) {
+    transactionRepository.save(transaction);
+  }
 }

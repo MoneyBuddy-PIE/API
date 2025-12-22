@@ -3,6 +3,7 @@
 								*/
 package moneybuddy.fr.moneybuddy.utils.operations;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import moneybuddy.fr.moneybuddy.dtos.Money.AddMoney;
@@ -26,15 +27,16 @@ public class Operations {
     this.transactionRepository = transactionRepository;
   }
 
-  public void updateProgression(Goal goal, Float depositStatement) {
-    Number updateProgression = depositStatement * 100 / goal.getAmount();
+  public void updateProgression(Goal goal, BigDecimal depositStatement) {
+    Number updateProgression =
+        depositStatement.multiply(BigDecimal.valueOf(100)).divide(goal.getAmount());
     if (updateProgression.floatValue() == 100) goal.setGoalStatus(GoalStatus.DONE);
 
     goal.setProgression(updateProgression);
   }
 
   public void updateGoalTransactionHistory(
-      Goal goal, TransactionType type, Float amount, Float updatedGoalAmount) {
+      Goal goal, TransactionType type, BigDecimal amount, BigDecimal updatedGoalAmount) {
     Transaction transaction =
         Transaction.builder()
             .goalId(goal.getId())
@@ -57,7 +59,7 @@ public class Operations {
   public void updateAccountBalanceMoney(
       SubAccount subAccount,
       String token,
-      String money,
+      BigDecimal money,
       boolean transferAddMoney,
       String description) {
     AddMoney newAddMoneyDetail =

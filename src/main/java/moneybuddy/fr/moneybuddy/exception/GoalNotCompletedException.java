@@ -3,6 +3,8 @@
 								*/
 package moneybuddy.fr.moneybuddy.exception;
 
+import java.math.BigDecimal;
+
 import org.springframework.http.HttpStatus;
 
 public class GoalNotCompletedException extends MoneyBuddyException {
@@ -13,7 +15,8 @@ public class GoalNotCompletedException extends MoneyBuddyException {
         "GOAL_NOT_COMPLETED");
   }
 
-  public GoalNotCompletedException(String goalName, Float currentAmount, Float targetAmount) {
+  public GoalNotCompletedException(
+      String goalName, BigDecimal currentAmount, BigDecimal targetAmount) {
     super(
         String.format(
             "L'objectif '%s' n'est pas encore atteint. Montant actuel: %.2f€ / %.2f€",

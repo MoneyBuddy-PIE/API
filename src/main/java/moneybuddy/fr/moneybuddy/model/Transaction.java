@@ -26,6 +26,7 @@ public class Transaction {
   private String childId;
   private String parentId;
   private String goalId;
+  private String incomeId;
 
   private TransactionType type;
   private TransactionCategory category;

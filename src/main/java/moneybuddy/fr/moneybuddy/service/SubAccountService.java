@@ -26,6 +26,7 @@ public class SubAccountService {
 
   private final AccountRepository accountRepository;
   private final SubAccountRepository subAccountRepository;
+  private final SettingService settingService;
   private final JwtService jwtService;
   private final DiscordService discordService;
 
@@ -52,19 +53,16 @@ public class SubAccountService {
             .accountId(accountId)
             .isActive(false)
             .role(subAccountDto.getRole())
-            .money("0")
             .createdAt(LocalDateTime.now())
             .build();
 
-    if (!subAccountDto.getIconName().isEmpty() && !subAccountDto.getIconStyle().isEmpty()) {
+    if (subAccountDto.getIconName() != null && subAccountDto.getIconStyle() != null) {
       subAccount.setIconName(subAccountDto.getIconName());
       subAccount.setIconStyle(subAccountDto.getIconStyle());
     }
 
     if (SubAccountRole.PARENT.equals(subAccountDto.getRole()))
       subAccount.setPin(subAccountDto.getPin());
-
-    if (SubAccountRole.CHILD.equals(subAccountDto.getRole())) subAccount.setMoney("0");
 
     if (optinalaccount.isPresent()) {
       subAccountRepository.save(subAccount);
@@ -79,6 +77,8 @@ public class SubAccountService {
       subAccounts.add(subAccount);
       account.setSubAccounts(subAccounts);
       accountRepository.save(account);
+      subAccount.setSetting(settingService.createSetting(subAccount));
+      subAccountRepository.save(subAccount);
 
       discordService.sendNewAccountMessage(account.getEmail(), subAccount, false);
 

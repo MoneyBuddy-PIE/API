@@ -14,7 +14,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/sub-accounts")
+@RequestMapping("/subAccount")
 @RequiredArgsConstructor
 public class SubAccountController {
   private final SubAccountService subAccountService;

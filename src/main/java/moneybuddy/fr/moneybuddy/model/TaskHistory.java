@@ -3,38 +3,35 @@
 								*/
 package moneybuddy.fr.moneybuddy.model;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import moneybuddy.fr.moneybuddy.model.enums.SubAccountRole;
+import moneybuddy.fr.moneybuddy.model.enums.TaskStatus;
+import moneybuddy.fr.moneybuddy.model.enums.TaskType;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document(collection = "chapters")
+@Document(collection = "tasksHistory")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Chapter {
+public class TaskHistory {
+
   @Id private String id;
+  private String taskId;
+  private String subAccounttId;
   private String accountId;
 
-  @DBRef private Account account;
+  private TaskStatus status;
+  private TaskType type;
 
-  private String title;
-  private String description;
-  private int level;
-  private int order;
-
-  private String image_url;
-
-  @Builder.Default private boolean locked = true;
-
-  private SubAccountRole subAccountRole;
+  private int coinReward;
+  private BigDecimal moneyReward;
 
   @Builder.Default private LocalDateTime createdAt = LocalDateTime.now();
   private LocalDateTime updatedAt;

@@ -3,6 +3,8 @@
 								*/
 package moneybuddy.fr.moneybuddy.dtos;
 
+import java.math.BigDecimal;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -24,7 +26,7 @@ public class CreateGoalRequest {
 
   @NotNull(message = "Le montant cible est obligatoire")
   @Positive(message = "Le montant doit être supérieur à zéro")
-  private Float amount;
+  private BigDecimal amount;
 
   @Size(max = 10, message = "L'emoji ne peut pas dépasser 10 caractères")
   private String emoji;

@@ -5,7 +5,6 @@ package moneybuddy.fr.moneybuddy.service;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
-import java.util.List;
 
 import lombok.RequiredArgsConstructor;
 import moneybuddy.fr.moneybuddy.dtos.AuthRequest;
@@ -37,6 +36,7 @@ import org.springframework.stereotype.Service;
 public class AuthService {
   private final AccountRepository repository;
   private final SubAccountRepository subAccountRepository;
+  private final SettingService settingService;
   private final PasswordEncoder passwordEncoder;
   private final JwtService jwtService;
   private final EmailService emailService;
@@ -74,9 +74,11 @@ public class AuthService {
 
     subAccountRepository.save(subAccount);
 
-    List<SubAccount> subAccounts = Arrays.asList(subAccount);
-    account.setSubAccounts(subAccounts);
+    account.setSubAccounts(Arrays.asList(subAccount));
     repository.save(account);
+
+    subAccount.setSetting(settingService.createSetting(subAccount));
+    subAccountRepository.save(subAccount);
 
     String jwtToken = jwtService.generateToken(account, account.getRole());
 
