@@ -87,13 +87,15 @@ public class AllowanceService {
       }
     }
 
-    if (req.getWeeklyDay() != null) allowance.setWeeklyDay(req.getWeeklyDay());
+    if (req.getFrequency() == AllowanceFrequency.WEEKLY && req.getWeeklyDay() != null)
+      allowance.setWeeklyDay(req.getWeeklyDay());
 
     if (req.getStartDate() != null) allowance.setStartDate(req.getStartDate());
 
     if (req.getSubAccountIdChild() != null)
       allowance.setSubAccountIdChild(req.getSubAccountIdChild());
 
+    allowance.setActive(req.isActive());
     allowance.setUpdatedAt(LocalDateTime.now());
     return allowanceRepository.save(allowance);
   }

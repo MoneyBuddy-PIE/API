@@ -24,6 +24,8 @@ public class UpdateAllowance {
 
   private LocalDate startDate = LocalDate.now();
 
+  private boolean active;
+
   @AssertTrue(message = "Si c'est WEEKLY alors weeklyDay doit un jour de la semaine coché")
   public boolean isWeeklyDayValid() {
     return frequency != AllowanceFrequency.WEEKLY || weeklyDay != null;
