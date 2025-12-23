@@ -11,6 +11,7 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import moneybuddy.fr.moneybuddy.dtos.AuthResponse;
 import moneybuddy.fr.moneybuddy.dtos.SubAccountDto;
+import moneybuddy.fr.moneybuddy.exception.SubAccountNotFoundException;
 import moneybuddy.fr.moneybuddy.model.Account;
 import moneybuddy.fr.moneybuddy.model.SubAccount;
 import moneybuddy.fr.moneybuddy.model.enums.SubAccountRole;
@@ -86,5 +87,9 @@ public class SubAccountService {
     }
 
     return response("Error", HttpStatus.NOT_FOUND);
+  }
+
+  public SubAccount get(String id) {
+    return subAccountRepository.findById(id).orElseThrow(() -> new SubAccountNotFoundException(id));
   }
 }

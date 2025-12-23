@@ -153,7 +153,7 @@ public class TaskService {
             .orElseThrow(() -> new SubAccountNotFoundException(task.getSubaccountIdChild()));
 
     if (req.isDone()) {
-      incomeService.increaseSubAccountIncome(subAccount, task);
+      incomeService.increaseSubAccountIncome(subAccount, task.getMoneyReward(), task);
       coinService.updateCoin(subAccount, task, true);
       task.setStatus(TaskStatus.COMPLETED);
     }

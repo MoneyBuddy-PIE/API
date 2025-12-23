@@ -13,6 +13,7 @@ import moneybuddy.fr.moneybuddy.dtos.Income.UpdateIncomeRequest;
 import moneybuddy.fr.moneybuddy.exception.IncomeNotFound;
 import moneybuddy.fr.moneybuddy.exception.NoRight;
 import moneybuddy.fr.moneybuddy.exception.SubAccountNotFoundException;
+import moneybuddy.fr.moneybuddy.model.Allowance;
 import moneybuddy.fr.moneybuddy.model.Income;
 import moneybuddy.fr.moneybuddy.model.SubAccount;
 import moneybuddy.fr.moneybuddy.model.Task;
@@ -89,27 +90,30 @@ public class IncomeService {
     incomeRepository.deleteById(id);
   }
 
-  public Income createIncome(Task task, SubAccount subAccount) {
+  private Income createIncomeFromSource(Object source, SubAccount subAccount) {
     Income income =
-        Income.builder()
-            .accountId(task.getAccountId())
-            .subAccountId(task.getSubaccountIdParent())
-            .subAccountIdChild(task.getSubaccountIdChild())
-            .task(task)
-            .subAccount(subAccount)
-            .amount(task.getMoneyReward())
-            .build();
+        Income.builder().subAccount(subAccount).subAccountIdChild(subAccount.getId()).build();
 
+    if (source instanceof Task task) {
+      income.setTask(task);
+      income.setAmount(task.getMoneyReward());
+      income.setAccountId(task.getAccountId());
+      income.setSubAccountId(task.getSubaccountIdParent());
+    } else if (source instanceof Allowance allowance) {
+      income.setAllowance(allowance);
+      income.setAmount(allowance.getAmount());
+      income.setAccountId(allowance.getAccountId());
+      income.setSubAccountId(allowance.getSubAccountId());
+    }
     return incomeRepository.save(income);
   }
 
-  public void increaseSubAccountIncome(SubAccount subAccount, Task task) {
-
-    subAccount.setIncome(subAccount.getIncome().add(task.getMoneyReward()));
+  public void increaseSubAccountIncome(SubAccount subAccount, BigDecimal amount, Object source) {
+    subAccount.setIncome(subAccount.getIncome().add(amount));
     subAccount.setUpdatedAt(LocalDateTime.now());
     subAccountRepository.save(subAccount);
 
-    Income income = createIncome(task, subAccount);
+    Income income = createIncomeFromSource(source, subAccount);
     createTransactionForIncome(income);
   }
 
