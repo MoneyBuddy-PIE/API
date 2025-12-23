@@ -5,9 +5,8 @@ package moneybuddy.fr.moneybuddy.utils;
 
 import java.time.LocalDate;
 
-import org.springframework.stereotype.Component;
-
 import moneybuddy.fr.moneybuddy.model.enums.AllowanceFrequency;
+import org.springframework.stereotype.Component;
 
 @Component
 public class CalculateNextExecution {

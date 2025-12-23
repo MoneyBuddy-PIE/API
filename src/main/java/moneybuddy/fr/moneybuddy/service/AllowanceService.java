@@ -18,7 +18,6 @@ import moneybuddy.fr.moneybuddy.model.enums.AllowanceFrequency;
 import moneybuddy.fr.moneybuddy.model.enums.SubAccountRole;
 import moneybuddy.fr.moneybuddy.repository.AllowanceRepository;
 import moneybuddy.fr.moneybuddy.utils.CalculateNextExecution;
-
 import org.springframework.stereotype.Service;
 
 @Service
