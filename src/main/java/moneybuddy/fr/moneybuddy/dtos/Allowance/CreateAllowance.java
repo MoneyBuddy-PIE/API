@@ -28,6 +28,8 @@ public class CreateAllowance {
   @Positive(message = "Amount doit etre > 0")
   private BigDecimal amount;
 
+  private boolean active;
+
   @Builder.Default private DayOfWeek weeklyDay = DayOfWeek.SATURDAY;
 
   @Builder.Default private LocalDate startDate = LocalDate.now();

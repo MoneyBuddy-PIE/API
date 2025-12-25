@@ -36,8 +36,12 @@ public class AllowanceService {
 
     String accountId = jwtService.extractSubAccountAccountId(token);
     String subAccountId = jwtService.extractSubAccountId(token);
+
+    LocalDate startDate = req.getStartDate() != null ? req.getStartDate() : LocalDate.now();
+    boolean active = req.isActive() ? req.isActive() : true;
+
     LocalDate nextExecution =
-        calculateNextExecution.calculateNextExecution(req.getFrequency(), req.getStartDate());
+        calculateNextExecution.calculateNextExecution(req.getFrequency(), startDate);
 
     SubAccount subAccount = subAccountService.get(subAccountId);
 
@@ -48,8 +52,9 @@ public class AllowanceService {
             .subAccount(subAccount)
             .subAccountIdChild(req.getSubAccountIdChild())
             .amount(req.getAmount())
+            .active(active)
             .frequency(req.getFrequency())
-            .startDate(req.getStartDate())
+            .startDate(startDate)
             .nextExecution(nextExecution)
             .build();
 

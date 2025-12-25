@@ -13,7 +13,6 @@ import moneybuddy.fr.moneybuddy.model.SubAccount;
 import moneybuddy.fr.moneybuddy.repository.AllowanceRepository;
 import moneybuddy.fr.moneybuddy.service.DiscordService;
 import moneybuddy.fr.moneybuddy.service.IncomeService;
-import moneybuddy.fr.moneybuddy.service.SubAccountService;
 import moneybuddy.fr.moneybuddy.utils.CalculateNextExecution;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -28,7 +27,6 @@ public class SchedulingAllowanceApplication {
   private final DiscordService discordService;
   private final CalculateNextExecution calculateNextExecution;
   private final IncomeService incomeService;
-  private final SubAccountService subAccountService;
 
   @Scheduled(cron = "0 5 0 * * *")
   public void processAllowances() {
@@ -48,7 +46,7 @@ public class SchedulingAllowanceApplication {
               allowance.getFrequency(), allowance.getNextExecution()));
       allowanceRepository.save(allowance);
 
-      SubAccount subAccount = subAccountService.get(allowance.getSubAccountIdChild());
+      SubAccount subAccount = allowance.getSubAccount();
       incomeService.increaseSubAccountIncome(subAccount, allowance.getAmount(), allowance);
     }
   }

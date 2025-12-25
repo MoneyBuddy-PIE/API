@@ -14,12 +14,12 @@ import moneybuddy.fr.moneybuddy.service.AllowanceService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -44,14 +44,14 @@ public class AllowanceController {
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<Allowance> getbyId(@RequestParam String id) {
+  public ResponseEntity<Allowance> getbyId(@PathVariable String id) {
     return ResponseEntity.status(HttpStatus.OK).body(allowanceService.getById(id));
   }
 
   @PutMapping("/{id}")
   public ResponseEntity<Allowance> updateAllowance(
       @RequestHeader("Authorization") String authHeader,
-      @RequestParam String id,
+      @PathVariable String id,
       @Valid @RequestBody UpdateAllowance req) {
     String token = authHeader.substring(7);
     return ResponseEntity.status(HttpStatus.OK)
