@@ -3,6 +3,8 @@
 								*/
 package moneybuddy.fr.moneybuddy.service;
 
+import java.time.LocalDateTime;
+
 import lombok.RequiredArgsConstructor;
 import moneybuddy.fr.moneybuddy.dtos.section.CreateSectionRequest;
 import moneybuddy.fr.moneybuddy.dtos.section.UpdateSectionRequest;
@@ -13,9 +15,6 @@ import moneybuddy.fr.moneybuddy.model.Section;
 import moneybuddy.fr.moneybuddy.repository.CourseRepository;
 import moneybuddy.fr.moneybuddy.repository.QuizRepository;
 import moneybuddy.fr.moneybuddy.repository.SectionRepository;
-
-import java.time.LocalDateTime;
-
 import org.springframework.stereotype.Service;
 
 @Service

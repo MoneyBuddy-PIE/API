@@ -8,6 +8,7 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 
 public interface QuizRepository extends MongoRepository<Quiz, String> {
 
-	void deleteAllBySectionId(String sectionId);
-	void deleteAllByCourseId(String courseId);
+  void deleteAllBySectionId(String sectionId);
+
+  void deleteAllByCourseId(String courseId);
 }

@@ -10,5 +10,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface SectionRepository extends MongoRepository<Section, String> {
 
-	void deleteAllByCourseId(String courseId);
+  void deleteAllByCourseId(String courseId);
 }
