@@ -75,6 +75,7 @@ public class CourseService {
     ressourceRepository.deleteAllByCourseId(courseId);
     sectionRepository.deleteAllByCourseId(courseId);
 
+    cloudflareService.remove(course.getImage_url());
     courseRepository.delete(course);
   }
 
