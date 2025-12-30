@@ -12,6 +12,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document(collection = "userProgress")
@@ -22,25 +23,11 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class UserProgress {
   @Id private String id;
 
-  @Builder.Default private Map<String, CourseProgress> courseProgress = new HashMap<>();
-
-  @Builder.Default private LocalDateTime createdAt = LocalDateTime.now();
-
-  @Builder.Default private LocalDateTime updatedAt = LocalDateTime.now();
-
+  @Indexed(unique = true)
   private String subAccountId;
 
-  @Data
-  @Builder
-  @NoArgsConstructor
-  @AllArgsConstructor
-  public static class CourseProgress {
-    @Builder.Default private boolean completed = false;
+  @Builder.Default private Map<String, ChapterProgress> chapterProgress = new HashMap<>();
 
-    private int quizScore;
-
-    @Builder.Default private boolean unlocked = false;
-
-    @Builder.Default private LocalDateTime completedAt = null;
-  }
+  @Builder.Default private LocalDateTime createdAt = LocalDateTime.now();
+  private LocalDateTime updatedAt;
 }

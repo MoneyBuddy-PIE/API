@@ -14,8 +14,6 @@ import org.springframework.data.mongodb.repository.Query;
 
 public interface CourseRepository extends MongoRepository<Course, String> {
 
-  Optional<List<Course>> findAllByChapterId(String chapterId);
-
   @Query(value = "{ 'chapterId': ?0, 'locked': false }")
   Optional<List<Course>> findAllByChapterIdAndLockedFalse(String chapterId);
 

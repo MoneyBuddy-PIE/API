@@ -5,7 +5,9 @@ package moneybuddy.fr.moneybuddy.model;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
@@ -42,7 +44,7 @@ public class Account implements UserDetails {
   private LocalDateTime updatedAt;
   private LocalDateTime lastConnexion;
 
-  @DBRef private List<SubAccount> subAccounts;
+  @DBRef @Builder.Default private Map<String, SubAccount> subAccounts = new HashMap<>();
 
   @Builder.Default private boolean activated = true;
 

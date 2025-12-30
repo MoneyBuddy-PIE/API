@@ -4,13 +4,11 @@
 package moneybuddy.fr.moneybuddy.service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 
 import lombok.RequiredArgsConstructor;
 import moneybuddy.fr.moneybuddy.dtos.AuthResponse;
 import moneybuddy.fr.moneybuddy.dtos.SubAccountDto;
+import moneybuddy.fr.moneybuddy.exception.AccountNotFoundException;
 import moneybuddy.fr.moneybuddy.exception.SubAccountNotFoundException;
 import moneybuddy.fr.moneybuddy.model.Account;
 import moneybuddy.fr.moneybuddy.model.SubAccount;
@@ -28,6 +26,7 @@ public class SubAccountService {
   private final AccountRepository accountRepository;
   private final SubAccountRepository subAccountRepository;
   private final SettingService settingService;
+  private final UserProgressService userProgressService;
   private final JwtService jwtService;
   private final DiscordService discordService;
 
@@ -39,7 +38,10 @@ public class SubAccountService {
     SubAccountRole subAccountRole = jwtService.extractSubAccountRole(token);
     String accountId = jwtService.extractSubAccountAccountId(token);
 
-    Optional<Account> optinalaccount = accountRepository.findById(accountId);
+    Account account =
+        accountRepository
+            .findById(accountId)
+            .orElseThrow(() -> new AccountNotFoundException(accountId));
 
     if (subAccountRole == null
         || (!SubAccountRole.OWNER.equals(subAccountRole)
@@ -65,28 +67,18 @@ public class SubAccountService {
     if (SubAccountRole.PARENT.equals(subAccountDto.getRole()))
       subAccount.setPin(subAccountDto.getPin());
 
-    if (optinalaccount.isPresent()) {
-      subAccountRepository.save(subAccount);
+    subAccountRepository.save(subAccount);
 
-      Account account = optinalaccount.get();
-      List<SubAccount> subAccounts = account.getSubAccounts();
+    account.getSubAccounts().put(subAccount.getId(), subAccount);
+    accountRepository.save(account);
+    subAccount.setSetting(settingService.createSetting(subAccount));
+    subAccountRepository.save(subAccount);
 
-      if (subAccounts == null) {
-        subAccounts = new ArrayList<>();
-      }
+    userProgressService.createBasicUserProgress(subAccount.getId());
 
-      subAccounts.add(subAccount);
-      account.setSubAccounts(subAccounts);
-      accountRepository.save(account);
-      subAccount.setSetting(settingService.createSetting(subAccount));
-      subAccountRepository.save(subAccount);
+    discordService.sendNewAccountMessage(account.getEmail(), subAccount, false);
 
-      discordService.sendNewAccountMessage(account.getEmail(), subAccount, false);
-
-      return response("SubAccount created", HttpStatus.OK);
-    }
-
-    return response("Error", HttpStatus.NOT_FOUND);
+    return response("SubAccount created", HttpStatus.OK);
   }
 
   public SubAccount get(String id) {

@@ -5,21 +5,35 @@ package moneybuddy.fr.moneybuddy.controller;
 
 import java.util.List;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import moneybuddy.fr.moneybuddy.dtos.ResponseDto;
+import moneybuddy.fr.moneybuddy.dtos.chapter.ChapterWithoutCoursesForAdmin;
 import moneybuddy.fr.moneybuddy.dtos.chapter.CreateChapterRequest;
 import moneybuddy.fr.moneybuddy.dtos.course.CreateCourseRequest;
+import moneybuddy.fr.moneybuddy.dtos.course.UpdateCourseRequest;
+import moneybuddy.fr.moneybuddy.dtos.quiz.CreateQuizRequest;
+import moneybuddy.fr.moneybuddy.dtos.quiz.UpdateQuizRequest;
+import moneybuddy.fr.moneybuddy.dtos.ressource.CreateRessourceRequest;
+import moneybuddy.fr.moneybuddy.dtos.ressource.UpdateRessourceRequest;
+import moneybuddy.fr.moneybuddy.dtos.section.CreateSectionRequest;
+import moneybuddy.fr.moneybuddy.dtos.section.UpdateSectionRequest;
 import moneybuddy.fr.moneybuddy.model.Account;
 import moneybuddy.fr.moneybuddy.model.Chapter;
-import moneybuddy.fr.moneybuddy.model.ChapterWithCourses;
-import moneybuddy.fr.moneybuddy.model.ChapterWithoutCourses;
 import moneybuddy.fr.moneybuddy.model.Course;
+import moneybuddy.fr.moneybuddy.model.Quiz;
+import moneybuddy.fr.moneybuddy.model.Ressource;
+import moneybuddy.fr.moneybuddy.model.Section;
 import moneybuddy.fr.moneybuddy.model.Transaction;
 import moneybuddy.fr.moneybuddy.model.enums.PlanType;
 import moneybuddy.fr.moneybuddy.service.AccountService;
 import moneybuddy.fr.moneybuddy.service.ChapterService;
 import moneybuddy.fr.moneybuddy.service.CourseService;
+import moneybuddy.fr.moneybuddy.service.QuizService;
+import moneybuddy.fr.moneybuddy.service.RessourceService;
+import moneybuddy.fr.moneybuddy.service.SectionService;
 import moneybuddy.fr.moneybuddy.service.TransactionService;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.springframework.data.domain.Page;
@@ -34,6 +48,9 @@ public class AdminController {
 
   private final ChapterService chapterService;
   private final CourseService courseService;
+  private final RessourceService ressourceService;
+  private final SectionService sectionService;
+  private final QuizService quizService;
   private final AccountService accountService;
   private final TransactionService transactionService;
 
@@ -61,17 +78,18 @@ public class AdminController {
   }
 
   @GetMapping("/chapters")
-  public ResponseEntity<Page<ChapterWithoutCourses>> getAllChapters(
+  public ResponseEntity<Page<ChapterWithoutCoursesForAdmin>> getAllChapters(
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "10") int size,
       @RequestParam(defaultValue = "order") String sortBy,
       @RequestParam(defaultValue = "asc") String sortDir) {
-    return chapterService.getAllChapters(page, size, sortBy, sortDir);
+    return ResponseEntity.status(HttpStatus.OK)
+        .body(chapterService.getAllChapters(page, size, sortBy, sortDir));
   }
 
   @GetMapping("/chapters/{id}")
-  public ResponseEntity<ChapterWithCourses> getChapter(@PathVariable String id) {
-    return chapterService.getChapter(id);
+  public ResponseEntity<Chapter> getChapter(@PathVariable String id) {
+    return ResponseEntity.status(HttpStatus.OK).body(chapterService.getTotalChapter(id));
   }
 
   @DeleteMapping("/chapters/{id}")
@@ -82,16 +100,19 @@ public class AdminController {
   // Courses
   @PostMapping("/courses")
   public ResponseEntity<Course> createCourse(
-      @Valid @RequestBody CreateCourseRequest request,
+      @Valid @ModelAttribute CreateCourseRequest request,
       @RequestHeader("Authorization") String authHeader)
-      throws FileUploadException {
+      throws FileUploadException, JsonMappingException, JsonProcessingException {
     String token = authHeader.substring(7);
-    return courseService.createCourse(token, request);
+    return ResponseEntity.status(HttpStatus.CREATED)
+        .body(courseService.createCourse(token, request));
   }
 
-  @DeleteMapping("/courses")
-  public ResponseEntity<ResponseDto> deleteCourse(@PathVariable String id) {
-    return courseService.deleteCourse(id);
+  @DeleteMapping("/courses/{courseId}")
+  public ResponseEntity<ResponseDto> deleteCourse(@PathVariable String courseId) {
+    courseService.deleteCourse(courseId);
+    return ResponseEntity.status(HttpStatus.OK)
+        .body(ResponseDto.builder().message("Course deleted").build());
   }
 
   @GetMapping("/courses")
@@ -105,7 +126,73 @@ public class AdminController {
 
   @GetMapping("/courses/{id}")
   public ResponseEntity<Course> getCourse(@PathVariable String id) {
-    return courseService.getCourse(id);
+    return ResponseEntity.status(HttpStatus.FOUND).body(courseService.getById(id));
+  }
+
+  @PutMapping("/courses/{id}")
+  public ResponseEntity<Course> updateCourse(
+      @Valid @ModelAttribute UpdateCourseRequest request, @PathVariable String id)
+      throws FileUploadException, JsonMappingException, JsonProcessingException {
+    return ResponseEntity.status(HttpStatus.OK).body(courseService.updateCourse(id, request));
+  }
+
+  @DeleteMapping("/courses/ressources/{ressourceId}")
+  public ResponseEntity<ResponseDto> deleteRessourceFromCourse(@PathVariable String ressourceId) {
+    ressourceService.deleteRessource(ressourceId);
+    return ResponseEntity.status(HttpStatus.OK)
+        .body(ResponseDto.builder().message("Ressource deleted").build());
+  }
+
+  @DeleteMapping("/courses/sections/{sectionId}")
+  public ResponseEntity<ResponseDto> deleteSectionFromCourse(@PathVariable String sectionId) {
+    sectionService.deleteSection(sectionId);
+    return ResponseEntity.status(HttpStatus.OK)
+        .body(ResponseDto.builder().message("Section deleted").build());
+  }
+
+  // Ressources
+  @PostMapping("/courses/ressources")
+  public ResponseEntity<Ressource> createRessource(@Valid @RequestBody CreateRessourceRequest req) {
+    return ResponseEntity.status(HttpStatus.CREATED).body(ressourceService.createRessource(req));
+  }
+
+  @PutMapping("/courses/ressources/{ressourceId}")
+  public ResponseEntity<Ressource> updateRessource(
+      @Valid @RequestBody UpdateRessourceRequest req, @PathVariable String ressourceId) {
+    return ResponseEntity.status(HttpStatus.ACCEPTED)
+        .body(ressourceService.updateRessource(ressourceId, req));
+  }
+
+  // Sections
+  @PostMapping("/courses/sections")
+  public ResponseEntity<Section> createSection(@Valid @RequestBody CreateSectionRequest req) {
+    return ResponseEntity.status(HttpStatus.CREATED).body(sectionService.createSection(req));
+  }
+
+  @PutMapping("/courses/sections/{sectionId}")
+  public ResponseEntity<Section> updateSection(
+      @Valid @RequestBody UpdateSectionRequest req, @PathVariable String sectionId) {
+    return ResponseEntity.status(HttpStatus.ACCEPTED)
+        .body(sectionService.updateSection(sectionId, req));
+  }
+
+  @DeleteMapping("/courses/sections/quizzes/{quizId}")
+  public ResponseEntity<ResponseDto> deleteQuizFromSection(@PathVariable String quizId) {
+    quizService.deleteQuiz(quizId);
+    return ResponseEntity.status(HttpStatus.OK)
+        .body(ResponseDto.builder().message("Quiz deleted").build());
+  }
+
+  // Quizzes
+  @PostMapping("/courses/sections/quizzes")
+  public ResponseEntity<Quiz> createQuiz(@Valid @RequestBody CreateQuizRequest req) {
+    return ResponseEntity.status(HttpStatus.CREATED).body(quizService.createQuiz(req));
+  }
+
+  @PutMapping("/courses/sections/quizzes/{quizId}")
+  public ResponseEntity<Quiz> updateQuiz(
+      @Valid @RequestBody UpdateQuizRequest req, @PathVariable String quizId) {
+    return ResponseEntity.status(HttpStatus.ACCEPTED).body(quizService.updateQuiz(quizId, req));
   }
 
   // Users

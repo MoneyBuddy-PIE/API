@@ -8,12 +8,14 @@ import java.util.UUID;
 
 import lombok.RequiredArgsConstructor;
 import moneybuddy.fr.moneybuddy.config.CloudflareBucketConfig;
+import moneybuddy.fr.moneybuddy.exception.CloudFlareNotSupportedFileType;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 @Service
@@ -25,6 +27,13 @@ public class CloudflareService {
   @Value("${cloudflare.bucket_name}")
   private String bucket_name;
 
+  public void remove(String id) {
+    S3Client s3 = cloudflareBucketConfig.s3Client();
+    DeleteObjectRequest deleteRequest =
+        DeleteObjectRequest.builder().bucket(bucket_name).key(id.split("/")[1]).build();
+    s3.deleteObject(deleteRequest);
+  }
+
   public String uploadImage(MultipartFile file) throws FileUploadException {
     String original = file.getOriginalFilename().toLowerCase();
     String contentType = file.getContentType();
@@ -32,10 +41,10 @@ public class CloudflareService {
     String ext = getFileExtension(original);
     String folder =
         switch (ext) {
-          case "jpg", "jpeg", "png", "gif" -> "images";
+          case "jpg", "jpeg", "png", "gif", "webp" -> "images";
           case "mp4", "mov" -> "videos";
           case "pdf", "doc", "docx", "txt" -> "documents";
-          default -> throw new Error("Unsupported file type: " + contentType);
+          default -> throw new CloudFlareNotSupportedFileType(ext);
         };
 
     String key = String.format("%s/%s-%s", folder, UUID.randomUUID(), original);

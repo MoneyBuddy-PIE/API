@@ -3,14 +3,12 @@
 								*/
 package moneybuddy.fr.moneybuddy.repository;
 
-import java.util.Optional;
-
-import moneybuddy.fr.moneybuddy.model.UserProgress;
+import moneybuddy.fr.moneybuddy.model.Section;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface UserProgressRepository extends MongoRepository<UserProgress, String> {
+public interface SectionRepository extends MongoRepository<Section, String> {
 
-  Optional<UserProgress> findBySubAccountId(String subAccountId);
+	void deleteAllByCourseId(String courseId);
 }

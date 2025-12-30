@@ -4,7 +4,6 @@
 package moneybuddy.fr.moneybuddy.service;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
 
 import lombok.RequiredArgsConstructor;
 import moneybuddy.fr.moneybuddy.dtos.AuthRequest;
@@ -41,6 +40,7 @@ public class AuthService {
   private final JwtService jwtService;
   private final EmailService emailService;
   private final DiscordService discordService;
+  private final UserProgressService userProgressService;
 
   public ResponseEntity<AuthResponse> register(RegisterRequest request) {
     if (!request.getPassword().equals(request.getConfirmPassword())) {
@@ -74,13 +74,15 @@ public class AuthService {
 
     subAccountRepository.save(subAccount);
 
-    account.setSubAccounts(Arrays.asList(subAccount));
+    account.getSubAccounts().put(subAccount.getId(), subAccount);
     repository.save(account);
 
     subAccount.setSetting(settingService.createSetting(subAccount));
     subAccountRepository.save(subAccount);
 
-    String jwtToken = jwtService.generateToken(account, account.getRole());
+    userProgressService.createBasicUserProgress(subAccount.getId());
+
+    String jwtToken = jwtService.generateToken(account, account.getId(), account.getRole());
 
     emailService.welcomeEmail(account.getEmail());
     discordService.sendNewAccountMessage(account.getEmail(), subAccount, true);
@@ -99,7 +101,7 @@ public class AuthService {
       throw new InvalidCredentialsException();
     }
 
-    String jwtToken = jwtService.generateToken(account, account.getRole());
+    String jwtToken = jwtService.generateToken(account, account.getId(), account.getRole());
     account.setLastConnexion(LocalDateTime.now());
     repository.save(account);
 
@@ -162,7 +164,7 @@ public class AuthService {
             .findByEmail(request.getEmail())
             .orElseThrow(() -> new AccountNotFoundException(request.getEmail()));
 
-    String token = jwtService.generateToken(account, account.getRole());
+    String token = jwtService.generateToken(account, account.getId(), account.getRole());
 
     emailService.resetPasswordEmail(request.getEmail(), token);
 
