@@ -1,17 +1,17 @@
 /*
 								* Copyright moneybuddy.fr moneybuddy
 								*/
-package moneybuddy.fr.moneybuddy.model;
+package moneybuddy.fr.moneybuddy.dtos.ressource;
 
-import lombok.*;
+import lombok.Data;
 import moneybuddy.fr.moneybuddy.model.enums.RessourceType;
 
 @Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class Resource {
+public class UpdateRessourceRequest {
+
   private String title;
+
   private String url;
+
   private RessourceType type;
 }

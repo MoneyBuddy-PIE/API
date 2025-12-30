@@ -27,6 +27,9 @@ public class CreateChapterRequest {
   @PositiveOrZero(message = "Level must be positive or zero")
   private int level;
 
+  @PositiveOrZero(message = "CoinReward must be positive or zero")
+  private int coinReward;
+
   @NotNull(message = "Attach a subAccount role")
   private SubAccountRole subAccountRole;
 

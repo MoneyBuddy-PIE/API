@@ -22,22 +22,26 @@ public class CoinService {
   private final SubAccountRepository subAccountRepository;
   private final TransactionRepository transactionRepository;
 
-  public void updateCoin(SubAccount subAccount, Task task, boolean isAdd) {
-    if (task.getCoinReward() == 0) return;
-
-    int coin = subAccount.getCoin();
-    int currentBalance = subAccount.getCoin();
+  public int updateCoin(SubAccount subAccount, int coin, boolean isAdd) {
+    int currentCoin = subAccount.getCoin();
 
     if (isAdd) {
-      coin = subAccount.getCoin() + task.getCoinReward();
+      currentCoin = subAccount.getCoin() + coin;
     } else {
-      if (task.getCoinReward() > coin) throw new UpdateCoinError(task.getSubaccountIdChild());
-
-      coin = subAccount.getCoin() - task.getCoinReward();
+      if (currentCoin < coin) throw new UpdateCoinError(subAccount.getId());
+      currentCoin = subAccount.getCoin() - coin;
     }
 
-    subAccount.setCoin(coin);
+    subAccount.setCoin(currentCoin);
     subAccountRepository.save(subAccount);
+
+    return currentCoin;
+  }
+
+  public void updateCoinForTask(SubAccount subAccount, Task task, boolean isAdd) {
+    if (task.getCoinReward() == 0) return;
+
+    int currentBalance = updateCoin(subAccount, task.getCoinReward(), isAdd);
 
     Transaction transaction =
         Transaction.builder()

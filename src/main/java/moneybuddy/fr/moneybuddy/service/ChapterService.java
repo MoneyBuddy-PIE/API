@@ -4,24 +4,22 @@
 package moneybuddy.fr.moneybuddy.service;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 import lombok.RequiredArgsConstructor;
 import moneybuddy.fr.moneybuddy.dtos.ResponseDto;
+import moneybuddy.fr.moneybuddy.dtos.chapter.ChapterDto;
+import moneybuddy.fr.moneybuddy.dtos.chapter.ChapterWithoutCourses;
+import moneybuddy.fr.moneybuddy.dtos.chapter.ChapterWithoutCoursesForAdmin;
 import moneybuddy.fr.moneybuddy.dtos.chapter.CreateChapterRequest;
+import moneybuddy.fr.moneybuddy.exception.ChapterNotFound;
 import moneybuddy.fr.moneybuddy.model.Account;
 import moneybuddy.fr.moneybuddy.model.Chapter;
-import moneybuddy.fr.moneybuddy.model.ChapterWithCourses;
-import moneybuddy.fr.moneybuddy.model.ChapterWithoutCourses;
 import moneybuddy.fr.moneybuddy.model.Course;
 import moneybuddy.fr.moneybuddy.model.enums.SubAccountRole;
 import moneybuddy.fr.moneybuddy.repository.ChapterRepository;
-import moneybuddy.fr.moneybuddy.repository.ChapterWithoutCoursesRepository;
-import moneybuddy.fr.moneybuddy.repository.CourseRepository;
 import moneybuddy.fr.moneybuddy.utils.Utils;
 import org.apache.http.HttpStatus;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
-import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -31,53 +29,55 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class ChapterService {
 
-  private final ChapterWithoutCoursesRepository chapterWithoutCoursesRepository;
-  private final CourseRepository courseRepository;
   private final ChapterRepository chapterRepository;
   private final AccountService accountService;
   private final CloudflareService cloudflareService;
   private final JwtService jwtService;
   private final Utils utils;
 
-  public ResponseEntity<Page<ChapterWithoutCourses>> getChapters(
+  public void addCourseToChapter(Chapter chapter, Course course) {
+    chapter.getCourses().put(course.getId(), course);
+    chapterRepository.save(chapter);
+  }
+
+  public Page<ChapterWithoutCourses> getChapters(
       String token, int page, int size, String sortBy, String sortDir) {
     SubAccountRole subAccountRole = jwtService.extractSubAccountRole(token);
     subAccountRole =
         SubAccountRole.OWNER.equals(subAccountRole) ? SubAccountRole.PARENT : subAccountRole;
 
     Pageable pageable = utils.pagination(page, size, sortBy, sortDir);
-    Page<ChapterWithoutCourses> chapters =
-        chapterWithoutCoursesRepository.findAllBySubAccountRoleAndLockedFalse(
-            subAccountRole, pageable);
+    Page<Chapter> chapters =
+        chapterRepository.findAllBySubAccountRoleAndLockedFalse(subAccountRole, pageable);
 
-    return ResponseEntity.status(200).body(chapters);
+    return chapters.map(ChapterWithoutCourses::from);
   }
 
-  public ResponseEntity<Page<ChapterWithoutCourses>> getAllChapters(
+  public Page<ChapterWithoutCoursesForAdmin> getAllChapters(
       int page, int size, String sortBy, String sortDir) {
     Pageable pageable = utils.pagination(page, size, sortBy, sortDir);
-    Page<ChapterWithoutCourses> chapters = chapterWithoutCoursesRepository.findAll(pageable);
-
-    return ResponseEntity.status(200).body(chapters);
+    Page<Chapter> chapters = chapterRepository.findAll(pageable);
+    return chapters.map(ChapterWithoutCoursesForAdmin::from);
   }
 
-  public ResponseEntity<ChapterWithCourses> getChapter(String id) {
-    List<Course> courses = courseRepository.findAllByChapterId(id).orElseThrow();
-    Chapter chapter = chapterRepository.findById(id).orElseThrow();
+  public ChapterDto getChapter(String id) {
+    Chapter chapter = chapterRepository.findById(id).orElseThrow(() -> new ChapterNotFound(id));
+    return ChapterDto.from(chapter);
+  }
 
-    ChapterWithCourses completeChapter = new ChapterWithCourses();
-    BeanUtils.copyProperties(chapter, completeChapter);
-    completeChapter.setCourses(courses);
-
-    return ResponseEntity.status(200).body(completeChapter);
+  public Chapter getTotalChapter(String id) {
+    return chapterRepository.findById(id).orElseThrow(() -> new ChapterNotFound(id));
   }
 
   public ResponseEntity<Chapter> createChapter(String token, CreateChapterRequest req)
       throws FileUploadException {
-    String accountId = jwtService.extractSubAccountAccountId(token);
+    String accountId = jwtService.extractAccountId(token);
+    System.out.println(accountId);
     String image_url = cloudflareService.uploadImage(req.getFile());
 
     Account account = accountService.getAccount(accountId);
+    System.out.println(image_url);
+    System.out.println(account);
 
     Chapter chapter =
         Chapter.builder()
@@ -87,9 +87,9 @@ public class ChapterService {
             .order(req.getOrder())
             .image_url(image_url)
             .locked(true)
+            .coinReward(req.getCoinReward())
             .subAccountRole(req.getSubAccountRole())
             .accountId(accountId)
-            .account(account)
             .createdAt(LocalDateTime.now())
             .build();
 

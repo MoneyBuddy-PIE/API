@@ -3,33 +3,25 @@
 								*/
 package moneybuddy.fr.moneybuddy.model;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
 
 import lombok.*;
+import moneybuddy.fr.moneybuddy.model.enums.RessourceType;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document(collection = "sections")
+@Document(collection = "ressources")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Section {
-
-  @Id private String id;
+public class Ressource {
+  @Id String id;
   private String courseId;
-  private String chapterId;
 
   private String title;
-  private String markdownContent;
-
-  @Builder.Default private BigDecimal minimumScoreToPass = new BigDecimal("70");
-
-  @DBRef @Builder.Default private Map<String, Quiz> quiz = new HashMap<>();
+  private String url;
+  private RessourceType type;
 
   @Builder.Default private LocalDateTime createdAt = LocalDateTime.now();
   private LocalDateTime updatedAt;

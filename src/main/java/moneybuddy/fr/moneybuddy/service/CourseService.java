@@ -3,16 +3,24 @@
 								*/
 package moneybuddy.fr.moneybuddy.service;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import lombok.RequiredArgsConstructor;
-import moneybuddy.fr.moneybuddy.dtos.ResponseDto;
+import moneybuddy.fr.moneybuddy.dtos.course.CourseDto;
 import moneybuddy.fr.moneybuddy.dtos.course.CreateCourseRequest;
-import moneybuddy.fr.moneybuddy.model.ChapterWithCourses;
+import moneybuddy.fr.moneybuddy.dtos.course.UpdateCourseRequest;
+import moneybuddy.fr.moneybuddy.exception.ChapterNotFound;
+import moneybuddy.fr.moneybuddy.exception.CourseNotFoundException;
+import moneybuddy.fr.moneybuddy.model.Chapter;
 import moneybuddy.fr.moneybuddy.model.Course;
-import moneybuddy.fr.moneybuddy.repository.ChapterWithCoursesRepository;
+import moneybuddy.fr.moneybuddy.repository.ChapterRepository;
 import moneybuddy.fr.moneybuddy.repository.CourseRepository;
+import moneybuddy.fr.moneybuddy.repository.QuizRepository;
+import moneybuddy.fr.moneybuddy.repository.RessourceRepository;
+import moneybuddy.fr.moneybuddy.repository.SectionRepository;
 import moneybuddy.fr.moneybuddy.utils.Utils;
 import org.apache.http.HttpStatus;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
@@ -26,14 +34,26 @@ import org.springframework.stereotype.Service;
 public class CourseService {
 
   private final CourseRepository courseRepository;
-  private final ChapterWithCoursesRepository chapterWithCoursesRepository;
+  private final ChapterService chapterService;
+  private final ChapterRepository chapterRepository;
+  private final RessourceRepository ressourceRepository;
+  private final SectionRepository sectionRepository;
+  private final QuizRepository quizRepository;
   private final CloudflareService cloudflareService;
   private final JwtService jwtService;
   private final Utils utils;
 
-  public ResponseEntity<List<Course>> getCourses(String id) {
+  public ResponseEntity<List<CourseDto>> getCoursesByChapterId(String id) {
     List<Course> courses = courseRepository.findAllByChapterIdAndLockedFalse(id).orElseThrow();
-    return ResponseEntity.status(200).body(courses);
+    return ResponseEntity.status(200).body(courses.stream().map(CourseDto::from).toList());
+  }
+
+  public Course getById(String id) {
+    return courseRepository.findById(id).orElseThrow(() -> new CourseNotFoundException(id));
+  }
+
+  public Chapter getChapter(String chapterId) {
+    return chapterRepository.findById(chapterId).orElseThrow(() -> new ChapterNotFound(chapterId));
   }
 
   public ResponseEntity<Page<Course>> getAllCourses(
@@ -44,49 +64,65 @@ public class CourseService {
     return ResponseEntity.status(HttpStatus.SC_OK).body(courses);
   }
 
-  public ResponseEntity<Course> getCourse(String id) {
-    Course course = courseRepository.findById(id).orElseThrow();
-    return ResponseEntity.status(200).body(course);
+  public void deleteCourse(String courseId) {
+    Course course = getById(courseId);
+    Chapter chapter = getChapter(course.getChapterId());
+
+    chapter.getCourses().remove(courseId);
+    chapterRepository.save(chapter);
+
+    quizRepository.deleteAllByCourseId(courseId);
+    ressourceRepository.deleteAllByCourseId(courseId);
+    sectionRepository.deleteAllByCourseId(courseId);
+
+    cloudflareService.remove(course.getImage_url());
+    courseRepository.delete(course);
   }
 
-  public ResponseEntity<Course> createCourse(String token, CreateCourseRequest req)
-      throws FileUploadException {
-    String creator = jwtService.extractUsername(token);
-    ChapterWithCourses chapter =
-        chapterWithCoursesRepository.findById(req.getChapterId()).orElseThrow();
-
-    String image_url = cloudflareService.uploadImage(req.getFile());
+  public Course createCourse(String token, CreateCourseRequest req)
+      throws FileUploadException, JsonMappingException, JsonProcessingException {
+    String accountId = jwtService.extractAccountId(token);
+    Chapter chapter = chapterService.getTotalChapter(req.getChapterId());
 
     Course course =
         Course.builder()
-            .creator(creator)
+            .accountId(accountId)
             .chapterId(req.getChapterId())
             .title(req.getTitle())
             .readTime(req.getReadTime())
             .order(req.getOrder())
             .locked(true)
-            .image_url(image_url)
-            .resources(req.getResources())
-            .sections(req.getSections())
             .build();
 
-    Course saved = courseRepository.save(course);
+    String image_url = cloudflareService.uploadImage(req.getFile());
+    course.setImage_url(image_url);
 
-    List<Course> courses = chapter.getCourses();
+    courseRepository.save(course);
+    chapterService.addCourseToChapter(chapter, course);
 
-    if (courses == null) {
-      courses = new ArrayList<>();
-    }
-
-    courses.add(saved);
-    chapter.setCourses(courses);
-    chapterWithCoursesRepository.save(chapter);
-
-    return ResponseEntity.status(201).body(saved);
+    return course;
   }
 
-  public ResponseEntity<ResponseDto> deleteCourse(String id) {
-    courseRepository.deleteById(id);
-    return ResponseEntity.status(204).body(null);
+  public Course updateCourse(String courseId, UpdateCourseRequest req)
+      throws FileUploadException, JsonMappingException, JsonProcessingException {
+    Course course = getById(courseId);
+
+    course.setReadTime(Optional.ofNullable(req.getReadTime()).orElse(course.getReadTime()));
+    course.setOrder(Optional.ofNullable(req.getOrder()).orElse(course.getOrder()));
+    course.setLocked(Optional.ofNullable(req.isLocked()).orElse(course.isLocked()));
+
+    if (req.getChapterId() != null) {
+      course.setChapterId(req.getChapterId());
+      course.setLocked(true);
+    }
+    if (req.getTitle() != null) course.setTitle(req.getTitle());
+
+    if (req.getFile() != null) {
+      String image_url = cloudflareService.uploadImage(req.getFile());
+      course.setImage_url(image_url);
+      cloudflareService.remove(course.getImage_url());
+    }
+
+    return course;
   }
 }
