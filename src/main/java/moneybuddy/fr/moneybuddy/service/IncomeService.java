@@ -49,7 +49,7 @@ public class IncomeService {
                 income.getStatus().equals(IncomeStatus.ACCEPTED)
                     ? TransactionType.CREDIT
                     : TransactionType.DEBIT)
-            .category(TransactionCategory.INCOME)
+            .category(TransactionCategory.MONEY)
             .amount(income.getAmount().toString())
             .description(income.getTask().getDescription())
             .incomeId(income.getId())

@@ -6,10 +6,10 @@ package moneybuddy.fr.moneybuddy.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import moneybuddy.fr.moneybuddy.dtos.ResponseDto;
-import moneybuddy.fr.moneybuddy.dtos.course.CompleteCourse;
 import moneybuddy.fr.moneybuddy.dtos.section.CompleteSection;
+import moneybuddy.fr.moneybuddy.model.enums.CompletedCourse;
 import moneybuddy.fr.moneybuddy.service.ProgressOrchestratorService;
-import org.springframework.http.HttpStatus;
+import moneybuddy.fr.moneybuddy.utils.Utils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -23,24 +23,33 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class UserProgressController {
   private final ProgressOrchestratorService progressOrchestratorService;
+  private final Utils utils;
 
-  @PutMapping("/course/{id}")
+  @PutMapping("/course/{courseId}")
   public ResponseEntity<ResponseDto> completeCourse(
-      @RequestHeader("Authorization") String authHeader,
-      @PathVariable String courseId,
-      @Valid @RequestBody CompleteCourse req) {
+      @RequestHeader("Authorization") String authHeader, @PathVariable String courseId) {
     String token = authHeader.substring(7);
-    progressOrchestratorService.completeCourse(token, req.getChapterId(), courseId);
-    return ResponseEntity.status(HttpStatus.OK).build();
+    CompletedCourse status = progressOrchestratorService.completeCourse(token, courseId);
+    ResponseDto res = utils.ResponseMessage(status);
+    return ResponseEntity.status(res.getStatus())
+        .body(
+            ResponseDto.builder()
+                .message(String.format("%s For course with id : %s", res.getMessage(), courseId))
+                .build());
   }
 
-  @PutMapping("/section/{id}")
+  @PutMapping("/section/{sectionId}")
   public ResponseEntity<ResponseDto> completeCourse(
       @RequestHeader("Authorization") String authHeader,
       @Valid @RequestBody CompleteSection req,
-      @PathVariable String id) {
+      @PathVariable String sectionId) {
     String token = authHeader.substring(7);
-    progressOrchestratorService.completeSection(token, id, req);
-    return ResponseEntity.status(HttpStatus.OK).build();
+    CompletedCourse status = progressOrchestratorService.completeSection(token, sectionId, req);
+    ResponseDto res = utils.ResponseMessage(status);
+    return ResponseEntity.status(res.getStatus())
+        .body(
+            ResponseDto.builder()
+                .message(String.format("%s For section with id : %s", res.getMessage(), sectionId))
+                .build());
   }
 }

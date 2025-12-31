@@ -80,7 +80,7 @@ public class AuthService {
     subAccount.setSetting(settingService.createSetting(subAccount));
     subAccountRepository.save(subAccount);
 
-    userProgressService.createBasicUserProgress(subAccount.getId());
+    userProgressService.createBasicUserProgress(subAccount);
 
     String jwtToken = jwtService.generateToken(account, account.getId(), account.getRole());
 

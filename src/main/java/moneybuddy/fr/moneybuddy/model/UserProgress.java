@@ -22,6 +22,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @AllArgsConstructor
 public class UserProgress {
   @Id private String id;
+  private String accountId;
 
   @Indexed(unique = true)
   private String subAccountId;

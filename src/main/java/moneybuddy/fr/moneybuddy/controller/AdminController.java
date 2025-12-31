@@ -63,8 +63,11 @@ public class AdminController {
       @RequestParam(defaultValue = "10") int size,
       @RequestParam(defaultValue = "order") String sortBy,
       @RequestParam(defaultValue = "asc") String sortDir) {
-    return transactionService.getAllTransactions(
-        page, size, sortBy, sortDir, accountId, subAccountId);
+
+    return ResponseEntity.status(HttpStatus.OK)
+        .body(
+            transactionService.getAllTransactions(
+                page, size, sortBy, sortDir, accountId, subAccountId));
   }
 
   // Chapters
@@ -74,7 +77,8 @@ public class AdminController {
       @RequestHeader("Authorization") String authHeader)
       throws FileUploadException {
     String token = authHeader.substring(7);
-    return chapterService.createChapter(token, request);
+    return ResponseEntity.status(HttpStatus.CREATED)
+        .body(chapterService.createChapter(token, request));
   }
 
   @GetMapping("/chapters")
@@ -94,7 +98,9 @@ public class AdminController {
 
   @DeleteMapping("/chapters/{id}")
   public ResponseEntity<ResponseDto> deleteChapter(@PathVariable String id) {
-    return chapterService.deleteChapter(id);
+    chapterService.deleteChapter(id);
+    return ResponseEntity.status(HttpStatus.OK)
+        .body(ResponseDto.builder().message("Chapter deleted").build());
   }
 
   // Courses
@@ -121,7 +127,8 @@ public class AdminController {
       @RequestParam(defaultValue = "10") int size,
       @RequestParam(defaultValue = "order") String sortBy,
       @RequestParam(defaultValue = "asc") String sortDir) {
-    return courseService.getAllCourses(page, size, sortBy, sortDir);
+    return ResponseEntity.status(HttpStatus.OK)
+        .body(courseService.getAllCourses(page, size, sortBy, sortDir));
   }
 
   @GetMapping("/courses/{id}")
@@ -208,18 +215,21 @@ public class AdminController {
 
   @GetMapping("/accounts/{id}")
   public ResponseEntity<Account> getAccount(@PathVariable String id) {
-    Account account = accountService.getAccount(id);
-    return ResponseEntity.status(HttpStatus.OK).body(account);
+    return ResponseEntity.status(HttpStatus.OK).body(accountService.getAccount(id));
   }
 
   @DeleteMapping("/accounts/{id}")
   public ResponseEntity<ResponseDto> deleteAccount(@PathVariable String id) {
-    return accountService.deleteAccount(id);
+    accountService.deleteAccount(id);
+    return ResponseEntity.status(HttpStatus.ACCEPTED)
+        .body(ResponseDto.builder().message("Account deleted").build());
   }
 
   @DeleteMapping("/accounts/{id}/desable")
   public ResponseEntity<ResponseDto> desableAccount(@PathVariable String id) {
-    return accountService.desableAccount(id);
+    accountService.desableAccount(id);
+    return ResponseEntity.status(HttpStatus.ACCEPTED)
+        .body(ResponseDto.builder().message("Account disabled").build());
   }
 
   @GetMapping("/accounts/{id}/transactions")
@@ -229,7 +239,8 @@ public class AdminController {
       @RequestParam(defaultValue = "10") int size,
       @RequestParam(defaultValue = "order") String sortBy,
       @RequestParam(defaultValue = "asc") String sortDir) {
-    return transactionService.getAllTransactionsByAccountId(id, page, size, sortBy, sortDir);
+    return ResponseEntity.status(HttpStatus.OK)
+        .body(transactionService.getAllTransactionsByAccountId(id, page, size, sortBy, sortDir));
   }
 
   // Goals Transactions
@@ -241,12 +252,15 @@ public class AdminController {
       @RequestParam(defaultValue = "10") int size,
       @RequestParam(defaultValue = "order") String sortBy,
       @RequestParam(defaultValue = "asc") String sortDir) {
-    return transactionService.getAllTransactions(
-        page, size, sortBy, sortDir, accountId, subAccountId);
+    return ResponseEntity.status(HttpStatus.OK)
+        .body(
+            transactionService.getAllTransactions(
+                page, size, sortBy, sortDir, accountId, subAccountId));
   }
 
   @GetMapping("/goal/{goalId}/transactions")
   public ResponseEntity<List<Transaction>> getSingleGoalTransactions(@PathVariable String goalId) {
-    return transactionService.getTransactionByGoalId(goalId);
+    return ResponseEntity.status(HttpStatus.OK)
+        .body(transactionService.getTransactionByGoalId(goalId));
   }
 }

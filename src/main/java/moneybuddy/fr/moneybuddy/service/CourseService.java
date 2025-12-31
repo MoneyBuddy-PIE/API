@@ -3,13 +3,11 @@
 								*/
 package moneybuddy.fr.moneybuddy.service;
 
-import java.util.List;
 import java.util.Optional;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import lombok.RequiredArgsConstructor;
-import moneybuddy.fr.moneybuddy.dtos.course.CourseDto;
 import moneybuddy.fr.moneybuddy.dtos.course.CreateCourseRequest;
 import moneybuddy.fr.moneybuddy.dtos.course.UpdateCourseRequest;
 import moneybuddy.fr.moneybuddy.exception.ChapterNotFound;
@@ -22,11 +20,9 @@ import moneybuddy.fr.moneybuddy.repository.QuizRepository;
 import moneybuddy.fr.moneybuddy.repository.RessourceRepository;
 import moneybuddy.fr.moneybuddy.repository.SectionRepository;
 import moneybuddy.fr.moneybuddy.utils.Utils;
-import org.apache.http.HttpStatus;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -43,11 +39,6 @@ public class CourseService {
   private final JwtService jwtService;
   private final Utils utils;
 
-  public ResponseEntity<List<CourseDto>> getCoursesByChapterId(String id) {
-    List<Course> courses = courseRepository.findAllByChapterIdAndLockedFalse(id).orElseThrow();
-    return ResponseEntity.status(200).body(courses.stream().map(CourseDto::from).toList());
-  }
-
   public Course getById(String id) {
     return courseRepository.findById(id).orElseThrow(() -> new CourseNotFoundException(id));
   }
@@ -56,12 +47,11 @@ public class CourseService {
     return chapterRepository.findById(chapterId).orElseThrow(() -> new ChapterNotFound(chapterId));
   }
 
-  public ResponseEntity<Page<Course>> getAllCourses(
-      int page, int size, String sortBy, String sortDir) {
+  public Page<Course> getAllCourses(int page, int size, String sortBy, String sortDir) {
     Pageable pageable = utils.pagination(page, size, sortBy, sortDir);
     Page<Course> courses = courseRepository.findAll(pageable);
 
-    return ResponseEntity.status(HttpStatus.SC_OK).body(courses);
+    return courses;
   }
 
   public void deleteCourse(String courseId) {

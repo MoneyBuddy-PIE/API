@@ -6,23 +6,19 @@ package moneybuddy.fr.moneybuddy.service;
 import java.time.LocalDateTime;
 
 import lombok.RequiredArgsConstructor;
-import moneybuddy.fr.moneybuddy.dtos.ResponseDto;
 import moneybuddy.fr.moneybuddy.dtos.chapter.ChapterDto;
 import moneybuddy.fr.moneybuddy.dtos.chapter.ChapterWithoutCourses;
 import moneybuddy.fr.moneybuddy.dtos.chapter.ChapterWithoutCoursesForAdmin;
 import moneybuddy.fr.moneybuddy.dtos.chapter.CreateChapterRequest;
 import moneybuddy.fr.moneybuddy.exception.ChapterNotFound;
-import moneybuddy.fr.moneybuddy.model.Account;
 import moneybuddy.fr.moneybuddy.model.Chapter;
 import moneybuddy.fr.moneybuddy.model.Course;
 import moneybuddy.fr.moneybuddy.model.enums.SubAccountRole;
 import moneybuddy.fr.moneybuddy.repository.ChapterRepository;
 import moneybuddy.fr.moneybuddy.utils.Utils;
-import org.apache.http.HttpStatus;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -30,7 +26,6 @@ import org.springframework.stereotype.Service;
 public class ChapterService {
 
   private final ChapterRepository chapterRepository;
-  private final AccountService accountService;
   private final CloudflareService cloudflareService;
   private final JwtService jwtService;
   private final Utils utils;
@@ -69,15 +64,9 @@ public class ChapterService {
     return chapterRepository.findById(id).orElseThrow(() -> new ChapterNotFound(id));
   }
 
-  public ResponseEntity<Chapter> createChapter(String token, CreateChapterRequest req)
-      throws FileUploadException {
+  public Chapter createChapter(String token, CreateChapterRequest req) throws FileUploadException {
     String accountId = jwtService.extractAccountId(token);
-    System.out.println(accountId);
     String image_url = cloudflareService.uploadImage(req.getFile());
-
-    Account account = accountService.getAccount(accountId);
-    System.out.println(image_url);
-    System.out.println(account);
 
     Chapter chapter =
         Chapter.builder()
@@ -93,12 +82,12 @@ public class ChapterService {
             .createdAt(LocalDateTime.now())
             .build();
 
-    Chapter saved = chapterRepository.save(chapter);
-    return ResponseEntity.status(201).body(saved);
+    return chapterRepository.save(chapter);
   }
 
-  public ResponseEntity<ResponseDto> deleteChapter(String id) {
+  public void deleteChapter(String id) {
+    ChapterDto chapter = getChapter(id);
+    cloudflareService.remove(chapter.getImage_url());
     chapterRepository.deleteById(id);
-    return ResponseEntity.status(HttpStatus.SC_OK).body(null);
   }
 }

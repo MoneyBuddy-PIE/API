@@ -30,7 +30,7 @@ public class CloudflareService {
   public void remove(String id) {
     S3Client s3 = cloudflareBucketConfig.s3Client();
     DeleteObjectRequest deleteRequest =
-        DeleteObjectRequest.builder().bucket(bucket_name).key(id.split("/")[1]).build();
+        DeleteObjectRequest.builder().bucket(bucket_name).key(id).build();
     s3.deleteObject(deleteRequest);
   }
 

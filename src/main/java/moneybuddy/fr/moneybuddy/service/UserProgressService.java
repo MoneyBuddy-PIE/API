@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 
 import lombok.RequiredArgsConstructor;
+import moneybuddy.fr.moneybuddy.exception.CourseNotFoundException;
 import moneybuddy.fr.moneybuddy.exception.UserProgressNotFoundException;
 import moneybuddy.fr.moneybuddy.model.Chapter;
 import moneybuddy.fr.moneybuddy.model.ChapterProgress;
@@ -17,6 +18,7 @@ import moneybuddy.fr.moneybuddy.model.Section;
 import moneybuddy.fr.moneybuddy.model.SectionProgress;
 import moneybuddy.fr.moneybuddy.model.SubAccount;
 import moneybuddy.fr.moneybuddy.model.UserProgress;
+import moneybuddy.fr.moneybuddy.model.enums.CompletedCourse;
 import moneybuddy.fr.moneybuddy.repository.ChapterRepository;
 import moneybuddy.fr.moneybuddy.repository.CourseRepository;
 import moneybuddy.fr.moneybuddy.repository.UserProgressRepository;
@@ -30,9 +32,13 @@ public class UserProgressService {
   private final ChapterRepository chapterRepository;
   private final CourseRepository courseRepository;
 
-  public void createBasicUserProgress(String subAccountId) {
+  public void createBasicUserProgress(SubAccount subAccount) {
     UserProgress userProgress =
-        UserProgress.builder().chapterProgress(new HashMap<>()).subAccountId(subAccountId).build();
+        UserProgress.builder()
+            .chapterProgress(new HashMap<>())
+            .subAccountId(subAccount.getId())
+            .accountId(subAccount.getAccountId())
+            .build();
 
     userProgressRepository.save(userProgress);
   }
@@ -43,7 +49,25 @@ public class UserProgressService {
         .orElseThrow(() -> new UserProgressNotFoundException(subAccountId));
   }
 
-  public void markSectionAsCompleted(SubAccount subAccount, Section section, BigDecimal score) {
+  private boolean checkIfAllSectionOfCourseCompleted(Course course, CourseProgress courseProgress) {
+    boolean allSectionsCompleted =
+        course.getSections().values().stream()
+            .allMatch(
+                sec -> {
+                  SectionProgress sp = courseProgress.getSectionProgress().get(sec.getId());
+                  return sp != null && sp.isCompleted();
+                });
+
+    if (allSectionsCompleted && !courseProgress.isCompleted()) {
+      courseProgress.setCompleted(true);
+      courseProgress.setCompletedAt(LocalDateTime.now());
+    }
+
+    return allSectionsCompleted;
+  }
+
+  public CompletedCourse markSectionAsCompleted(
+      SubAccount subAccount, Section section, BigDecimal score) {
     UserProgress userProgress = getBySubAccountId(subAccount.getId());
 
     String chapterId = section.getChapterId();
@@ -58,6 +82,10 @@ public class UserProgressService {
                     .build());
 
     String courseId = section.getCourseId();
+    Course course =
+        courseRepository
+            .findById(courseId)
+            .orElseThrow(() -> new CourseNotFoundException(courseId));
     CourseProgress courseProgress =
         chapterProgress
             .getCourseProgress()
@@ -81,27 +109,25 @@ public class UserProgressService {
                     .score(section.getMinimumScoreToPass())
                     .build());
 
-    sectionProgress.setCompleted(true);
+    if (sectionProgress.isCompleted()) return CompletedCourse.ALREADY_COMPLETED;
+
+    sectionProgress.setCompleted(section.getMinimumScoreToPass().compareTo(score) <= 0);
     sectionProgress.setScore(score);
     courseProgress.getSectionProgress().put(section.getId(), sectionProgress);
 
-    boolean allCompleted =
-        courseProgress.getSectionProgress().values().stream()
-            .allMatch(SectionProgress::isCompleted);
-
-    if (allCompleted && !courseProgress.isCompleted()) {
-      courseProgress.setCompleted(true);
-      courseProgress.setCompletedAt(LocalDateTime.now());
-    }
+    checkIfAllSectionOfCourseCompleted(course, courseProgress);
 
     userProgress.getChapterProgress().put(chapterId, chapterProgress);
     chapterProgress.getCourseProgress().put(courseId, courseProgress);
     userProgress.setUpdatedAt(LocalDateTime.now());
 
     userProgressRepository.save(userProgress);
+    return section.getMinimumScoreToPass().compareTo(score) <= 0
+        ? CompletedCourse.COMPLETED
+        : CompletedCourse.LOW_SCORE;
   }
 
-  public void markCourseAsCompleted(SubAccount subAccount, Course course) {
+  public CompletedCourse markCourseAsCompleted(SubAccount subAccount, Course course) {
     UserProgress userProgress = getBySubAccountId(subAccount.getId());
     ChapterProgress chapterProgress = userProgress.getChapterProgress().get(course.getChapterId());
 
@@ -115,7 +141,13 @@ public class UserProgressService {
                     .sectionProgress(new HashMap<>())
                     .build());
 
-    courseProgress.setCompleted(true);
+    if (courseProgress.isCompleted()) return CompletedCourse.ALREADY_COMPLETED;
+
+    boolean AllSectionsCompleted = checkIfAllSectionOfCourseCompleted(course, courseProgress);
+
+    if (!AllSectionsCompleted) return CompletedCourse.NOT_ENOUGH_SECTION_COMPLETED;
+
+    courseProgress.setCompleted(AllSectionsCompleted);
     courseProgress.setCompletedAt(LocalDateTime.now());
 
     chapterProgress.getCourseProgress().put(course.getId(), courseProgress);
@@ -126,6 +158,7 @@ public class UserProgressService {
 
     course.setCompleted(course.getCompleted() + 1);
     courseRepository.save(course);
+    return CompletedCourse.COMPLETED;
   }
 
   public void markChapterAsCompleted(SubAccount subAccount, Chapter chapter) {
