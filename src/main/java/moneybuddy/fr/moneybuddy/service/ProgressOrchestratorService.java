@@ -9,6 +9,7 @@ import moneybuddy.fr.moneybuddy.model.Chapter;
 import moneybuddy.fr.moneybuddy.model.Course;
 import moneybuddy.fr.moneybuddy.model.Section;
 import moneybuddy.fr.moneybuddy.model.SubAccount;
+import moneybuddy.fr.moneybuddy.model.enums.CompletedCourse;
 import moneybuddy.fr.moneybuddy.model.enums.SubAccountRole;
 import org.springframework.stereotype.Service;
 
@@ -24,23 +25,24 @@ public class ProgressOrchestratorService {
   private final CoinService coinService;
   private final JwtService jwtService;
 
-  public void completeSection(String token, String sectionId, CompleteSection req) {
+  public CompletedCourse completeSection(String token, String sectionId, CompleteSection req) {
     Section section = sectionService.getById(sectionId);
     SubAccount subAccount = subAccountService.get(jwtService.extractSubAccountId(token));
 
-    userProgressService.markSectionAsCompleted(subAccount, section, req.getScore());
+    return userProgressService.markSectionAsCompleted(subAccount, section, req.getScore());
   }
 
-  public void completeCourse(String token, String chapterId, String courseId) {
+  public CompletedCourse completeCourse(String token, String courseId) {
     Course course = courseService.getById(courseId);
     SubAccount subAccount = subAccountService.get(jwtService.extractSubAccountId(token));
 
-    userProgressService.markCourseAsCompleted(subAccount, course);
+    CompletedCourse status = userProgressService.markCourseAsCompleted(subAccount, course);
 
     if (subAccount.getRole() == SubAccountRole.CHILD)
       coinService.updateCoin(subAccount, course.getCoinReward(), true);
 
-    completeChapter(subAccount, chapterId);
+    completeChapter(subAccount, course.getChapterId());
+    return status;
   }
 
   public void completeChapter(SubAccount subAccount, String chapterId) {

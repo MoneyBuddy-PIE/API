@@ -74,7 +74,7 @@ public class SubAccountService {
     subAccount.setSetting(settingService.createSetting(subAccount));
     subAccountRepository.save(subAccount);
 
-    userProgressService.createBasicUserProgress(subAccount.getId());
+    userProgressService.createBasicUserProgress(subAccount);
 
     discordService.sendNewAccountMessage(account.getEmail(), subAccount, false);
 

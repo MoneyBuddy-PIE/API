@@ -22,6 +22,7 @@ public class ChapterWithoutCourses {
   private int level;
   private int order;
   private int coinReward;
+  private int totalCoursesCount;
 
   private String image_url;
 
@@ -40,6 +41,7 @@ public class ChapterWithoutCourses {
         .description(chapter.getDescription())
         .level(chapter.getLevel())
         .order(chapter.getOrder())
+        .totalCoursesCount(chapter.getCourses().size())
         .coinReward(chapter.getCoinReward())
         .image_url(chapter.getImage_url())
         .locked(chapter.isLocked())
