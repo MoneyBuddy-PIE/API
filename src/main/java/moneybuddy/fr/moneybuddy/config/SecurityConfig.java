@@ -35,11 +35,16 @@ public class SecurityConfig {
     http.csrf(AbstractHttpConfigurer::disable)
         .authorizeHttpRequests(
             auth ->
-                auth.requestMatchers("/auth/login", "/auth/register", "/auth/reset-password")
+                auth.requestMatchers(
+                        "/auth/login",
+                        "/auth/register",
+                        "/auth/reset-password",
+                        "/actuator/prometheus",
+                        "/actuator/health")
                     .permitAll()
                     .requestMatchers("/swagger-ui/**", "/v3/api-docs/**")
                     .authenticated()
-                    .requestMatchers("/admin/**")
+                    .requestMatchers("/admin/**", "/actuator/**")
                     .hasRole("ADMIN")
                     .anyRequest()
                     .authenticated())
