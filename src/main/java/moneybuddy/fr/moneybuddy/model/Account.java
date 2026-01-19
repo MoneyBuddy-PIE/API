@@ -4,12 +4,14 @@
 package moneybuddy.fr.moneybuddy.model;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -44,7 +46,12 @@ public class Account implements UserDetails {
   private LocalDateTime updatedAt;
   private LocalDateTime lastConnexion;
 
-  @DBRef @Builder.Default private Map<String, SubAccount> subAccounts = new HashMap<>();
+  @JsonIgnore @DBRef @Builder.Default private Map<String, SubAccount> subAccounts = new HashMap<>();
+
+  @JsonProperty("subAccounts")
+  public List<SubAccount> getSubAccountsAsList() {
+    return new ArrayList<>(subAccounts.values());
+  }
 
   @Builder.Default private boolean activated = true;
 

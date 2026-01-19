@@ -4,9 +4,13 @@
 package moneybuddy.fr.moneybuddy.model;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -35,7 +39,12 @@ public class Chapter {
 
   @Builder.Default private boolean locked = true;
 
-  @DBRef @Builder.Default private Map<String, Course> courses = new HashMap<>();
+  @JsonIgnore @DBRef @Builder.Default private Map<String, Course> courses = new HashMap<>();
+
+  @JsonProperty("courses")
+  public List<Course> getCoursesAsList() {
+    return new ArrayList<>(courses.values());
+  }
 
   private SubAccountRole subAccountRole;
 

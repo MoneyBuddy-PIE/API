@@ -4,9 +4,13 @@
 package moneybuddy.fr.moneybuddy.model;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -27,7 +31,13 @@ public class UserProgress {
   @Indexed(unique = true)
   private String subAccountId;
 
-  @Builder.Default private Map<String, ChapterProgress> chapterProgress = new HashMap<>();
+  @JsonIgnore @Builder.Default
+  private Map<String, ChapterProgress> chapterProgress = new HashMap<>();
+
+  @JsonProperty("chapterProgress")
+  public List<ChapterProgress> getOptionsAsList() {
+    return new ArrayList<>(chapterProgress.values());
+  }
 
   @Builder.Default private LocalDateTime createdAt = LocalDateTime.now();
   private LocalDateTime updatedAt;

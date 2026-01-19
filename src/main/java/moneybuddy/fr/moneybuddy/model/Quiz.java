@@ -3,9 +3,13 @@
 								*/
 package moneybuddy.fr.moneybuddy.model;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -22,7 +26,12 @@ public class Quiz {
 
   private String question;
 
-  @Builder.Default private Map<String, String> options = new HashMap<>();
+  @JsonIgnore @Builder.Default private Map<String, String> options = new HashMap<>();
+
+  @JsonProperty("options")
+  public List<String> getOptionsAsList() {
+    return new ArrayList<>(options.values());
+  }
 
   private int correctAnswerIndex;
 }
