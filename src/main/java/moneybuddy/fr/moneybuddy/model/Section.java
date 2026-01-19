@@ -5,9 +5,13 @@ package moneybuddy.fr.moneybuddy.model;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
@@ -29,7 +33,12 @@ public class Section {
 
   @Builder.Default private BigDecimal minimumScoreToPass = new BigDecimal("70");
 
-  @DBRef @Builder.Default private Map<String, Quiz> quiz = new HashMap<>();
+  @JsonIgnore @DBRef @Builder.Default private Map<String, Quiz> quiz = new HashMap<>();
+
+  @JsonProperty("quiz")
+  public List<Quiz> getOptionsAsList() {
+    return new ArrayList<>(quiz.values());
+  }
 
   @Builder.Default private LocalDateTime createdAt = LocalDateTime.now();
   private LocalDateTime updatedAt;

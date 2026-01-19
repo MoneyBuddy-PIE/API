@@ -4,9 +4,13 @@
 package moneybuddy.fr.moneybuddy.model;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
@@ -28,8 +32,19 @@ public class Course {
   private int order;
   private int coinReward;
 
-  @DBRef @Builder.Default private Map<String, Ressource> ressource = new HashMap<>();
-  @DBRef @Builder.Default private Map<String, Section> sections = new HashMap<>();
+  @JsonIgnore @DBRef @Builder.Default private Map<String, Ressource> ressource = new HashMap<>();
+
+  @JsonProperty("ressource")
+  public List<Ressource> getRessourceAsList() {
+    return new ArrayList<>(ressource.values());
+  }
+
+  @JsonIgnore @DBRef @Builder.Default private Map<String, Section> sections = new HashMap<>();
+
+  @JsonProperty("sections")
+  public List<Section> getSectionAsList() {
+    return new ArrayList<>(sections.values());
+  }
 
   @Builder.Default private boolean locked = true;
 
