@@ -85,7 +85,7 @@ public class AdminController {
   public ResponseEntity<Page<ChapterWithoutCoursesForAdmin>> getAllChapters(
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "10") int size,
-      @RequestParam(defaultValue = "order") String sortBy,
+      @RequestParam(defaultValue = "createdAt") String sortBy,
       @RequestParam(defaultValue = "asc") String sortDir) {
     return ResponseEntity.status(HttpStatus.OK)
         .body(chapterService.getAllChapters(page, size, sortBy, sortDir));

@@ -50,8 +50,13 @@ public class ChapterService {
 
   public Page<ChapterWithoutCoursesForAdmin> getAllChapters(
       int page, int size, String sortBy, String sortDir) {
-    Pageable pageable = utils.pagination(page, size, sortBy, sortDir);
-    Page<Chapter> chapters = chapterRepository.findAll(pageable);
+    Pageable pageable;
+    try {
+      pageable = utils.pagination(page, size, sortBy, sortDir);
+    } catch (Exception e) {
+      pageable = utils.pagination(page, size, "createdAt", sortDir != null ? sortDir : "asc");
+    }
+    Page<Chapter> chapters = chapterRepository.findAllWithoutCourses(pageable);
     return chapters.map(ChapterWithoutCoursesForAdmin::from);
   }
 

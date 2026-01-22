@@ -67,6 +67,24 @@ public class GlobalExceptionHandler {
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
   }
 
+  @ExceptionHandler(IndexOutOfBoundsException.class)
+  public ResponseEntity<ErrorResponse> handleIndexOutOfBoundsException(
+      IndexOutOfBoundsException ex, WebRequest request) {
+    ErrorResponse errorResponse =
+        ErrorResponse.builder()
+            .timestamp(LocalDateTime.now())
+            .status(HttpStatus.BAD_REQUEST.value())
+            .error("Erreur de paramètre de tri")
+            .message(
+                "Le paramètre de tri est invalide. Veuillez vérifier le paramètre 'sortBy'. "
+                    + ex.getMessage())
+            .errorCode("INVALID_SORT_PARAMETER")
+            .path(request.getDescription(false).replace("uri=", ""))
+            .build();
+
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+  }
+
   @ExceptionHandler(Exception.class)
   public ResponseEntity<ErrorResponse> handleGenericException(Exception ex, WebRequest request) {
     ErrorResponse errorResponse =
