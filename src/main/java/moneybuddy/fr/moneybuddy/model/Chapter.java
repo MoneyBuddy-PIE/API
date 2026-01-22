@@ -19,6 +19,7 @@ import moneybuddy.fr.moneybuddy.model.enums.SubAccountRole;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 @Document(collection = "chapters")
 @Data
@@ -32,7 +33,10 @@ public class Chapter {
   private String title;
   private String description;
   private int level;
+
+  @Field("order")
   private int order;
+
   private int coinReward;
 
   private String image_url;
