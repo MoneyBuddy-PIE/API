@@ -5,13 +5,18 @@ package moneybuddy.fr.moneybuddy.dtos.section;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import lombok.Builder;
 import lombok.Data;
 import moneybuddy.fr.moneybuddy.model.Quiz;
 import org.springframework.data.mongodb.core.mapping.DBRef;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Data
 @Builder
@@ -31,5 +36,9 @@ public class SectionWithProgress {
 
   private boolean completed;
 
-  @DBRef @Builder.Default private Map<String, Quiz> quiz = new HashMap<>();
+  @JsonIgnore @DBRef @Builder.Default private Map<String, Quiz> quiz = new HashMap<>();
+  @JsonProperty("quiz")
+  public List<Quiz> getQuizAsList() {
+    return new ArrayList<>(quiz.values());
+  }
 }

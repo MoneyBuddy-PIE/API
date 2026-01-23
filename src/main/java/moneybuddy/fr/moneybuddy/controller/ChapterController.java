@@ -27,14 +27,19 @@ public class ChapterController {
       @RequestParam(defaultValue = "order") String sortBy,
       @RequestParam(defaultValue = "asc") String sortDir) {
     String token = authHeader.substring(7);
+    System.out.println(page + " " + size + " " + sortBy + " " + sortDir);
     Page<ChapterWithoutCoursesWithProgress> chapters =
         chapterQueryService.getChaptersWithProgress(token, page, size, sortBy, sortDir);
+    System.out.println(chapters);
     return ResponseEntity.status(HttpStatus.OK).body(chapters);
   }
 
   @GetMapping("/{id}")
   public ResponseEntity<ChapterWithProgress> getChapterById(
-      @RequestHeader("Authorization") String authHeader, @PathVariable String id) {
+      @RequestHeader("Authorization") String authHeader, 
+      @PathVariable String id
+    ) {
+
     String token = authHeader.substring(7);
     return ResponseEntity.status(HttpStatus.OK)
         .body(chapterQueryService.getChapterWithProgress(token, id));

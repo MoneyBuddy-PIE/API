@@ -4,13 +4,11 @@
 package moneybuddy.fr.moneybuddy.dtos.chapter;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 import lombok.Builder;
 import lombok.Data;
-import moneybuddy.fr.moneybuddy.model.Course;
-import org.springframework.data.mongodb.core.mapping.DBRef;
+import moneybuddy.fr.moneybuddy.dtos.course.CourseWithProgress;
 
 @Data
 @Builder
@@ -32,5 +30,5 @@ public class ChapterWithProgress {
   @Builder.Default private LocalDateTime createdAt = LocalDateTime.now();
   private LocalDateTime updatedAt;
 
-  @DBRef @Builder.Default private Map<String, Course> courses = new HashMap<>();
+  List<CourseWithProgress> courses;
 }
