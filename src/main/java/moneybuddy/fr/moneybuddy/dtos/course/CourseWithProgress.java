@@ -4,9 +4,13 @@
 package moneybuddy.fr.moneybuddy.dtos.course;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
 import moneybuddy.fr.moneybuddy.dtos.section.SectionWithProgress;
@@ -36,6 +40,18 @@ public class CourseWithProgress {
   @Builder.Default private LocalDateTime createdAt = LocalDateTime.now();
   private LocalDateTime updatedAt;
 
-  @DBRef @Builder.Default private Map<String, SectionWithProgress> sections = new HashMap<>();
-  @DBRef @Builder.Default private Map<String, Ressource> ressources = new HashMap<>();
+  @JsonIgnore @DBRef @Builder.Default
+  private Map<String, SectionWithProgress> sections = new HashMap<>();
+
+  @JsonIgnore @DBRef @Builder.Default private Map<String, Ressource> ressources = new HashMap<>();
+
+  @JsonProperty("sections")
+  public List<SectionWithProgress> getSectionAsList() {
+    return new ArrayList<>(sections.values());
+  }
+
+  @JsonProperty("ressources")
+  public List<Ressource> getRessourceAsList() {
+    return new ArrayList<>(ressources.values());
+  }
 }

@@ -4,7 +4,6 @@
 package moneybuddy.fr.moneybuddy.dtos;
 
 import jakarta.validation.constraints.AssertTrue;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,7 +19,7 @@ import moneybuddy.fr.moneybuddy.utils.CheckByRegex;
 public class SubAccountDto {
   private static final CheckByRegex checkByRegex = new CheckByRegex();
 
-  @NotBlank(message = "Name is mandatory")
+  @NotNull(message = "Name is mandatory")
   private String name;
 
   @NotNull(message = "Role is mandatory")

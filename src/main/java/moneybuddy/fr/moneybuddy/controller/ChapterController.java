@@ -29,12 +29,14 @@ public class ChapterController {
     String token = authHeader.substring(7);
     Page<ChapterWithoutCoursesWithProgress> chapters =
         chapterQueryService.getChaptersWithProgress(token, page, size, sortBy, sortDir);
+
     return ResponseEntity.status(HttpStatus.OK).body(chapters);
   }
 
   @GetMapping("/{id}")
   public ResponseEntity<ChapterWithProgress> getChapterById(
       @RequestHeader("Authorization") String authHeader, @PathVariable String id) {
+
     String token = authHeader.substring(7);
     return ResponseEntity.status(HttpStatus.OK)
         .body(chapterQueryService.getChapterWithProgress(token, id));

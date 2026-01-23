@@ -37,7 +37,6 @@ public class SubAccountService {
   public ResponseEntity<AuthResponse> addSubAccount(SubAccountDto subAccountDto, String token) {
     SubAccountRole subAccountRole = jwtService.extractSubAccountRole(token);
     String accountId = jwtService.extractSubAccountAccountId(token);
-
     Account account =
         accountRepository
             .findById(accountId)
