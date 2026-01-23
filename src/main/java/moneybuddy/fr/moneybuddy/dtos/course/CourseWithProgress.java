@@ -9,14 +9,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
 import moneybuddy.fr.moneybuddy.dtos.section.SectionWithProgress;
 import moneybuddy.fr.moneybuddy.model.Ressource;
 import org.springframework.data.mongodb.core.mapping.DBRef;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Data
 @Builder
@@ -41,8 +40,9 @@ public class CourseWithProgress {
   @Builder.Default private LocalDateTime createdAt = LocalDateTime.now();
   private LocalDateTime updatedAt;
 
+  @JsonIgnore @DBRef @Builder.Default
+  private Map<String, SectionWithProgress> sections = new HashMap<>();
 
-  @JsonIgnore @DBRef @Builder.Default private Map<String, SectionWithProgress> sections = new HashMap<>();
   @JsonIgnore @DBRef @Builder.Default private Map<String, Ressource> ressources = new HashMap<>();
 
   @JsonProperty("sections")

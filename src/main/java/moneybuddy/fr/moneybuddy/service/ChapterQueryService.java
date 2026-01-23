@@ -3,6 +3,9 @@
 								*/
 package moneybuddy.fr.moneybuddy.service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import moneybuddy.fr.moneybuddy.dtos.chapter.ChapterProgressData;
 import moneybuddy.fr.moneybuddy.dtos.chapter.ChapterWithProgress;
@@ -21,10 +24,6 @@ import moneybuddy.fr.moneybuddy.repository.ChapterRepository;
 import moneybuddy.fr.moneybuddy.repository.CourseRepository;
 import moneybuddy.fr.moneybuddy.repository.UserProgressRepository;
 import moneybuddy.fr.moneybuddy.utils.Utils;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -96,16 +95,15 @@ public class ChapterQueryService {
 
     ChapterProgressData progress = calculateChapterProgress(chapter, userProgress);
 
-    List<Course> courses = courseRepository
-    .findAllByChapterIdAndLockedFalse(chapterId)
-    .orElseThrow(CourseNotFoundException::new);
+    List<Course> courses =
+        courseRepository
+            .findAllByChapterIdAndLockedFalse(chapterId)
+            .orElseThrow(CourseNotFoundException::new);
 
     List<CourseWithProgress> courseWithProgress = new ArrayList<>();
 
     for (Course course : courses) {
-        courseWithProgress.add(
-                courseQueryService.getCourseWithProgress(token, course.getId())
-        );
+      courseWithProgress.add(courseQueryService.getCourseWithProgress(token, course.getId()));
     }
 
     return ChapterWithProgress.builder()

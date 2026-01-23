@@ -20,8 +20,7 @@ public class SubAccountController {
   @PostMapping("")
   public ResponseEntity<AuthResponse> addSubAccount(
       @Valid @RequestBody SubAccountDto subAccount,
-      @RequestHeader("Authorization") String authHeader
-    ) {
+      @RequestHeader("Authorization") String authHeader) {
     String token = authHeader.substring(7);
     return subAccountService.addSubAccount(subAccount, token);
   }
