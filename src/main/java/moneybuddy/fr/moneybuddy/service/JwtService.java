@@ -78,8 +78,10 @@ public class JwtService {
 
   public SubAccountRole extractSubAccountRole(String token) {
     String roleString = extractClaim(token, claims -> claims.get("subAccountRole", String.class));
-    SubAccountRole role = SubAccountRole.valueOf(roleString);
-    return role;
+    if (roleString == null) {
+      return null;
+    }
+    return SubAccountRole.valueOf(roleString);
   }
 
   public Role extractAccountRole(String token) {

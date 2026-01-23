@@ -18,7 +18,7 @@ import moneybuddy.fr.moneybuddy.utils.CheckByRegex;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SubAccountDto {
-  private final CheckByRegex checkByRegex = new CheckByRegex();
+  private static final CheckByRegex checkByRegex = new CheckByRegex();
 
   @NotBlank(message = "Name is mandatory")
   private String name;
