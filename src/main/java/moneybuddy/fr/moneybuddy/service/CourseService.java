@@ -103,7 +103,7 @@ public class CourseService {
 
     if (!req.getTitle().isEmpty()) course.setTitle(req.getTitle());
 
-    if (req.getFile().getSize() > 0) {
+    if (req.getFile() != null && req.getFile().getSize() > 0) {
       String image_url = cloudflareService.uploadImage(req.getFile());
       cloudflareService.remove(course.getImage_url());
       course.setImage_url(image_url);

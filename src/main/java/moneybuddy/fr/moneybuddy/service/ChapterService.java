@@ -113,7 +113,7 @@ public class ChapterService {
     if (!req.getDescription().isEmpty()) chapter.setDescription(req.getTitle());
     if (req.getSubAccountRole() != null) chapter.setSubAccountRole(req.getSubAccountRole());
 
-    if (req.getFile().getSize() > 0) {
+    if (req.getFile() != null && req.getFile().getSize() > 0) {
       String image_url = cloudflareService.uploadImage(req.getFile());
       cloudflareService.remove(chapter.getImage_url());
       chapter.setImage_url(image_url);
