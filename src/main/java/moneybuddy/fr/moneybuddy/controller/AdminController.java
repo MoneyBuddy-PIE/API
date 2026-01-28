@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import moneybuddy.fr.moneybuddy.dtos.ResponseDto;
 import moneybuddy.fr.moneybuddy.dtos.chapter.ChapterWithoutCoursesForAdmin;
 import moneybuddy.fr.moneybuddy.dtos.chapter.CreateChapterRequest;
+import moneybuddy.fr.moneybuddy.dtos.chapter.UpdateChapterRequest;
 import moneybuddy.fr.moneybuddy.dtos.course.CreateCourseRequest;
 import moneybuddy.fr.moneybuddy.dtos.course.UpdateCourseRequest;
 import moneybuddy.fr.moneybuddy.dtos.quiz.CreateQuizRequest;
@@ -94,6 +95,13 @@ public class AdminController {
   @GetMapping("/chapters/{id}")
   public ResponseEntity<Chapter> getChapter(@PathVariable String id) {
     return ResponseEntity.status(HttpStatus.OK).body(chapterService.getTotalChapter(id));
+  }
+
+  @PutMapping("/chapters/{id}")
+  public ResponseEntity<Chapter> updateChapter(
+      @Valid @ModelAttribute UpdateChapterRequest request, @PathVariable String id)
+      throws FileUploadException, JsonMappingException, JsonProcessingException {
+    return ResponseEntity.status(HttpStatus.OK).body(chapterService.updateCourse(id, request));
   }
 
   @DeleteMapping("/chapters/{id}")

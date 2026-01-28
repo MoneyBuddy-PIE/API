@@ -4,12 +4,16 @@
 package moneybuddy.fr.moneybuddy.service;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import lombok.RequiredArgsConstructor;
 import moneybuddy.fr.moneybuddy.dtos.chapter.ChapterDto;
 import moneybuddy.fr.moneybuddy.dtos.chapter.ChapterWithoutCourses;
 import moneybuddy.fr.moneybuddy.dtos.chapter.ChapterWithoutCoursesForAdmin;
 import moneybuddy.fr.moneybuddy.dtos.chapter.CreateChapterRequest;
+import moneybuddy.fr.moneybuddy.dtos.chapter.UpdateChapterRequest;
 import moneybuddy.fr.moneybuddy.exception.ChapterNotFound;
 import moneybuddy.fr.moneybuddy.model.Chapter;
 import moneybuddy.fr.moneybuddy.model.Course;
@@ -94,5 +98,28 @@ public class ChapterService {
     ChapterDto chapter = getChapter(id);
     cloudflareService.remove(chapter.getImage_url());
     chapterRepository.deleteById(id);
+  }
+
+  public Chapter updateCourse(String chapterId, UpdateChapterRequest req)
+      throws FileUploadException, JsonMappingException, JsonProcessingException {
+    Chapter chapter = getTotalChapter(chapterId);
+
+    chapter.setOrder(Optional.ofNullable(req.getOrder()).orElse(chapter.getOrder()));
+    chapter.setLevel(Optional.ofNullable(req.getLevel()).orElse(chapter.getLevel()));
+    chapter.setCoinReward(Optional.ofNullable(req.getCoinReward()).orElse(chapter.getCoinReward()));
+    chapter.setLocked(Optional.ofNullable(req.isLocked()).orElse(chapter.isLocked()));
+
+    if (!req.getTitle().isEmpty()) chapter.setTitle(req.getTitle());
+    if (!req.getDescription().isEmpty()) chapter.setDescription(req.getTitle());
+    if (req.getSubAccountRole() != null) chapter.setSubAccountRole(req.getSubAccountRole());
+
+    if (req.getFile().getSize() > 0) {
+      String image_url = cloudflareService.uploadImage(req.getFile());
+      cloudflareService.remove(chapter.getImage_url());
+      chapter.setImage_url(image_url);
+    }
+
+    chapterRepository.save(chapter);
+    return chapter;
   }
 }

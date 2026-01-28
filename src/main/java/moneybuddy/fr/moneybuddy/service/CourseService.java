@@ -101,18 +101,15 @@ public class CourseService {
     course.setOrder(Optional.ofNullable(req.getOrder()).orElse(course.getOrder()));
     course.setLocked(Optional.ofNullable(req.isLocked()).orElse(course.isLocked()));
 
-    if (req.getChapterId() != null) {
-      course.setChapterId(req.getChapterId());
-      course.setLocked(true);
-    }
-    if (req.getTitle() != null) course.setTitle(req.getTitle());
+    if (!req.getTitle().isEmpty()) course.setTitle(req.getTitle());
 
-    if (req.getFile() != null) {
+    if (req.getFile().getSize() > 0) {
       String image_url = cloudflareService.uploadImage(req.getFile());
-      course.setImage_url(image_url);
       cloudflareService.remove(course.getImage_url());
+      course.setImage_url(image_url);
     }
 
+    courseRepository.save(course);
     return course;
   }
 }
