@@ -43,7 +43,7 @@ public class AllowanceService {
     LocalDate nextExecution =
         calculateNextExecution.calculateNextExecution(req.getFrequency(), startDate);
 
-    SubAccount subAccount = subAccountService.get(subAccountId);
+    SubAccount subAccount = subAccountService.getById(subAccountId);
 
     Allowance allowance =
         Allowance.builder()

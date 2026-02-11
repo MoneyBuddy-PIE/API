@@ -24,5 +24,7 @@ public interface TransactionRepository extends MongoRepository<Transaction, Stri
 
   Page<Transaction> findAllByAccountId(String accountId, Pageable pageable);
 
-  Page<Transaction> findAllByChildId(Pageable pageable, String childId);
+  Page<Transaction> findAllByParentId(String parentId, Pageable pageable);
+
+  Page<Transaction> findAllByChildId(String childId, Pageable pageable);
 }
