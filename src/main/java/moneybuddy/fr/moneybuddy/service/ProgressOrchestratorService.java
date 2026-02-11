@@ -27,14 +27,14 @@ public class ProgressOrchestratorService {
 
   public CompletedCourse completeSection(String token, String sectionId, CompleteSection req) {
     Section section = sectionService.getById(sectionId);
-    SubAccount subAccount = subAccountService.get(jwtService.extractSubAccountId(token));
+    SubAccount subAccount = subAccountService.getById(jwtService.extractSubAccountId(token));
 
     return userProgressService.markSectionAsCompleted(subAccount, section, req.getScore());
   }
 
   public CompletedCourse completeCourse(String token, String courseId) {
     Course course = courseService.getById(courseId);
-    SubAccount subAccount = subAccountService.get(jwtService.extractSubAccountId(token));
+    SubAccount subAccount = subAccountService.getById(jwtService.extractSubAccountId(token));
 
     CompletedCourse status = userProgressService.markCourseAsCompleted(subAccount, course);
 

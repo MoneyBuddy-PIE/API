@@ -10,6 +10,8 @@ import java.util.Optional;
 import moneybuddy.fr.moneybuddy.model.Task;
 import moneybuddy.fr.moneybuddy.model.enums.TaskStatus;
 import moneybuddy.fr.moneybuddy.model.enums.TaskType;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -24,6 +26,10 @@ public interface TaskRepository extends MongoRepository<Task, String> {
   List<Task> findByAccountId(String accountId);
 
   Optional<Task> findByIdAndSubaccountIdParent(String id, String subAccountId);
+
+  Page<Task> findAllBysubaccountIdChild(String subaccountIdChild, Pageable pageable);
+
+  Page<Task> findAllBysubaccountIdParent(String subaccountIdParent, Pageable pageable);
 
   @Query(
       value =

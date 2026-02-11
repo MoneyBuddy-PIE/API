@@ -63,4 +63,11 @@ public class DeviceService {
 
     deviceRepository.save(device);
   }
+
+  public Device getDeviceBySubAccountId(String subAccountId) {
+    return deviceRepository
+        .findBySubAccountId(subAccountId)
+        .orElseThrow(
+            () -> new DeviceNotFoundException(String.format("%s subAccount", subAccountId)));
+  }
 }

@@ -24,17 +24,23 @@ import moneybuddy.fr.moneybuddy.dtos.section.UpdateSectionRequest;
 import moneybuddy.fr.moneybuddy.model.Account;
 import moneybuddy.fr.moneybuddy.model.Chapter;
 import moneybuddy.fr.moneybuddy.model.Course;
+import moneybuddy.fr.moneybuddy.model.Device;
 import moneybuddy.fr.moneybuddy.model.Quiz;
 import moneybuddy.fr.moneybuddy.model.Ressource;
 import moneybuddy.fr.moneybuddy.model.Section;
+import moneybuddy.fr.moneybuddy.model.SubAccount;
+import moneybuddy.fr.moneybuddy.model.Task;
 import moneybuddy.fr.moneybuddy.model.Transaction;
 import moneybuddy.fr.moneybuddy.model.enums.PlanType;
 import moneybuddy.fr.moneybuddy.service.AccountService;
 import moneybuddy.fr.moneybuddy.service.ChapterService;
 import moneybuddy.fr.moneybuddy.service.CourseService;
+import moneybuddy.fr.moneybuddy.service.DeviceService;
 import moneybuddy.fr.moneybuddy.service.QuizService;
 import moneybuddy.fr.moneybuddy.service.RessourceService;
 import moneybuddy.fr.moneybuddy.service.SectionService;
+import moneybuddy.fr.moneybuddy.service.SubAccountService;
+import moneybuddy.fr.moneybuddy.service.TaskService;
 import moneybuddy.fr.moneybuddy.service.TransactionService;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.springframework.data.domain.Page;
@@ -53,7 +59,10 @@ public class AdminController {
   private final SectionService sectionService;
   private final QuizService quizService;
   private final AccountService accountService;
+  private final SubAccountService subAccountService;
   private final TransactionService transactionService;
+  private final TaskService taskService;
+  private final DeviceService deviceService;
 
   // Transactions
   @GetMapping("/transactions")
@@ -249,6 +258,40 @@ public class AdminController {
       @RequestParam(defaultValue = "asc") String sortDir) {
     return ResponseEntity.status(HttpStatus.OK)
         .body(transactionService.getAllTransactionsByAccountId(id, page, size, sortBy, sortDir));
+  }
+
+  // SubAccounts
+
+  @GetMapping("/accounts/subAccounts/{id}")
+  public ResponseEntity<SubAccount> getSubAccount(@PathVariable String id) {
+    return ResponseEntity.status(HttpStatus.OK).body(subAccountService.getById(id));
+  }
+
+  @GetMapping("/accounts/subAccounts/{id}/device")
+  public ResponseEntity<Device> getSubAccountDevice(@PathVariable String id) {
+    return ResponseEntity.status(HttpStatus.OK).body(deviceService.getDeviceBySubAccountId(id));
+  }
+
+  @GetMapping("/accounts/subAccounts/{id}/transactions")
+  public ResponseEntity<Page<Transaction>> getSubAccountTransactions(
+      @PathVariable String id,
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "10") int size,
+      @RequestParam(defaultValue = "order") String sortBy,
+      @RequestParam(defaultValue = "asc") String sortDir) {
+    return ResponseEntity.status(HttpStatus.OK)
+        .body(transactionService.getAllTransactionsBySubAccountId(id, page, size, sortBy, sortDir));
+  }
+
+  @GetMapping("/accounts/subAccounts/{id}/tasks")
+  public ResponseEntity<Page<Task>> getSubAccountTasks(
+      @PathVariable String id,
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "10") int size,
+      @RequestParam(defaultValue = "order") String sortBy,
+      @RequestParam(defaultValue = "asc") String sortDir) {
+    return ResponseEntity.status(HttpStatus.OK)
+        .body(taskService.getTasksBySubAccountId(id, page, size, sortBy, sortDir));
   }
 
   // Goals Transactions

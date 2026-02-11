@@ -80,7 +80,7 @@ public class SubAccountService {
     return response("SubAccount created", HttpStatus.OK);
   }
 
-  public SubAccount get(String id) {
+  public SubAccount getById(String id) {
     return subAccountRepository.findById(id).orElseThrow(() -> new SubAccountNotFoundException(id));
   }
 }

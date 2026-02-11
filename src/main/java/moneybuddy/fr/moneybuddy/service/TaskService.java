@@ -26,6 +26,9 @@ import moneybuddy.fr.moneybuddy.model.enums.TaskType;
 import moneybuddy.fr.moneybuddy.repository.SubAccountRepository;
 import moneybuddy.fr.moneybuddy.repository.TaskRepository;
 import moneybuddy.fr.moneybuddy.repository.TaskWithHistoryRepository;
+import moneybuddy.fr.moneybuddy.utils.Utils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -45,6 +48,7 @@ public class TaskService {
   private final IncomeService incomeService;
   private final CoinService coinService;
   private final JwtService jwtService;
+  private final Utils utils;
 
   public ResponseEntity<AuthResponse> createTask(TaskRequest request, String token) {
     SubAccountRole role = jwtService.extractSubAccountRole(token);
@@ -79,13 +83,12 @@ public class TaskService {
     SubAccountRole role = jwtService.extractSubAccountRole(token);
     role = SubAccountRole.OWNER.equals(role) ? SubAccountRole.PARENT : role;
     boolean isParent = SubAccountRole.PARENT.equals(role);
-    System.out.println(role);
-    System.out.println(isParent);
+
     String id =
         isParent
             ? jwtService.extractSubAccountAccountId(token)
             : jwtService.extractSubAccountId(token);
-    System.out.println(id);
+
     Criteria criteria = new Criteria();
 
     Criteria dateLimitCriteria =
@@ -243,5 +246,18 @@ public class TaskService {
 
     Task updatedTask = taskRepository.save(task);
     return ResponseEntity.status(HttpStatus.OK).body(updatedTask);
+  }
+
+  public Page<Task> getTasksBySubAccountId(
+      String subAccountId, int page, int size, String sortBy, String sortDir) {
+    SubAccount subAccount =
+        subAccountRepository
+            .findById(subAccountId)
+            .orElseThrow(() -> new SubAccountNotFoundException(subAccountId));
+
+    Pageable pageable = utils.pagination(page, size, sortBy, sortDir);
+    return subAccount.getRole().equals(SubAccountRole.CHILD)
+        ? taskRepository.findAllBysubaccountIdChild(subAccountId, pageable)
+        : taskRepository.findAllBysubaccountIdParent(subAccountId, pageable);
   }
 }
