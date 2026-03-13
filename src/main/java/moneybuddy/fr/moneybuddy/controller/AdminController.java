@@ -225,7 +225,7 @@ public class AdminController {
       @RequestParam(required = false) PlanType planType,
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "10") int size,
-      @RequestParam(defaultValue = "id") String sortBy,
+      @RequestParam(defaultValue = "order") String sortBy,
       @RequestParam(defaultValue = "asc") String sortDir) {
     return ResponseEntity.status(HttpStatus.ACCEPTED)
         .body(accountService.getAccounts(planType, page, size, sortBy, sortDir));
