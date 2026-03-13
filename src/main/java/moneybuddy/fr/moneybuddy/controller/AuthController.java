@@ -12,10 +12,12 @@ import moneybuddy.fr.moneybuddy.dtos.AuthSubAccountRequest;
 import moneybuddy.fr.moneybuddy.dtos.RegisterRequest;
 import moneybuddy.fr.moneybuddy.dtos.ResponseDto;
 import moneybuddy.fr.moneybuddy.dtos.device.CreateDeviceRequest;
+import moneybuddy.fr.moneybuddy.dtos.subAccount.UpdateSubAccountDto;
 import moneybuddy.fr.moneybuddy.model.Account;
 import moneybuddy.fr.moneybuddy.model.SubAccount;
 import moneybuddy.fr.moneybuddy.service.AuthService;
 import moneybuddy.fr.moneybuddy.service.DeviceService;
+import moneybuddy.fr.moneybuddy.service.SubAccountService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,6 +34,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
   private final AuthService service;
   private final DeviceService deviceService;
+  private final SubAccountService subAccountService;
 
   @PostMapping("/register")
   public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
@@ -95,5 +98,14 @@ public class AuthController {
 
     return ResponseEntity.status(HttpStatus.ACCEPTED)
         .body(ResponseDto.builder().message("Appareil désactivé.").build());
+  }
+
+  @PutMapping("/subAccount")
+  public ResponseEntity<SubAccount> updateSubAccount(
+      @RequestHeader("Authorization") String authHeader,
+      @Valid @RequestBody UpdateSubAccountDto req) {
+    String token = authHeader.substring(7);
+    return ResponseEntity.status(HttpStatus.ACCEPTED)
+        .body(subAccountService.updateSubAccount(token, req));
   }
 }

@@ -12,7 +12,6 @@ import moneybuddy.fr.moneybuddy.model.enums.Role;
 import moneybuddy.fr.moneybuddy.repository.AccountRepository;
 import moneybuddy.fr.moneybuddy.repository.SubAccountRepository;
 import moneybuddy.fr.moneybuddy.utils.Utils;
-import org.apache.http.HttpStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +25,7 @@ public class AccountService {
   private final SubAccountRepository subAccountRepository;
   private final Utils utils;
 
-  public ResponseEntity<Page<Account>> getAccounts(
+  public Page<Account> getAccounts(
       PlanType planType, int page, int size, String sortBy, String sortDir) {
     Pageable pageable = utils.pagination(page, size, sortBy, sortDir);
 
@@ -35,7 +34,7 @@ public class AccountService {
             ? accountRepository.findAllByPlanType(planType, pageable)
             : accountRepository.findAll(pageable);
 
-    return ResponseEntity.status(HttpStatus.SC_OK).body(accounts);
+    return accounts;
   }
 
   public Account getAccount(String id) {

@@ -32,9 +32,6 @@ public class SubAccountDto {
 
   @AssertTrue(message = "PIN must be exactly 4 digits")
   private boolean isPinValid() {
-    if (SubAccountRole.PARENT.equals(role)) {
-      return pin != null && pin.length() == 4 && checkByRegex.validate(pin, "^\\d{4}$");
-    }
-    return true;
+    return pin != null && pin.length() == 4 && checkByRegex.validate(pin, "^\\d{4}$");
   }
 }
