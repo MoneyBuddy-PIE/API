@@ -70,6 +70,7 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(IndexOutOfBoundsException.class)
   public ResponseEntity<ErrorResponse> handleIndexOutOfBoundsException(
       IndexOutOfBoundsException ex, WebRequest request) {
+
     ErrorResponse errorResponse =
         ErrorResponse.builder()
             .timestamp(LocalDateTime.now())

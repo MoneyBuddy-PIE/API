@@ -227,7 +227,8 @@ public class AdminController {
       @RequestParam(defaultValue = "10") int size,
       @RequestParam(defaultValue = "order") String sortBy,
       @RequestParam(defaultValue = "asc") String sortDir) {
-    return accountService.getAccounts(planType, page, size, sortBy, sortDir);
+    return ResponseEntity.status(HttpStatus.ACCEPTED)
+        .body(accountService.getAccounts(planType, page, size, sortBy, sortDir));
   }
 
   @GetMapping("/accounts/{id}")
