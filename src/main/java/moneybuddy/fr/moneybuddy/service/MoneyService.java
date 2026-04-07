@@ -36,7 +36,7 @@ public class MoneyService {
         && isAdd
         && !request.getSubAccountId().equals(subAccount.getId())) throw new NoRight();
 
-    String parentId = jwtService.extractSubAccountAccountId(token);
+    String parentId = jwtService.extractSubAccountId(token);
     String accountId = jwtService.extractSubAccountAccountId(token);
 
     BigDecimal amount;
