@@ -34,14 +34,11 @@ public class ReceiptOcrService {
   public boolean updateMoneyAndInsertReceipt(MultipartFile file, String token) throws IOException {
     String subAccountId = jwtService.extractSubAccountId(token);
     Receipt receipts = scanReceipt(file);
-    System.out.println(receipts);
 
     receipts
         .getReceipts()
         .forEach(
             (receipt) -> {
-              System.out.println(receipt);
-
               if (receipt.getOcr_confidence().compareTo(new BigDecimal(50)) < 0)
                 throw new CustomError(
                     String.format(
