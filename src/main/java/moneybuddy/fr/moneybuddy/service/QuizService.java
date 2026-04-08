@@ -43,6 +43,7 @@ public class QuizService {
             .correctAnswerIndex(req.getCorrectAnswerIndex())
             .options(req.getOptions())
             .question(req.getQuestion())
+            .response(req.getResponse())
             .sectionId(req.getSectionId())
             .courseId(section.getCourseId())
             .build();
@@ -59,6 +60,7 @@ public class QuizService {
 
     if (req.getCorrectAnswerIndex() >= 0) quiz.setCorrectAnswerIndex(req.getCorrectAnswerIndex());
     if (req.getQuestion() != null) quiz.setQuestion(req.getQuestion());
+    if (req.getResponse() != null) quiz.setResponse(req.getResponse());
     if (req.getOptions().size() > 0) {
       Map<String, String> options = new HashMap<>();
       req.getOptions()

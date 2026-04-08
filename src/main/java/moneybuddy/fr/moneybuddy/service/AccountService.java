@@ -3,8 +3,11 @@
 								*/
 package moneybuddy.fr.moneybuddy.service;
 
+import java.util.Optional;
+
 import lombok.RequiredArgsConstructor;
 import moneybuddy.fr.moneybuddy.dtos.ResponseDto;
+import moneybuddy.fr.moneybuddy.dtos.account.UpdateAccountForAdmin;
 import moneybuddy.fr.moneybuddy.exception.AccountNotFoundException;
 import moneybuddy.fr.moneybuddy.model.Account;
 import moneybuddy.fr.moneybuddy.model.enums.PlanType;
@@ -14,6 +17,7 @@ import moneybuddy.fr.moneybuddy.repository.SubAccountRepository;
 import moneybuddy.fr.moneybuddy.utils.Utils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -47,14 +51,27 @@ public class AccountService {
     return ResponseEntity.status(204).body(null);
   }
 
-  public ResponseEntity<ResponseDto> desableAccount(String id) {
+  public ResponseDto changeAccountStatus(String id) {
     Account account = accountRepository.findById(id).orElseThrow();
+
     if (Role.ADMIN.equals(account.getRole())) {
-      return ResponseEntity.status(403).body(null);
+      return ResponseDto.builder().message("No right").status(HttpStatus.FORBIDDEN).build();
     }
 
-    account.setActivated(false);
+    account.setActivated(!account.isActivated());
+    String message = "Status Changed to " + (!account.isActivated() ? "activated" : "desabled");
     accountRepository.save(account);
-    return ResponseEntity.status(204).body(null);
+    return ResponseDto.builder().message(message).build();
+  }
+
+  public Account updateAccount(String id, UpdateAccountForAdmin req) {
+    Account account = getAccount(id);
+
+    account.setPlanType(Optional.ofNullable(req.getPlanType()).orElse(account.getPlanType()));
+    account.setRole(Optional.ofNullable(req.getRole()).orElse(account.getRole()));
+    account.setSubscriptionStatus(
+        Optional.ofNullable(req.isSubscriptionStatus()).orElse(account.isSubscriptionStatus()));
+
+    return accountRepository.save(account);
   }
 }

@@ -11,11 +11,13 @@ import moneybuddy.fr.moneybuddy.dtos.AuthResetPassword;
 import moneybuddy.fr.moneybuddy.dtos.AuthResponse;
 import moneybuddy.fr.moneybuddy.dtos.AuthSubAccountRequest;
 import moneybuddy.fr.moneybuddy.dtos.RegisterRequest;
+import moneybuddy.fr.moneybuddy.exception.AccountDesactivated;
 import moneybuddy.fr.moneybuddy.exception.AccountNotFoundException;
 import moneybuddy.fr.moneybuddy.exception.EmailAlreadyExistsException;
 import moneybuddy.fr.moneybuddy.exception.InvalidCredentialsException;
 import moneybuddy.fr.moneybuddy.exception.InvalidPinException;
 import moneybuddy.fr.moneybuddy.exception.PasswordMismatchException;
+import moneybuddy.fr.moneybuddy.exception.SubAccountDesactivated;
 import moneybuddy.fr.moneybuddy.exception.SubAccountNotFoundException;
 import moneybuddy.fr.moneybuddy.model.Account;
 import moneybuddy.fr.moneybuddy.model.SubAccount;
@@ -41,8 +43,9 @@ public class AuthService {
   private final EmailService emailService;
   private final DiscordService discordService;
   private final UserProgressService userProgressService;
+  private final RefreshTokenService refreshTokenService;
 
-  public ResponseEntity<AuthResponse> register(RegisterRequest request) {
+  public AuthResponse register(RegisterRequest request) {
     if (!request.getPassword().equals(request.getConfirmPassword())) {
       throw new PasswordMismatchException();
     }
@@ -83,19 +86,21 @@ public class AuthService {
     userProgressService.createBasicUserProgress(subAccount);
 
     String jwtToken = jwtService.generateToken(account, account.getId(), account.getRole());
+    String refreshToken = refreshTokenService.createRefreshToken(account.getId());
 
     emailService.welcomeEmail(account.getEmail());
     discordService.sendNewAccountMessage(account.getEmail(), subAccount, true);
 
-    return ResponseEntity.status(HttpStatus.CREATED)
-        .body(AuthResponse.builder().token(jwtToken).build());
+    return AuthResponse.builder().token(jwtToken).refreshToken(refreshToken).build();
   }
 
-  public ResponseEntity<AuthResponse> authenticate(AuthRequest request) {
+  public AuthResponse authenticate(AuthRequest request) {
     Account account =
         repository
             .findByEmail(request.getEmail())
             .orElseThrow(() -> new AccountNotFoundException(request.getEmail()));
+
+    if (!account.isActivated()) throw new AccountDesactivated(account.getId());
 
     if (!passwordEncoder.matches(request.getPassword(), account.getPassword())) {
       throw new InvalidCredentialsException();
@@ -105,8 +110,8 @@ public class AuthService {
     account.setLastConnexion(LocalDateTime.now());
     repository.save(account);
 
-    return ResponseEntity.status(HttpStatus.ACCEPTED)
-        .body(AuthResponse.builder().token(jwtToken).build());
+    String refreshToken = refreshTokenService.createRefreshToken(account.getId());
+    return AuthResponse.builder().token(jwtToken).refreshToken(refreshToken).build();
   }
 
   public ResponseEntity<Account> getMe(String token) {
@@ -128,6 +133,8 @@ public class AuthService {
         subAccountRepository
             .findById(subAccountId)
             .orElseThrow(() -> new SubAccountNotFoundException(subAccountId));
+
+    if (!subAccount.isActive()) throw new SubAccountDesactivated(subAccount.getId());
 
     if (!SubAccountRole.CHILD.equals(subAccount.getRole()) && !pin.equals(subAccount.getPin())) {
       throw new InvalidPinException();

@@ -19,6 +19,9 @@ public class CreateQuizRequest {
   @NotBlank(message = "Question is mandatory")
   private String question;
 
+  @NotBlank(message = "Response is mandatory")
+  private String response;
+
   @NotNull(message = "At least two options are required")
   private Map<String, String> options;
 

@@ -59,7 +59,7 @@ public class SubAccountService {
         SubAccount.builder()
             .name(subAccountDto.getName())
             .accountId(accountId)
-            .isActive(false)
+            .isActive(true)
             .role(subAccountDto.getRole())
             .pin(subAccountDto.getPin())
             .createdAt(LocalDateTime.now())

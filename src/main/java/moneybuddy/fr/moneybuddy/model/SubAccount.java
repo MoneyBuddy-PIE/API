@@ -37,7 +37,7 @@ public class SubAccount {
 
   @Builder.Default private SubAccountRole role = SubAccountRole.CHILD;
 
-  @Builder.Default private boolean isActive = false;
+  @Builder.Default private boolean isActive = true;
 
   @Builder.Default private BigDecimal money = BigDecimal.ZERO.setScale(2);
   @Builder.Default private BigDecimal income = BigDecimal.ZERO.setScale(2);
