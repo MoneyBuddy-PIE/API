@@ -25,6 +25,7 @@ public class Quiz {
   private String courseId;
 
   private String question;
+  private String response;
 
   @JsonIgnore @Builder.Default private Map<String, String> options = new HashMap<>();
 

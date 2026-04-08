@@ -36,7 +36,7 @@ public class Account implements UserDetails {
 
   @JsonIgnore private String password;
 
-  private Role role;
+  @Builder.Default private Role role = Role.USER;
 
   @Builder.Default private PlanType planType = PlanType.FREE;
 

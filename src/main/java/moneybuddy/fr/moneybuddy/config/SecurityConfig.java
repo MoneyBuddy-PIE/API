@@ -38,6 +38,7 @@ public class SecurityConfig {
                 auth.requestMatchers(
                         "/auth/login",
                         "/auth/register",
+                        "/auth/refreshToken",
                         "/auth/reset-password",
                         "/actuator/prometheus",
                         "/actuator/health")

@@ -11,6 +11,7 @@ import lombok.Data;
 @Data
 public class UpdateQuizRequest {
   private String question;
+  private String response;
 
   private Map<String, String> options;
 

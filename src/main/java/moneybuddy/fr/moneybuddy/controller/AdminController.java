@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import moneybuddy.fr.moneybuddy.dtos.ResponseDto;
+import moneybuddy.fr.moneybuddy.dtos.account.UpdateAccountForAdmin;
 import moneybuddy.fr.moneybuddy.dtos.chapter.ChapterWithoutCoursesForAdmin;
 import moneybuddy.fr.moneybuddy.dtos.chapter.CreateChapterRequest;
 import moneybuddy.fr.moneybuddy.dtos.chapter.UpdateChapterRequest;
@@ -200,13 +201,6 @@ public class AdminController {
         .body(sectionService.updateSection(sectionId, req));
   }
 
-  @DeleteMapping("/courses/sections/quizzes/{quizId}")
-  public ResponseEntity<ResponseDto> deleteQuizFromSection(@PathVariable String quizId) {
-    quizService.deleteQuiz(quizId);
-    return ResponseEntity.status(HttpStatus.OK)
-        .body(ResponseDto.builder().message("Quiz deleted").build());
-  }
-
   // Quizzes
   @PostMapping("/courses/sections/quizzes")
   public ResponseEntity<Quiz> createQuiz(@Valid @RequestBody CreateQuizRequest req) {
@@ -217,6 +211,13 @@ public class AdminController {
   public ResponseEntity<Quiz> updateQuiz(
       @Valid @RequestBody UpdateQuizRequest req, @PathVariable String quizId) {
     return ResponseEntity.status(HttpStatus.ACCEPTED).body(quizService.updateQuiz(quizId, req));
+  }
+
+  @DeleteMapping("/courses/sections/quizzes/{quizId}")
+  public ResponseEntity<ResponseDto> deleteQuizFromSection(@PathVariable String quizId) {
+    quizService.deleteQuiz(quizId);
+    return ResponseEntity.status(HttpStatus.OK)
+        .body(ResponseDto.builder().message("Quiz deleted").build());
   }
 
   // Users
@@ -243,11 +244,16 @@ public class AdminController {
         .body(ResponseDto.builder().message("Account deleted").build());
   }
 
-  @DeleteMapping("/accounts/{id}/desable")
+  @PutMapping("/accounts/{id}/status")
   public ResponseEntity<ResponseDto> desableAccount(@PathVariable String id) {
-    accountService.desableAccount(id);
-    return ResponseEntity.status(HttpStatus.ACCEPTED)
-        .body(ResponseDto.builder().message("Account disabled").build());
+    ResponseDto res = accountService.changeAccountStatus(id);
+    return ResponseEntity.status(res.getStatus()).body(res);
+  }
+
+  @PutMapping("/accounts/{id}")
+  public ResponseEntity<Account> updateAccount(
+      @PathVariable String id, @Valid @RequestBody UpdateAccountForAdmin req) {
+    return ResponseEntity.status(HttpStatus.ACCEPTED).body(accountService.updateAccount(id, req));
   }
 
   @GetMapping("/accounts/{id}/transactions")

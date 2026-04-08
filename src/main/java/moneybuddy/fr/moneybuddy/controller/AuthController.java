@@ -12,11 +12,13 @@ import moneybuddy.fr.moneybuddy.dtos.AuthSubAccountRequest;
 import moneybuddy.fr.moneybuddy.dtos.RegisterRequest;
 import moneybuddy.fr.moneybuddy.dtos.ResponseDto;
 import moneybuddy.fr.moneybuddy.dtos.device.CreateDeviceRequest;
+import moneybuddy.fr.moneybuddy.dtos.refreshToken.RefreshTokenRequest;
 import moneybuddy.fr.moneybuddy.dtos.subAccount.UpdateSubAccountDto;
 import moneybuddy.fr.moneybuddy.model.Account;
 import moneybuddy.fr.moneybuddy.model.SubAccount;
 import moneybuddy.fr.moneybuddy.service.AuthService;
 import moneybuddy.fr.moneybuddy.service.DeviceService;
+import moneybuddy.fr.moneybuddy.service.RefreshTokenService;
 import moneybuddy.fr.moneybuddy.service.SubAccountService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,18 +34,36 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/auth")
 @RequiredArgsConstructor
 public class AuthController {
+
   private final AuthService service;
   private final DeviceService deviceService;
   private final SubAccountService subAccountService;
+  private final RefreshTokenService refreshTokenService;
 
   @PostMapping("/register")
   public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
-    return service.register(request);
+    return ResponseEntity.status(HttpStatus.CREATED).body(service.register(request));
   }
 
   @PostMapping("/login")
   public ResponseEntity<AuthResponse> authenticate(@Valid @RequestBody AuthRequest request) {
-    return service.authenticate(request);
+    return ResponseEntity.status(HttpStatus.ACCEPTED).body(service.authenticate(request));
+  }
+
+  @PostMapping("/logout")
+  public ResponseEntity<ResponseDto> deleteRefreshToken(
+      @RequestHeader("Authorization") String authHeader,
+      @Valid @RequestBody RefreshTokenRequest req) {
+    String token = authHeader.substring(7);
+    refreshTokenService.deleteRefreshToken(token, req.getRefreshToken());
+    return ResponseEntity.status(HttpStatus.OK)
+        .body(ResponseDto.builder().message("Disconnected with success !").build());
+  }
+
+  @PostMapping("/refreshToken")
+  public ResponseEntity<AuthResponse> refreshToken(@Valid @RequestBody RefreshTokenRequest req) {
+    return ResponseEntity.status(HttpStatus.OK)
+        .body(refreshTokenService.refreshToken(req.getRefreshToken()));
   }
 
   @GetMapping("/me")
