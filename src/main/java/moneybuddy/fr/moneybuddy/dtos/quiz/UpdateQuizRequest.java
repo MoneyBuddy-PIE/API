@@ -3,7 +3,7 @@
 								*/
 package moneybuddy.fr.moneybuddy.dtos.quiz;
 
-import java.util.Map;
+import java.util.List;
 
 import jakarta.validation.constraints.Min;
 import lombok.Data;
@@ -13,7 +13,7 @@ public class UpdateQuizRequest {
   private String question;
   private String response;
 
-  private Map<String, String> options;
+  private List<String> options;
 
   @Min(0)
   private int correctAnswerIndex;
