@@ -247,7 +247,6 @@ public class AdminController {
   @PutMapping("/accounts/{id}/status")
   public ResponseEntity<ResponseDto> desableAccount(@PathVariable String id) {
     ResponseDto res = accountService.changeAccountStatus(id);
-    System.out.println(res);
     return ResponseEntity.status(res.getStatus()).body(res);
   }
 

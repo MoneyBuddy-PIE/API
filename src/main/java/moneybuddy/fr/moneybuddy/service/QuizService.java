@@ -56,7 +56,7 @@ public class QuizService {
 
   public Quiz updateQuiz(String quizId, UpdateQuizRequest req) {
     Quiz quiz = getById(quizId);
-    System.out.println(req);
+
     if (req.getCorrectAnswerIndex() >= 0) quiz.setCorrectAnswerIndex(req.getCorrectAnswerIndex());
     quiz.setQuestion(Optional.ofNullable(req.getQuestion()).orElse(quiz.getQuestion()));
     quiz.setResponse(Optional.ofNullable(req.getResponse()).orElse(quiz.getResponse()));
