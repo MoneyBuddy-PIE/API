@@ -59,9 +59,10 @@ public class AccountService {
     }
 
     account.setActivated(!account.isActivated());
-    String message = "Status Changed to " + (!account.isActivated() ? "activated" : "desabled");
+    String message = "Status Changed to " + (account.isActivated() ? "activated" : "desabled");
     accountRepository.save(account);
-    return ResponseDto.builder().message(message).build();
+
+    return ResponseDto.builder().message(message).status(HttpStatus.OK).build();
   }
 
   public Account updateAccount(String id, UpdateAccountForAdmin req) {
