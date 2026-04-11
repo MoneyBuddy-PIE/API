@@ -125,7 +125,6 @@ public class CourseQueryService {
                         .chapterId(sec.getChapterId())
                         .title(sec.getTitle())
                         .markdownContent(sec.getMarkdownContent())
-                        .minimumScoreToPass(sec.getMinimumScoreToPass())
                         .createdAt(sec.getCreatedAt())
                         .updatedAt(sec.getUpdatedAt())
                         .completed(false)
@@ -186,7 +185,6 @@ public class CourseQueryService {
         .updatedAt(section.getUpdatedAt())
         .markdownContent(section.getMarkdownContent())
         .title(section.getTitle())
-        .minimumScoreToPass(section.getMinimumScoreToPass())
         .quiz(section.getQuiz())
         .build();
   }

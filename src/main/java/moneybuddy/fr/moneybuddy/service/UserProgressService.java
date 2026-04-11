@@ -106,12 +106,11 @@ public class UserProgressService {
                     .sectionId(section.getId())
                     .chapterId(chapterId)
                     .courseId(courseId)
-                    .score(section.getMinimumScoreToPass())
                     .build());
 
     if (sectionProgress.isCompleted()) return CompletedCourse.ALREADY_COMPLETED;
 
-    sectionProgress.setCompleted(section.getMinimumScoreToPass().compareTo(score) <= 0);
+    sectionProgress.setCompleted(true);
     sectionProgress.setScore(score);
     courseProgress.getSectionProgress().put(section.getId(), sectionProgress);
 
@@ -122,9 +121,7 @@ public class UserProgressService {
     userProgress.setUpdatedAt(LocalDateTime.now());
 
     userProgressRepository.save(userProgress);
-    return section.getMinimumScoreToPass().compareTo(score) <= 0
-        ? CompletedCourse.COMPLETED
-        : CompletedCourse.LOW_SCORE;
+    return CompletedCourse.COMPLETED;
   }
 
   public CompletedCourse markCourseAsCompleted(SubAccount subAccount, Course course) {

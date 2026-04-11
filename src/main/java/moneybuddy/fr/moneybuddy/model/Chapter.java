@@ -15,6 +15,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import moneybuddy.fr.moneybuddy.model.enums.ChapterCategory;
 import moneybuddy.fr.moneybuddy.model.enums.SubAccountRole;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
@@ -31,13 +32,12 @@ public class Chapter {
 
   private String title;
   private String description;
-  private int level;
+  private String image_url;
 
+  private int level;
   private int order;
 
   private int coinReward;
-
-  private String image_url;
 
   @Builder.Default private boolean locked = true;
 
@@ -49,6 +49,7 @@ public class Chapter {
   }
 
   private SubAccountRole subAccountRole;
+  private List<ChapterCategory> category;
 
   @Builder.Default private LocalDateTime createdAt = LocalDateTime.now();
   private LocalDateTime updatedAt;

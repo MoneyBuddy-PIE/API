@@ -44,7 +44,6 @@ public class SectionService {
             .courseId(course.getId())
             .title(req.getTitle())
             .markdownContent(req.getMarkdownContent())
-            .minimumScoreToPass(req.getMinimumScoreToPass())
             .build();
     section = sectionRepository.save(section);
 
@@ -59,8 +58,6 @@ public class SectionService {
 
     if (req.getTitle() != null) section.setTitle(req.getTitle());
     if (req.getMarkdownContent() != null) section.setMarkdownContent(req.getMarkdownContent());
-    if (req.getMinimumScoreToPass() != null)
-      section.setMinimumScoreToPass(req.getMinimumScoreToPass());
 
     section.setUpdatedAt(LocalDateTime.now());
     section = sectionRepository.save(section);
