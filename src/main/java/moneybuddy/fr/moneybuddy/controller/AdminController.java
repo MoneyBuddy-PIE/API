@@ -88,7 +88,7 @@ public class AdminController {
       @RequestHeader("Authorization") String authHeader)
       throws FileUploadException {
     String token = authHeader.substring(7);
-    System.out.println(request);
+
     return ResponseEntity.status(HttpStatus.CREATED)
         .body(chapterService.createChapter(token, request));
   }
