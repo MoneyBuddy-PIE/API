@@ -40,7 +40,7 @@ public class ChapterQueryService {
   private final CourseQueryService courseQueryService;
 
   public Page<ChapterWithoutCoursesWithProgress> getChaptersWithProgress(
-      String token, int page, int size, String sortBy, String sortDir) {
+      String token, String category, int page, int size, String sortBy, String sortDir) {
 
     SubAccountRole subAccountRole = jwtService.extractSubAccountRole(token);
     subAccountRole =
@@ -49,8 +49,15 @@ public class ChapterQueryService {
     String subAccountId = jwtService.extractSubAccountId(token);
 
     Pageable pageable = utils.pagination(page, size, sortBy, sortDir);
-    Page<Chapter> chapters =
-        chapterRepository.findAllBySubAccountRoleAndLockedFalse(subAccountRole, pageable);
+    Page<Chapter> chapters;
+
+    if (category == null || category.equals("*")) {
+      chapters = chapterRepository.findAllBySubAccountRoleAndLockedFalse(subAccountRole, pageable);
+    } else {
+      chapters =
+          chapterRepository.findAllBySubAccountRoleAndLockedFalseAndCategoryContaining(
+              subAccountRole, category, pageable);
+    }
 
     UserProgress userProgress =
         userProgressRepository
@@ -64,6 +71,7 @@ public class ChapterQueryService {
               .id(chapter.getId())
               .title(chapter.getTitle())
               .description(chapter.getDescription())
+              .category(chapter.getCategory())
               .level(chapter.getLevel())
               .order(chapter.getOrder())
               .coinReward(chapter.getCoinReward())
@@ -110,6 +118,7 @@ public class ChapterQueryService {
         .id(chapter.getId())
         .title(chapter.getTitle())
         .description(chapter.getDescription())
+        .subAccountRole(chapter.getSubAccountRole())
         .level(chapter.getLevel())
         .order(chapter.getOrder())
         .coinReward(chapter.getCoinReward())

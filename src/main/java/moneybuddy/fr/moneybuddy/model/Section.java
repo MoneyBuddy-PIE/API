@@ -3,7 +3,6 @@
 								*/
 package moneybuddy.fr.moneybuddy.model;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,8 +29,6 @@ public class Section {
 
   private String title;
   private String markdownContent;
-
-  @Builder.Default private BigDecimal minimumScoreToPass = new BigDecimal("70");
 
   @JsonIgnore @DBRef @Builder.Default private Map<String, Quiz> quiz = new HashMap<>();
 

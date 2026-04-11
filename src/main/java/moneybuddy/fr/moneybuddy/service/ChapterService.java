@@ -4,6 +4,7 @@
 package moneybuddy.fr.moneybuddy.service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -17,6 +18,7 @@ import moneybuddy.fr.moneybuddy.dtos.chapter.UpdateChapterRequest;
 import moneybuddy.fr.moneybuddy.exception.ChapterNotFound;
 import moneybuddy.fr.moneybuddy.model.Chapter;
 import moneybuddy.fr.moneybuddy.model.Course;
+import moneybuddy.fr.moneybuddy.model.enums.ChapterCategory;
 import moneybuddy.fr.moneybuddy.model.enums.SubAccountRole;
 import moneybuddy.fr.moneybuddy.repository.ChapterRepository;
 import moneybuddy.fr.moneybuddy.utils.Utils;
@@ -33,6 +35,10 @@ public class ChapterService {
   private final CloudflareService cloudflareService;
   private final JwtService jwtService;
   private final Utils utils;
+
+  public List<ChapterCategory> getCahpterCategories() {
+    return List.of(ChapterCategory.values());
+  }
 
   public void addCourseToChapter(Chapter chapter, Course course) {
     chapter.getCourses().put(course.getId(), course);
@@ -53,14 +59,21 @@ public class ChapterService {
   }
 
   public Page<ChapterWithoutCoursesForAdmin> getAllChapters(
-      int page, int size, String sortBy, String sortDir) {
+      String category, int page, int size, String sortBy, String sortDir) {
     Pageable pageable;
     try {
       pageable = utils.pagination(page, size, sortBy, sortDir);
     } catch (Exception e) {
       pageable = utils.pagination(page, size, "createdAt", sortDir != null ? sortDir : "asc");
     }
-    Page<Chapter> chapters = chapterRepository.findAllWithoutCourses(pageable);
+
+    Page<Chapter> chapters;
+    if (category == null || category.equals("*")) {
+      chapters = chapterRepository.findAllWithoutCourses(pageable);
+    } else {
+      chapters = chapterRepository.findAllByCategoryContaining(category, pageable);
+    }
+
     return chapters.map(ChapterWithoutCoursesForAdmin::from);
   }
 
@@ -89,6 +102,7 @@ public class ChapterService {
             .subAccountRole(req.getSubAccountRole())
             .accountId(accountId)
             .createdAt(LocalDateTime.now())
+            .category(req.getCategory())
             .build();
 
     return chapterRepository.save(chapter);
@@ -111,6 +125,7 @@ public class ChapterService {
 
     if (!req.getTitle().isEmpty()) chapter.setTitle(req.getTitle());
     if (!req.getDescription().isEmpty()) chapter.setDescription(req.getTitle());
+    if (!req.getCategory().isEmpty()) chapter.setCategory(req.getCategory());
     if (req.getSubAccountRole() != null) chapter.setSubAccountRole(req.getSubAccountRole());
 
     if (req.getFile() != null && req.getFile().getSize() > 0) {
@@ -118,8 +133,6 @@ public class ChapterService {
       cloudflareService.remove(chapter.getImage_url());
       chapter.setImage_url(image_url);
     }
-
-    chapterRepository.save(chapter);
-    return chapter;
+    return chapterRepository.save(chapter);
   }
 }

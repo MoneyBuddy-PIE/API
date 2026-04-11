@@ -88,18 +88,20 @@ public class AdminController {
       @RequestHeader("Authorization") String authHeader)
       throws FileUploadException {
     String token = authHeader.substring(7);
+    System.out.println(request);
     return ResponseEntity.status(HttpStatus.CREATED)
         .body(chapterService.createChapter(token, request));
   }
 
   @GetMapping("/chapters")
   public ResponseEntity<Page<ChapterWithoutCoursesForAdmin>> getAllChapters(
+      @RequestParam(defaultValue = "*") String category,
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "10") int size,
       @RequestParam(defaultValue = "createdAt") String sortBy,
       @RequestParam(defaultValue = "asc") String sortDir) {
     return ResponseEntity.status(HttpStatus.OK)
-        .body(chapterService.getAllChapters(page, size, sortBy, sortDir));
+        .body(chapterService.getAllChapters(category, page, size, sortBy, sortDir));
   }
 
   @GetMapping("/chapters/{id}")

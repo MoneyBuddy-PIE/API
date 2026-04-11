@@ -3,8 +3,11 @@
 								*/
 package moneybuddy.fr.moneybuddy.dtos.chapter;
 
+import java.util.List;
+
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Data;
+import moneybuddy.fr.moneybuddy.model.enums.ChapterCategory;
 import moneybuddy.fr.moneybuddy.model.enums.SubAccountRole;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -12,6 +15,10 @@ import org.springframework.web.multipart.MultipartFile;
 public class UpdateChapterRequest {
   private String title;
   private String description;
+  private boolean locked;
+  private MultipartFile file;
+
+  private List<ChapterCategory> category;
   private SubAccountRole subAccountRole;
 
   @PositiveOrZero(message = "Level has to be >= 0")
@@ -22,7 +29,4 @@ public class UpdateChapterRequest {
 
   @PositiveOrZero(message = "Coin reward has to be >= 0")
   private int coinReward;
-
-  private boolean locked;
-  private MultipartFile file;
 }

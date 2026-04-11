@@ -4,10 +4,12 @@
 package moneybuddy.fr.moneybuddy.dtos.chapter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import lombok.Builder;
 import lombok.Data;
 import moneybuddy.fr.moneybuddy.model.Chapter;
+import moneybuddy.fr.moneybuddy.model.enums.ChapterCategory;
 import moneybuddy.fr.moneybuddy.model.enums.SubAccountRole;
 import org.springframework.data.annotation.Id;
 
@@ -29,6 +31,7 @@ public class ChapterWithoutCoursesForAdmin {
   @Builder.Default private boolean locked = true;
 
   private SubAccountRole subAccountRole;
+  private List<ChapterCategory> category;
 
   @Builder.Default private LocalDateTime createdAt = LocalDateTime.now();
   private LocalDateTime updatedAt;
@@ -48,6 +51,7 @@ public class ChapterWithoutCoursesForAdmin {
         .image_url(chapter.getImage_url())
         .locked(chapter.isLocked())
         .subAccountRole(chapter.getSubAccountRole())
+        .category(chapter.getCategory())
         .viewed(chapter.getViewed())
         .completed(chapter.getCompleted())
         .createdAt(chapter.getCreatedAt())
