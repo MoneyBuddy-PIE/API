@@ -13,6 +13,7 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.WebRequest;
 
@@ -33,6 +34,7 @@ public class DiscordService {
   private String monitoring_basic_channel;
 
   @PostConstruct
+  @Async
   public void init() {
     this.jda = JDABuilder.createDefault(token).build();
   }
