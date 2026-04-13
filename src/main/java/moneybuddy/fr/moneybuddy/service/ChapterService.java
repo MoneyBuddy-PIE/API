@@ -36,7 +36,7 @@ public class ChapterService {
   private final JwtService jwtService;
   private final Utils utils;
 
-  public List<ChapterCategory> getCahpterCategories() {
+  public List<ChapterCategory> getChapterCategories() {
     return List.of(ChapterCategory.values());
   }
 
@@ -94,16 +94,19 @@ public class ChapterService {
         Chapter.builder()
             .title(req.getTitle())
             .description(req.getDescription())
-            .level(req.getLevel())
-            .order(req.getOrder())
             .image_url(image_url)
             .locked(true)
-            .coinReward(req.getCoinReward())
             .subAccountRole(req.getSubAccountRole())
             .accountId(accountId)
             .createdAt(LocalDateTime.now())
             .category(req.getCategory())
             .build();
+
+    if (SubAccountRole.CHILD.equals(req.getSubAccountRole())) {
+      chapter.setOrder(req.getOrder());
+      chapter.setLevel(req.getLevel());
+      chapter.setCoinReward(req.getCoinReward());
+    }
 
     return chapterRepository.save(chapter);
   }
