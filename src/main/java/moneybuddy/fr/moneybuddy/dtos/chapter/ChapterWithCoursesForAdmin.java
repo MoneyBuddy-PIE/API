@@ -4,12 +4,14 @@
 package moneybuddy.fr.moneybuddy.dtos.chapter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Data;
 import moneybuddy.fr.moneybuddy.model.Chapter;
+import moneybuddy.fr.moneybuddy.model.Course;
 import moneybuddy.fr.moneybuddy.model.enums.ChapterCategory;
 import moneybuddy.fr.moneybuddy.model.enums.SubAccountRole;
 import org.springframework.data.annotation.Id;
@@ -17,8 +19,7 @@ import org.springframework.data.annotation.Id;
 @Data
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ChapterWithoutCoursesForAdmin {
-
+public class ChapterWithCoursesForAdmin {
   @Id private String id;
   private String accountId;
 
@@ -35,15 +36,17 @@ public class ChapterWithoutCoursesForAdmin {
   private SubAccountRole subAccountRole;
   private List<ChapterCategory> category;
 
+  @Builder.Default public List<Course> courses = new ArrayList<>();
+
   @Builder.Default private LocalDateTime createdAt = LocalDateTime.now();
   private LocalDateTime updatedAt;
 
   private int viewed;
   private int completed;
 
-  public static ChapterWithoutCoursesForAdmin from(Chapter chapter) {
-    ChapterWithoutCoursesForAdmin chapterWithoutCoursesForAdmin =
-        ChapterWithoutCoursesForAdmin.builder()
+  public static ChapterWithCoursesForAdmin from(Chapter chapter) {
+    ChapterWithCoursesForAdmin chapterWithCoursesForAdmin =
+        ChapterWithCoursesForAdmin.builder()
             .id(chapter.getId())
             .accountId(chapter.getAccountId())
             .title(chapter.getTitle())
@@ -56,14 +59,15 @@ public class ChapterWithoutCoursesForAdmin {
             .completed(chapter.getCompleted())
             .createdAt(chapter.getCreatedAt())
             .updatedAt(chapter.getUpdatedAt())
+            .courses(chapter.getCoursesAsList())
             .build();
 
     if (SubAccountRole.CHILD.equals(chapter.getSubAccountRole())) {
-      chapterWithoutCoursesForAdmin.setOrder(chapter.getOrder());
-      chapterWithoutCoursesForAdmin.setCoinReward(chapter.getCoinReward());
-      chapterWithoutCoursesForAdmin.setLevel(chapter.getLevel());
+      chapterWithCoursesForAdmin.setOrder(chapter.getOrder());
+      chapterWithCoursesForAdmin.setCoinReward(chapter.getCoinReward());
+      chapterWithCoursesForAdmin.setLevel(chapter.getLevel());
     }
 
-    return chapterWithoutCoursesForAdmin;
+    return chapterWithCoursesForAdmin;
   }
 }
