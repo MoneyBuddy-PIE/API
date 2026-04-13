@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import moneybuddy.fr.moneybuddy.dtos.ResponseDto;
 import moneybuddy.fr.moneybuddy.dtos.account.UpdateAccountForAdmin;
+import moneybuddy.fr.moneybuddy.dtos.chapter.ChapterWithCoursesForAdmin;
 import moneybuddy.fr.moneybuddy.dtos.chapter.ChapterWithoutCoursesForAdmin;
 import moneybuddy.fr.moneybuddy.dtos.chapter.CreateChapterRequest;
 import moneybuddy.fr.moneybuddy.dtos.chapter.UpdateChapterRequest;
@@ -105,8 +106,9 @@ public class AdminController {
   }
 
   @GetMapping("/chapters/{id}")
-  public ResponseEntity<Chapter> getChapter(@PathVariable String id) {
-    return ResponseEntity.status(HttpStatus.OK).body(chapterService.getTotalChapter(id));
+  public ResponseEntity<ChapterWithCoursesForAdmin> getChapter(@PathVariable String id) {
+    Chapter chapter = chapterService.getTotalChapter(id);
+    return ResponseEntity.status(HttpStatus.OK).body(ChapterWithCoursesForAdmin.from(chapter));
   }
 
   @PutMapping("/chapters/{id}")
