@@ -8,8 +8,7 @@ RUN mvn clean package -DskipTests
 # Execution
 FROM eclipse-temurin:21-jre-jammy
 WORKDIR /app
-EXPOSE 10000
-ENV PORT=10000
+EXPOSE 8080
 COPY --from=build /app/target/*.jar app.jar
 ENV JAVA_OPTS="-Xmx512m -Xms256m -XX:+UseG1GC -XX:MaxGCPauseMillis=200"
 
