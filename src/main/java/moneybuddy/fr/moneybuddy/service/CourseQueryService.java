@@ -3,6 +3,7 @@
 								*/
 package moneybuddy.fr.moneybuddy.service;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -64,6 +65,7 @@ public class CourseQueryService {
               .createdAt(course.getCreatedAt())
               .updatedAt(course.getUpdatedAt())
               .completed(progress.isCompleted())
+              .ressource(course.getRessourceAsList())
               .completedCoursesCount(progress.getCompletedCoursesCount())
               .totalCoursesCount(progress.getTotalCoursesCount())
               .progressPercentage(progress.getProgressPercentage())
@@ -110,28 +112,35 @@ public class CourseQueryService {
             ? userProgress.getChapterProgress().get(course.getChapterId())
             : null;
 
+    // Pas de progression du tout
     if (chapterProgress == null
         || chapterProgress.getCourseProgress() == null
         || chapterProgress.getCourseProgress().isEmpty()) {
-      int totalSections = course.getSections() != null ? course.getSections().size() : 0;
-      Map<String, SectionWithProgress> sections =
-          course.getSections().entrySet().stream()
-              .map(
-                  entry -> {
-                    Section sec = entry.getValue();
-                    return SectionWithProgress.builder()
-                        .id(sec.getId())
-                        .courseId(sec.getCourseId())
-                        .chapterId(sec.getChapterId())
-                        .title(sec.getTitle())
-                        .markdownContent(sec.getMarkdownContent())
-                        .createdAt(sec.getCreatedAt())
-                        .updatedAt(sec.getUpdatedAt())
-                        .completed(false)
-                        .quiz(sec.getQuiz())
-                        .build();
-                  })
-              .collect(Collectors.toMap(SectionWithProgress::getId, s -> s));
+
+      Map<String, Section> courseSections = course.getSections();
+      int totalSections = courseSections != null ? courseSections.size() : 0;
+
+      Map<String, SectionWithProgress> sections = new HashMap<>();
+      if (courseSections != null && !courseSections.isEmpty()) {
+        sections =
+            courseSections.entrySet().stream()
+                .map(
+                    entry -> {
+                      Section sec = entry.getValue();
+                      return SectionWithProgress.builder()
+                          .id(sec.getId())
+                          .courseId(sec.getCourseId())
+                          .chapterId(sec.getChapterId())
+                          .title(sec.getTitle())
+                          .markdownContent(sec.getMarkdownContent())
+                          .createdAt(sec.getCreatedAt())
+                          .updatedAt(sec.getUpdatedAt())
+                          .completed(false)
+                          .quiz(sec.getQuiz())
+                          .build();
+                    })
+                .collect(Collectors.toMap(SectionWithProgress::getId, s -> s));
+      }
 
       return CourseProgressData.builder()
           .completed(false)
@@ -142,10 +151,24 @@ public class CourseQueryService {
           .build();
     }
 
+    // Il y a une progression
     CourseProgress courseProgress = chapterProgress.getCourseProgress().get(course.getId());
 
+    // Vérifier que course.getSections() n'est pas null
+    Map<String, Section> courseSections = course.getSections();
+
+    if (courseSections == null || courseSections.isEmpty()) {
+      return CourseProgressData.builder()
+          .completed(false)
+          .completedCoursesCount(0)
+          .totalCoursesCount(0)
+          .progressPercentage(0)
+          .sections(new HashMap<>())
+          .build();
+    }
+
     boolean completed = courseProgress != null && courseProgress.isCompleted();
-    int totalSections = course.getSections() != null ? course.getSections().size() : 0;
+    int totalSections = courseSections.size();
     int completedSections = 0;
 
     if (courseProgress != null && courseProgress.getSectionProgress() != null) {
@@ -158,8 +181,9 @@ public class CourseQueryService {
 
     int progressPercentage = totalSections > 0 ? (completedSections * 100 / totalSections) : 0;
 
+    // Maintenant on sait que courseSections n'est pas null
     Map<String, SectionWithProgress> sections =
-        course.getSections().entrySet().stream()
+        courseSections.entrySet().stream()
             .map(entry -> calculateSectionProgress(entry.getValue(), courseProgress))
             .collect(Collectors.toMap(SectionWithProgress::getId, section -> section));
 
@@ -174,13 +198,18 @@ public class CourseQueryService {
 
   private SectionWithProgress calculateSectionProgress(
       Section section, CourseProgress courseProgress) {
-    SectionProgress sectionProgress = courseProgress.getSectionProgress().get(section.getId());
+    boolean sectionCompleted = false;
+
+    if (courseProgress != null && courseProgress.getSectionProgress() != null) {
+      SectionProgress progress = courseProgress.getSectionProgress().get(section.getId());
+      sectionCompleted = progress != null && progress.isCompleted();
+    }
 
     return SectionWithProgress.builder()
         .id(section.getId())
         .chapterId(section.getChapterId())
-        .completed(sectionProgress != null && sectionProgress.isCompleted())
-        .courseId(section.getId())
+        .completed(sectionCompleted)
+        .courseId(section.getCourseId())
         .createdAt(section.getCreatedAt())
         .updatedAt(section.getUpdatedAt())
         .markdownContent(section.getMarkdownContent())

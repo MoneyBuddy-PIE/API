@@ -86,6 +86,7 @@ public class UserProgressService {
         courseRepository
             .findById(courseId)
             .orElseThrow(() -> new CourseNotFoundException(courseId));
+
     CourseProgress courseProgress =
         chapterProgress
             .getCourseProgress()
