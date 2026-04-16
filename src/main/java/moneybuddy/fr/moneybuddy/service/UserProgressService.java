@@ -82,10 +82,12 @@ public class UserProgressService {
                     .build());
 
     String courseId = section.getCourseId();
+    System.out.println(courseId + "dfgdfghfghjfghj");
     Course course =
         courseRepository
             .findById(courseId)
             .orElseThrow(() -> new CourseNotFoundException(courseId));
+
     CourseProgress courseProgress =
         chapterProgress
             .getCourseProgress()

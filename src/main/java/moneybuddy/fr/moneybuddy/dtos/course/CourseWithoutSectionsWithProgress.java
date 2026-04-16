@@ -4,9 +4,11 @@
 package moneybuddy.fr.moneybuddy.dtos.course;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import lombok.Builder;
 import lombok.Data;
+import moneybuddy.fr.moneybuddy.model.Ressource;
 
 @Data
 @Builder
@@ -21,6 +23,8 @@ public class CourseWithoutSectionsWithProgress {
   private int readTime;
 
   private boolean locked;
+
+  private List<Ressource> ressource;
 
   private boolean completed;
   private int completedCoursesCount;
