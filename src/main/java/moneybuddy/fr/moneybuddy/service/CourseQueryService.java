@@ -84,8 +84,6 @@ public class CourseQueryService {
             .findBySubAccountId(subAccountId)
             .orElseThrow(() -> new UserProgressNotFoundException(subAccountId));
 
-    System.out.println(userProgress);
-
     CourseProgressData progress = calculateCoursProgress(course, userProgress);
 
     return CourseWithProgress.builder()
