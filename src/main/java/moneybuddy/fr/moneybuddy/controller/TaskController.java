@@ -11,9 +11,9 @@ import moneybuddy.fr.moneybuddy.dtos.AuthResponse;
 import moneybuddy.fr.moneybuddy.dtos.TaskComplete;
 import moneybuddy.fr.moneybuddy.dtos.TaskRequest;
 import moneybuddy.fr.moneybuddy.dtos.TaskUpdate;
+import moneybuddy.fr.moneybuddy.dtos.TaskWithSubAccountsDto;
 import moneybuddy.fr.moneybuddy.model.Task;
 import moneybuddy.fr.moneybuddy.model.TaskHistory;
-import moneybuddy.fr.moneybuddy.model.TaskWithHistory;
 import moneybuddy.fr.moneybuddy.model.enums.TaskStatus;
 import moneybuddy.fr.moneybuddy.model.enums.TaskType;
 import moneybuddy.fr.moneybuddy.service.TaskHistoryService;
@@ -57,7 +57,7 @@ public class TaskController {
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<TaskWithHistory> getTask(@PathVariable String id) {
+  public ResponseEntity<TaskWithSubAccountsDto> getTask(@PathVariable String id) {
     return service.getTask(id);
   }
 

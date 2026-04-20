@@ -7,8 +7,8 @@ import java.util.List;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import moneybuddy.fr.moneybuddy.dtos.AuthResponse;
 import moneybuddy.fr.moneybuddy.dtos.CreateGoalRequest;
+import moneybuddy.fr.moneybuddy.dtos.ResponseDto;
 import moneybuddy.fr.moneybuddy.dtos.GoalMoneyRequest;
 import moneybuddy.fr.moneybuddy.dtos.GoalRequest;
 import moneybuddy.fr.moneybuddy.model.Goal;
@@ -34,7 +34,7 @@ public class GoalController {
   private final GoalService service;
 
   @PostMapping("")
-  public ResponseEntity<AuthResponse> createGoal(
+  public ResponseEntity<ResponseDto> createGoal(
       @Valid @RequestBody CreateGoalRequest request,
       @RequestHeader("Authorization") String authHeader) {
 
@@ -54,8 +54,10 @@ public class GoalController {
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<Goal> getGoal(@PathVariable String id) {
-    return service.getGoal(id);
+  public ResponseEntity<Goal> getGoal(
+      @RequestHeader("Authorization") String authHeader, @PathVariable String id) {
+    String token = authHeader.substring(7);
+    return service.getGoal(token, id);
   }
 
   @DeleteMapping("/{id}")
