@@ -10,9 +10,9 @@ import java.util.Optional;
 
 import lombok.RequiredArgsConstructor;
 import moneybuddy.fr.moneybuddy.dtos.CreateGoalRequest;
-import moneybuddy.fr.moneybuddy.dtos.ResponseDto;
 import moneybuddy.fr.moneybuddy.dtos.GoalMoneyRequest;
 import moneybuddy.fr.moneybuddy.dtos.GoalRequest;
+import moneybuddy.fr.moneybuddy.dtos.ResponseDto;
 import moneybuddy.fr.moneybuddy.exception.GoalAlreadyCompletedException;
 import moneybuddy.fr.moneybuddy.exception.GoalAlreadyUsedException;
 import moneybuddy.fr.moneybuddy.exception.GoalAmountExceededException;
@@ -63,7 +63,11 @@ public class GoalService {
 
     goalRepository.save(goal);
     return ResponseEntity.status(HttpStatus.CREATED)
-        .body(ResponseDto.builder().message("Objectif d'épargne créé avec succès").status(HttpStatus.CREATED).build());
+        .body(
+            ResponseDto.builder()
+                .message("Objectif d'épargne créé avec succès")
+                .status(HttpStatus.CREATED)
+                .build());
   }
 
   public ResponseEntity<Goal> modifyGoal(GoalRequest request, String token, String goalId) {
