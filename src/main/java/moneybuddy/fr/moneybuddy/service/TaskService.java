@@ -6,13 +6,18 @@ package moneybuddy.fr.moneybuddy.service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import lombok.RequiredArgsConstructor;
 import moneybuddy.fr.moneybuddy.dtos.AuthResponse;
 import moneybuddy.fr.moneybuddy.dtos.TaskComplete;
 import moneybuddy.fr.moneybuddy.dtos.TaskRequest;
 import moneybuddy.fr.moneybuddy.dtos.TaskUpdate;
+import moneybuddy.fr.moneybuddy.dtos.TaskWithSubAccountsDto;
 import moneybuddy.fr.moneybuddy.exception.NoRight;
 import moneybuddy.fr.moneybuddy.exception.SubAccountNotFoundException;
 import moneybuddy.fr.moneybuddy.exception.TaskNotFoundException;
@@ -127,11 +132,46 @@ public class TaskService {
     return ResponseEntity.status(HttpStatus.ACCEPTED).body(tasks);
   }
 
-  public ResponseEntity<TaskWithHistory> getTask(String id) {
+  public ResponseEntity<TaskWithSubAccountsDto> getTask(String id) {
     TaskWithHistory task =
         taskWithHistoryRepository.findById(id).orElseThrow(() -> new TaskNotFoundException(id));
 
-    return ResponseEntity.status(HttpStatus.ACCEPTED).body(task);
+    // Chargement batch des deux sous-comptes en une seule requête pour éviter le N+1
+    List<String> subAccountIds =
+        Stream.of(task.getSubaccountIdChild(), task.getSubaccountIdParent())
+            .filter(sid -> sid != null && !sid.isEmpty())
+            .distinct()
+            .collect(Collectors.toList());
+
+    Map<String, SubAccount> subAccountMap =
+        subAccountRepository.findAllById(subAccountIds).stream()
+            .collect(Collectors.toMap(SubAccount::getId, Function.identity()));
+
+    TaskWithSubAccountsDto dto =
+        TaskWithSubAccountsDto.builder()
+            .id(task.getId())
+            .subaccountIdParent(task.getSubaccountIdParent())
+            .subaccountIdChild(task.getSubaccountIdChild())
+            .accountId(task.getAccountId())
+            .description(task.getDescription())
+            .type(task.getType())
+            .status(task.getStatus())
+            .preValidate(task.isPreValidate())
+            .disable(task.isDisable())
+            .income(task.getIncome())
+            .weeklyDays(task.getWeeklyDays())
+            .monthlyDay(task.getMonthlyDay())
+            .moneyReward(task.getMoneyReward())
+            .coinReward(task.getCoinReward())
+            .dateLimit(task.getDateLimit())
+            .createdAt(task.getCreatedAt())
+            .updatedAt(task.getUpdatedAt())
+            .taskHistory(task.getTaskHistory())
+            .childSubAccount(subAccountMap.get(task.getSubaccountIdChild()))
+            .parentSubAccount(subAccountMap.get(task.getSubaccountIdParent()))
+            .build();
+
+    return ResponseEntity.status(HttpStatus.ACCEPTED).body(dto);
   }
 
   public ResponseEntity<AuthResponse> deleteTask(String token, String taskId) {

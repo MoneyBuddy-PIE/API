@@ -9,10 +9,10 @@ import java.util.List;
 import java.util.Optional;
 
 import lombok.RequiredArgsConstructor;
-import moneybuddy.fr.moneybuddy.dtos.AuthResponse;
 import moneybuddy.fr.moneybuddy.dtos.CreateGoalRequest;
 import moneybuddy.fr.moneybuddy.dtos.GoalMoneyRequest;
 import moneybuddy.fr.moneybuddy.dtos.GoalRequest;
+import moneybuddy.fr.moneybuddy.dtos.ResponseDto;
 import moneybuddy.fr.moneybuddy.exception.GoalAlreadyCompletedException;
 import moneybuddy.fr.moneybuddy.exception.GoalAlreadyUsedException;
 import moneybuddy.fr.moneybuddy.exception.GoalAmountExceededException;
@@ -47,7 +47,7 @@ public class GoalService {
   private final JwtService jwtService;
   private final Operations operations;
 
-  public ResponseEntity<AuthResponse> createGoal(CreateGoalRequest request, String token) {
+  public ResponseEntity<ResponseDto> createGoal(CreateGoalRequest request, String token) {
     String subAccountId = jwtService.extractSubAccountId(token);
     String accountId = jwtService.extractSubAccountAccountId(token);
 
@@ -55,7 +55,7 @@ public class GoalService {
         Goal.builder()
             .name(request.getName())
             .amount(request.getAmount())
-            .emoji(request.getEmoji() != null ? request.getEmoji() : null)
+            .emoji(request.getEmoji())
             .subaccountIdChild(subAccountId)
             .accountId(accountId)
             .createdAt(LocalDateTime.now())
@@ -63,7 +63,11 @@ public class GoalService {
 
     goalRepository.save(goal);
     return ResponseEntity.status(HttpStatus.CREATED)
-        .body(AuthResponse.builder().error("Objectif d'épargne créé avec succès").build());
+        .body(
+            ResponseDto.builder()
+                .message("Objectif d'épargne créé avec succès")
+                .status(HttpStatus.CREATED)
+                .build());
   }
 
   public ResponseEntity<Goal> modifyGoal(GoalRequest request, String token, String goalId) {
@@ -88,14 +92,13 @@ public class GoalService {
     return ResponseEntity.status(HttpStatus.OK).body(updatedGoal);
   }
 
-  public ResponseEntity<Goal> getGoal(String id) {
+  public ResponseEntity<Goal> getGoal(String token, String id) {
     Goal goal = goalRepository.findById(id).orElseThrow(() -> new GoalNotFoundException(id));
-
     return ResponseEntity.status(HttpStatus.OK).body(goal);
   }
 
   public ResponseEntity<String> deleteGoal(String token, String goalId) {
-    String subAccountId = jwtService.extractSubAccountAccountId(token);
+    String subAccountId = jwtService.extractSubAccountId(token);
 
     goalRepository.findById(goalId).orElseThrow(() -> new GoalNotFoundException(goalId));
 
@@ -273,8 +276,8 @@ public class GoalService {
 
     // Effectuer le transfert
     if (GoalStatus.DONE.equals(goal.getGoalStatus())
-        && goal.getDepositStatement().doubleValue() == goal.getAmount().doubleValue()
-        && goal.getProgression().intValue() == 100) {
+        && goal.getDepositStatement().compareTo(goal.getAmount()) == 0
+        && goal.getProgression().intValue() >= 100) {
       operations.updateGoalTransactionHistory(
           goal, TransactionType.DEBIT, goal.getAmount(), goal.getAmount());
       operations.updateAccountBalanceMoney(
