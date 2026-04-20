@@ -22,7 +22,6 @@ public class AddMoney {
   @NotBlank(message = "SubAccountId est obligatoire")
   private String subAccountId;
 
-  // @NotBlank ne fonctionne que sur String — utiliser @NotNull + @Positive sur BigDecimal
   @NotNull(message = "Le montant est obligatoire")
   @Positive(message = "Le montant doit être supérieur à zéro")
   private BigDecimal amount;
