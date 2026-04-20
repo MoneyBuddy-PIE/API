@@ -94,23 +94,6 @@ public class GoalService {
 
   public ResponseEntity<Goal> getGoal(String token, String id) {
     Goal goal = goalRepository.findById(id).orElseThrow(() -> new GoalNotFoundException(id));
-
-    // Vérification d'autorisation selon le rôle
-    if (!Role.ADMIN.equals(jwtService.extractAccountRole(token))) {
-      if (SubAccountRole.CHILD.equals(jwtService.extractSubAccountRole(token))) {
-        String subAccountId = jwtService.extractSubAccountId(token);
-        if (!subAccountId.equals(goal.getSubaccountIdChild())) {
-          throw new UnauthorizedGoalAccessException("Vous n'avez pas accès à cet objectif");
-        }
-      } else {
-        // PARENT ou OWNER : vérification par accountId
-        String accountId = jwtService.extractSubAccountAccountId(token);
-        if (!accountId.equals(goal.getAccountId())) {
-          throw new UnauthorizedGoalAccessException("Vous n'avez pas accès à cet objectif");
-        }
-      }
-    }
-
     return ResponseEntity.status(HttpStatus.OK).body(goal);
   }
 
