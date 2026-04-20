@@ -4,7 +4,6 @@
 package moneybuddy.fr.moneybuddy.utils.operations;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDateTime;
 
 import moneybuddy.fr.moneybuddy.dtos.Money.AddMoney;
@@ -29,13 +28,9 @@ public class Operations {
   }
 
   public void updateProgression(Goal goal, BigDecimal depositStatement) {
-    BigDecimal updateProgression =
-        depositStatement
-            .multiply(BigDecimal.valueOf(100))
-            .divide(goal.getAmount(), 2, RoundingMode.HALF_UP);
-    if (updateProgression.compareTo(BigDecimal.valueOf(100)) >= 0) {
-      goal.setGoalStatus(GoalStatus.DONE);
-    }
+    Number updateProgression =
+        depositStatement.multiply(BigDecimal.valueOf(100)).divide(goal.getAmount());
+    if (updateProgression.floatValue() == 100) goal.setGoalStatus(GoalStatus.DONE);
 
     goal.setProgression(updateProgression);
   }

@@ -96,7 +96,7 @@ public class AuthController {
   public ResponseEntity<AuthResponse> resetPasswordConfirm(
       @RequestBody AuthResetPassword request, @RequestHeader("Authorization") String authHeader) {
     String token = authHeader.substring(7);
-    return service.resetPasswordConfirm(request, token);
+    return service.restPasswordConfirm(request, token);
   }
 
   @PostMapping("/device")

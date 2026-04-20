@@ -68,7 +68,7 @@ public class AuthService {
     SubAccount subAccount =
         SubAccount.builder()
             .name(request.getName())
-            .pin(passwordEncoder.encode(request.getPin()))
+            .pin(request.getPin())
             .accountId(account.getId())
             .role(SubAccountRole.OWNER)
             .isActive(true)
@@ -136,16 +136,13 @@ public class AuthService {
 
     if (!subAccount.isActive()) throw new SubAccountDesactivated(subAccount.getId());
 
-    // Vérification du PIN null/vide en premier pour PARENT et OWNER avant toute comparaison
-    if (!SubAccountRole.CHILD.equals(subAccount.getRole())
-        && (pin == null || pin.isEmpty())) {
-      throw new InvalidPinException("Le code PIN est obligatoire pour ce type de compte");
+    if (!SubAccountRole.CHILD.equals(subAccount.getRole()) && !pin.equals(subAccount.getPin())) {
+      throw new InvalidPinException();
     }
 
-    // Vérification du PIN hashé pour les comptes non-enfant
-    if (!SubAccountRole.CHILD.equals(subAccount.getRole())
-        && !passwordEncoder.matches(pin, subAccount.getPin())) {
-      throw new InvalidPinException();
+    if (SubAccountRole.PARENT.equals(subAccount.getRole())
+        && (request.getPin() == null || request.getPin().isEmpty())) {
+      throw new InvalidPinException("Le code PIN est obligatoire pour un compte parent");
     }
 
     var jwtToken =
@@ -181,7 +178,7 @@ public class AuthService {
     return ResponseEntity.status(HttpStatus.OK).body(null);
   }
 
-  public ResponseEntity<AuthResponse> resetPasswordConfirm(AuthResetPassword request, String token) {
+  public ResponseEntity<AuthResponse> restPasswordConfirm(AuthResetPassword request, String token) {
     String accountId = jwtService.extractUsername(token);
     Account account =
         repository
@@ -195,7 +192,7 @@ public class AuthService {
       throw new SubAccountNotFoundException("Compte propriétaire introuvable");
     }
 
-    if (!passwordEncoder.matches(request.getPin(), subAccount.getPin())) {
+    if (!subAccount.getPin().equals(request.getPin())) {
       throw new InvalidPinException();
     }
 

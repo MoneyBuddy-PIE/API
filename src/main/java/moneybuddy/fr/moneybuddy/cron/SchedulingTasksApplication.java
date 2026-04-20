@@ -13,10 +13,12 @@ import moneybuddy.fr.moneybuddy.model.enums.TaskStatus;
 import moneybuddy.fr.moneybuddy.model.enums.TaskType;
 import moneybuddy.fr.moneybuddy.repository.TaskRepository;
 import moneybuddy.fr.moneybuddy.service.DiscordService;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
 
-@Component
+@SpringBootApplication
+@EnableScheduling
 @RequiredArgsConstructor
 public class SchedulingTasksApplication {
 

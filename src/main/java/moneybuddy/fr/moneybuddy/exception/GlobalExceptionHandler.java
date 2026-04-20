@@ -7,12 +7,14 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import jakarta.validation.UnexpectedTypeException;
 import moneybuddy.fr.moneybuddy.dtos.ErrorResponse;
 import moneybuddy.fr.moneybuddy.service.DiscordService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
@@ -62,6 +64,38 @@ public class GlobalExceptionHandler {
             .errorCode("VALIDATION_ERROR")
             .path(request.getDescription(false).replace("uri=", ""))
             .validationErrors(validationErrors)
+            .build();
+
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+  }
+
+  @ExceptionHandler(MissingServletRequestParameterException.class)
+  public ResponseEntity<ErrorResponse> handleMissingParam(
+      MissingServletRequestParameterException ex, WebRequest request) {
+    ErrorResponse errorResponse =
+        ErrorResponse.builder()
+            .timestamp(LocalDateTime.now())
+            .status(HttpStatus.BAD_REQUEST.value())
+            .error("Paramètre manquant")
+            .message("Le paramètre '" + ex.getParameterName() + "' est obligatoire")
+            .errorCode("MISSING_PARAMETER")
+            .path(request.getDescription(false).replace("uri=", ""))
+            .build();
+
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+  }
+
+  @ExceptionHandler(UnexpectedTypeException.class)
+  public ResponseEntity<ErrorResponse> handleUnexpectedTypeException(
+      UnexpectedTypeException ex, WebRequest request) {
+    ErrorResponse errorResponse =
+        ErrorResponse.builder()
+            .timestamp(LocalDateTime.now())
+            .status(HttpStatus.BAD_REQUEST.value())
+            .error("Erreur de validation")
+            .message("Contrainte de validation incompatible avec le type du champ")
+            .errorCode("VALIDATION_TYPE_ERROR")
+            .path(request.getDescription(false).replace("uri=", ""))
             .build();
 
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
