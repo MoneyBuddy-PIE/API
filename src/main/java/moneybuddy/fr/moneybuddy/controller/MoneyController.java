@@ -31,7 +31,7 @@ public class MoneyController {
       @Valid @RequestBody AddMoney request,
       @RequestHeader("Authorization") String authHeader,
       BindingResult bindingResult,
-      @RequestParam(required = true) Boolean isAdd) {
+      @RequestParam(required = false, defaultValue = "true") Boolean isAdd) {
     if (bindingResult.hasErrors()) {
       return validatorResult.returnErrorMessage(bindingResult);
     }
