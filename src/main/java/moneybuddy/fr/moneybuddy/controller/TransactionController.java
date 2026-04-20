@@ -34,8 +34,11 @@ public class TransactionController {
   }
 
   @GetMapping("/goal/{goalId}")
-  public ResponseEntity<List<Transaction>> getSingleGoalTransactions(@PathVariable String goalId) {
+  public ResponseEntity<List<Transaction>> getSingleGoalTransactions(
+      @RequestHeader("Authorization") String authHeader,
+      @PathVariable String goalId) {
+    String token = authHeader.substring(7);
     return ResponseEntity.status(HttpStatus.OK)
-        .body(transactionService.getTransactionByGoalId(goalId));
+        .body(transactionService.getTransactionByGoalId(token, goalId));
   }
 }

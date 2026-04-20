@@ -19,6 +19,7 @@ import moneybuddy.fr.moneybuddy.repository.AccountRepository;
 import moneybuddy.fr.moneybuddy.repository.SubAccountRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -31,6 +32,7 @@ public class SubAccountService {
   private final UserProgressService userProgressService;
   private final JwtService jwtService;
   private final DiscordService discordService;
+  private final PasswordEncoder passwordEncoder;
 
   public ResponseEntity<AuthResponse> response(String message, HttpStatus status) {
     return ResponseEntity.status(status).body(AuthResponse.builder().error(message).build());
@@ -61,7 +63,7 @@ public class SubAccountService {
             .accountId(accountId)
             .isActive(true)
             .role(subAccountDto.getRole())
-            .pin(subAccountDto.getPin())
+            .pin(passwordEncoder.encode(subAccountDto.getPin()))
             .createdAt(LocalDateTime.now())
             .build();
 

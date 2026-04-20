@@ -5,6 +5,7 @@ package moneybuddy.fr.moneybuddy.service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 
 import lombok.AllArgsConstructor;
@@ -68,7 +69,7 @@ public class AllowanceService {
     String accountId = jwtService.extractSubAccountAccountId(token);
     return allowanceRepository
         .findAllByAccountId(accountId)
-        .orElseThrow(() -> new AllowanceNotFoundException());
+        .orElse(Collections.emptyList());
   }
 
   public Allowance getById(String id) {

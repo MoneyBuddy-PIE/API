@@ -7,19 +7,16 @@ import java.time.LocalDate;
 import java.util.List;
 
 import lombok.RequiredArgsConstructor;
-import moneybuddy.fr.moneybuddy.exception.CronException;
 import moneybuddy.fr.moneybuddy.model.Allowance;
 import moneybuddy.fr.moneybuddy.model.SubAccount;
 import moneybuddy.fr.moneybuddy.repository.AllowanceRepository;
 import moneybuddy.fr.moneybuddy.service.DiscordService;
 import moneybuddy.fr.moneybuddy.service.IncomeService;
 import moneybuddy.fr.moneybuddy.utils.CalculateNextExecution;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 
-@SpringBootApplication
-@EnableScheduling
+@Component
 @RequiredArgsConstructor
 public class SchedulingAllowanceApplication {
 
@@ -35,7 +32,7 @@ public class SchedulingAllowanceApplication {
     List<Allowance> allowances =
         allowanceRepository
             .findByActiveTrueAndNextExecutionIsNullOrNextExecutionEquals(today)
-            .orElseThrow(() -> new CronException("Allowances pas trouvé"));
+            .orElse(java.util.Collections.emptyList());
 
     discordService.SendMessage(
         "CRON JOB - Distribution de l'allocation ! Nombre : " + allowances.size());

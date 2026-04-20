@@ -32,11 +32,13 @@ public class MoneyService {
             .findById(request.getSubAccountId())
             .orElseThrow(() -> new IllegalArgumentException("SubAccount non trouvé"));
 
+    // Un compte enfant ne peut ajouter de l'argent qu'à son propre sous-compte
+    String tokenSubAccountId = jwtService.extractSubAccountId(token);
     if (SubAccountRole.CHILD.equals(jwtService.extractSubAccountRole(token))
         && isAdd
-        && !request.getSubAccountId().equals(subAccount.getId())) throw new NoRight();
+        && !request.getSubAccountId().equals(tokenSubAccountId)) throw new NoRight();
 
-    String parentId = jwtService.extractSubAccountId(token);
+    String parentId = tokenSubAccountId;
     String accountId = jwtService.extractSubAccountAccountId(token);
 
     BigDecimal amount;

@@ -95,7 +95,7 @@ public class GoalService {
   }
 
   public ResponseEntity<String> deleteGoal(String token, String goalId) {
-    String subAccountId = jwtService.extractSubAccountAccountId(token);
+    String subAccountId = jwtService.extractSubAccountId(token);
 
     goalRepository.findById(goalId).orElseThrow(() -> new GoalNotFoundException(goalId));
 
@@ -273,8 +273,9 @@ public class GoalService {
 
     // Effectuer le transfert
     if (GoalStatus.DONE.equals(goal.getGoalStatus())
-        && goal.getDepositStatement().doubleValue() == goal.getAmount().doubleValue()
-        && goal.getProgression().intValue() == 100) {
+        && goal.getDepositStatement().compareTo(goal.getAmount()) == 0
+        && new java.math.BigDecimal(goal.getProgression().toString())
+                .compareTo(java.math.BigDecimal.valueOf(100)) >= 0) {
       operations.updateGoalTransactionHistory(
           goal, TransactionType.DEBIT, goal.getAmount(), goal.getAmount());
       operations.updateAccountBalanceMoney(
