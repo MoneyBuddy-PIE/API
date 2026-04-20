@@ -49,7 +49,7 @@ public class UserProgressService {
         .orElseThrow(() -> new UserProgressNotFoundException(subAccountId));
   }
 
-  private boolean checkIfAllSectionOfCourseCompleted(Course course, CourseProgress courseProgress) {
+  private boolean completeIfAllSectionsFinished(Course course, CourseProgress courseProgress) {
     boolean allSectionsCompleted =
         course.getSections().values().stream()
             .allMatch(
@@ -112,13 +112,14 @@ public class UserProgressService {
     if (sectionProgress.isCompleted()) return CompletedCourse.ALREADY_COMPLETED;
 
     sectionProgress.setCompleted(true);
+    sectionProgress.setCompletedAt(LocalDateTime.now());
     sectionProgress.setScore(score);
+
     courseProgress.getSectionProgress().put(section.getId(), sectionProgress);
+    completeIfAllSectionsFinished(course, courseProgress);
 
-    checkIfAllSectionOfCourseCompleted(course, courseProgress);
-
-    userProgress.getChapterProgress().put(chapterId, chapterProgress);
     chapterProgress.getCourseProgress().put(courseId, courseProgress);
+    userProgress.getChapterProgress().put(chapterId, chapterProgress);
     userProgress.setUpdatedAt(LocalDateTime.now());
 
     userProgressRepository.save(userProgress);
@@ -127,7 +128,17 @@ public class UserProgressService {
 
   public CompletedCourse markCourseAsCompleted(SubAccount subAccount, Course course) {
     UserProgress userProgress = getBySubAccountId(subAccount.getId());
-    ChapterProgress chapterProgress = userProgress.getChapterProgress().get(course.getChapterId());
+
+    String chapterId = course.getChapterId();
+    ChapterProgress chapterProgress =
+        userProgress
+            .getChapterProgress()
+            .getOrDefault(
+                chapterId,
+                ChapterProgress.builder()
+                    .chapterId(chapterId)
+                    .courseProgress(new HashMap<>())
+                    .build());
 
     CourseProgress courseProgress =
         chapterProgress
@@ -136,20 +147,18 @@ public class UserProgressService {
                 course.getId(),
                 CourseProgress.builder()
                     .courseId(course.getId())
+                    .chapterId(chapterId)
                     .sectionProgress(new HashMap<>())
                     .build());
 
     if (courseProgress.isCompleted()) return CompletedCourse.ALREADY_COMPLETED;
 
-    boolean AllSectionsCompleted = checkIfAllSectionOfCourseCompleted(course, courseProgress);
+    boolean allSectionsCompleted = completeIfAllSectionsFinished(course, courseProgress);
 
-    if (!AllSectionsCompleted) return CompletedCourse.NOT_ENOUGH_SECTION_COMPLETED;
-
-    courseProgress.setCompleted(AllSectionsCompleted);
-    courseProgress.setCompletedAt(LocalDateTime.now());
+    if (!allSectionsCompleted) return CompletedCourse.NOT_ENOUGH_SECTION_COMPLETED;
 
     chapterProgress.getCourseProgress().put(course.getId(), courseProgress);
-    userProgress.getChapterProgress().put(chapterProgress.getChapterId(), chapterProgress);
+    userProgress.getChapterProgress().put(chapterId, chapterProgress);
     userProgress.setUpdatedAt(LocalDateTime.now());
 
     userProgressRepository.save(userProgress);
@@ -161,7 +170,15 @@ public class UserProgressService {
 
   public void markChapterAsCompleted(SubAccount subAccount, Chapter chapter) {
     UserProgress userProgress = getBySubAccountId(subAccount.getId());
-    ChapterProgress chapterProgress = userProgress.getChapterProgress().get(chapter.getId());
+    ChapterProgress chapterProgress =
+        userProgress
+            .getChapterProgress()
+            .getOrDefault(
+                chapter.getId(),
+                ChapterProgress.builder()
+                    .chapterId(chapter.getId())
+                    .courseProgress(new HashMap<>())
+                    .build());
 
     int courseCompleted = 0;
     for (CourseProgress c : chapterProgress.getCourseProgress().values())

@@ -38,10 +38,13 @@ public class ProgressOrchestratorService {
 
     CompletedCourse status = userProgressService.markCourseAsCompleted(subAccount, course);
 
-    if (subAccount.getRole() == SubAccountRole.CHILD)
-      coinService.updateCoin(subAccount, course.getCoinReward(), true);
+    if (status == CompletedCourse.COMPLETED) {
+      if (subAccount.getRole() == SubAccountRole.CHILD)
+        coinService.updateCoin(subAccount, course.getCoinReward(), true);
 
-    completeChapter(subAccount, course.getChapterId());
+      completeChapter(subAccount, course.getChapterId());
+    }
+
     return status;
   }
 
