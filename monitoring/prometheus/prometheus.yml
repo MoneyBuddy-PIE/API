@@ -1,3 +1,11 @@
+global:
+  scrape_interval: 60s
+remote_write:
+  - url: https://prometheus-prod-55-prod-gb-south-1.grafana.net/api/prom/push
+    basic_auth:
+      username: 2894369
+      password: glc_eyJvIjoiMTYzMjA2MiIsIm4iOiJzdGFjay0xNDg1MDY4LWFsbG95LXByb21ldGhldXNfbW9uZXlidWRkeSIsImsiOiJIODhZVjk4WU9zaDVhMVN5bUozejZsODkiLCJtIjp7InIiOiJwcm9kLWdiLXNvdXRoLTEifX0=
+
 scrape_configs:
   - job_name: "moneybuddy"
     metrics_path: "/actuator/prometheus"
