@@ -39,7 +39,7 @@ public class UserProgressController {
   }
 
   @PutMapping("/section/{sectionId}")
-  public ResponseEntity<ResponseDto> completeCourse(
+  public ResponseEntity<ResponseDto> completeSection(
       @RequestHeader("Authorization") String authHeader,
       @Valid @RequestBody CompleteSection req,
       @PathVariable String sectionId) {
