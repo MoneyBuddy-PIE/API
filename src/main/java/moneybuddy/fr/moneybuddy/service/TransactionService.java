@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 public class TransactionService {
   private final SubAccountService subAccountService;
   private final TransactionRepository transactionRepository;
+  private final JwtService jwtService;
   private final Utils utils;
 
   public Page<Transaction> getAllTransactions(
@@ -36,11 +37,37 @@ public class TransactionService {
     return transactions;
   }
 
-  public List<Transaction> getTransactions(String token, String subAccountId, boolean isGoal) {
-    List<Transaction> transactions =
-        isGoal
-            ? transactionRepository.findByChildAndGoal(subAccountId)
-            : transactionRepository.findAllByChildId(subAccountId);
+  public Page<Transaction> getTransactions(
+      String token,
+      String subAccountIdParams,
+      boolean isGoal,
+      int page,
+      int size,
+      String sortBy,
+      String sortDir) {
+    SubAccountRole subAccountRole = jwtService.extractSubAccountRole(token);
+    subAccountRole =
+        subAccountRole.equals(SubAccountRole.OWNER) ? SubAccountRole.PARENT : subAccountRole;
+    String accountId = jwtService.extractSubAccountAccountId(token);
+    String subAccountId = jwtService.extractSubAccountId(token);
+
+    Pageable pageable = utils.pagination(page, size, sortBy, sortDir);
+    Page<Transaction> transactions;
+
+    if (subAccountRole.equals(SubAccountRole.PARENT)) {
+      transactions =
+          isGoal
+              ? transactionRepository.findByAccountIdAndGoal(accountId, pageable)
+              : subAccountIdParams != null
+                  ? transactionRepository.findAllByAccountIdAndChildId(
+                      accountId, subAccountIdParams, pageable)
+                  : transactionRepository.findAllByAccountId(accountId, pageable);
+    } else {
+      transactions =
+          isGoal
+              ? transactionRepository.findByChildIdAndGoal(subAccountId, pageable)
+              : transactionRepository.findAllByChildId(subAccountId, pageable);
+    }
 
     return transactions;
   }
@@ -64,9 +91,7 @@ public class TransactionService {
   }
 
   public List<Transaction> getTransactionByGoalId(String goalId) {
-
-    List<Transaction> transactions = transactionRepository.findAllByGoalId(goalId);
-    return transactions;
+    return transactionRepository.findAllByGoalId(goalId);
   }
 
   public void createTransaction(Transaction transaction) {

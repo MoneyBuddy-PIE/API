@@ -15,14 +15,18 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface TransactionRepository extends MongoRepository<Transaction, String> {
 
-  List<Transaction> findAllByChildId(String childId);
+  @Query(value = "{ 'goalId': { $ne: null }}")
+  Page<Transaction> findByChildIdAndGoal(String childId, Pageable pageable);
 
   @Query(value = "{ 'goalId': { $ne: null }}")
-  List<Transaction> findByChildAndGoal(String childId);
+  Page<Transaction> findByAccountIdAndGoal(String accountId, Pageable pageable);
 
   List<Transaction> findAllByGoalId(String goalId);
 
   Page<Transaction> findAllByAccountId(String accountId, Pageable pageable);
+
+  Page<Transaction> findAllByAccountIdAndChildId(
+      String accountId, String childId, Pageable pageable);
 
   Page<Transaction> findAllByParentId(String parentId, Pageable pageable);
 

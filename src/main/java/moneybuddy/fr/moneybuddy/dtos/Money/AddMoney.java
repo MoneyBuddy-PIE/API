@@ -26,6 +26,9 @@ public class AddMoney {
   @Positive(message = "Le montant doit être supérieur à zéro")
   private BigDecimal amount;
 
+  @NotBlank(message = "Emoji est obligatoire")
+  private String emoji;
+
   private String description;
   private String goalId;
 }

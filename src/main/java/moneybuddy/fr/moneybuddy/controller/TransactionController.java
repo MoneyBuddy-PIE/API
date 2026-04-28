@@ -8,6 +8,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import moneybuddy.fr.moneybuddy.model.Transaction;
 import moneybuddy.fr.moneybuddy.service.TransactionService;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,14 +24,20 @@ import org.springframework.web.bind.annotation.RestController;
 public class TransactionController {
   private final TransactionService transactionService;
 
-  @GetMapping("/subAccount/{subAccountId}")
-  public ResponseEntity<List<Transaction>> getTransactions(
+  @GetMapping("/subAccount")
+  public ResponseEntity<Page<Transaction>> getTransactions(
       @RequestHeader("Authorization") String authHeader,
-      @PathVariable String subAccountId,
-      @RequestParam(required = false) boolean isGoal) {
+      @RequestParam(required = false) String subAccountId,
+      @RequestParam(required = false) boolean isGoal,
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "50") int size,
+      @RequestParam(defaultValue = "createdAt") String sortBy,
+      @RequestParam(defaultValue = "desc") String sortDir) {
     String token = authHeader.substring(7);
     return ResponseEntity.status(HttpStatus.OK)
-        .body(transactionService.getTransactions(token, subAccountId, isGoal));
+        .body(
+            transactionService.getTransactions(
+                token, subAccountId, isGoal, page, size, sortBy, sortDir));
   }
 
   @GetMapping("/goal/{goalId}")

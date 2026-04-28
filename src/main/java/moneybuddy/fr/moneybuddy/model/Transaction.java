@@ -38,4 +38,5 @@ public class Transaction {
   private String oldAmount;
   private String newAmount;
   private String description;
+  private String emoji;
 }

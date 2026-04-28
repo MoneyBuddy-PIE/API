@@ -16,14 +16,13 @@ import moneybuddy.fr.moneybuddy.model.enums.SubAccountRole;
 import moneybuddy.fr.moneybuddy.model.enums.TransactionCategory;
 import moneybuddy.fr.moneybuddy.model.enums.TransactionType;
 import moneybuddy.fr.moneybuddy.repository.SubAccountRepository;
-import moneybuddy.fr.moneybuddy.repository.TransactionRepository;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
 public class MoneyService {
   private final SubAccountRepository subAccountRepository;
-  private final TransactionRepository transactionRepository;
+  private final TransactionService transactionService;
   private final JwtService jwtService;
 
   public void updateMoney(AddMoney request, String token, boolean isAdd) {
@@ -67,10 +66,12 @@ public class MoneyService {
             .oldAmount(String.valueOf(currentBalance))
             .newAmount(String.valueOf(newBalance))
             .description(request.getDescription())
+            .emoji(request.getEmoji())
             .type(isAdd ? TransactionType.CREDIT : TransactionType.DEBIT)
             .category(TransactionCategory.MONEY)
             .createdAt(LocalDateTime.now())
             .build();
-    transactionRepository.save(transaction);
+
+    transactionService.createTransaction(transaction);
   }
 }

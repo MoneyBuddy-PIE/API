@@ -13,14 +13,13 @@ import moneybuddy.fr.moneybuddy.model.Transaction;
 import moneybuddy.fr.moneybuddy.model.enums.TransactionCategory;
 import moneybuddy.fr.moneybuddy.model.enums.TransactionType;
 import moneybuddy.fr.moneybuddy.repository.SubAccountRepository;
-import moneybuddy.fr.moneybuddy.repository.TransactionRepository;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
 public class CoinService {
   private final SubAccountRepository subAccountRepository;
-  private final TransactionRepository transactionRepository;
+  private final TransactionService transactionService;
 
   public int updateCoin(SubAccount subAccount, int coin, boolean isAdd) {
     int currentCoin = subAccount.getCoin();
@@ -38,10 +37,31 @@ public class CoinService {
     return currentCoin;
   }
 
-  public void updateCoinForTask(SubAccount subAccount, Task task, boolean isAdd) {
+  public void updateCoinForCourseOrChapter(
+      SubAccount subAccount, int coinReward, String description) {
+    if (coinReward == 0) return;
+
+    int currentBalance = updateCoin(subAccount, coinReward, true);
+
+    Transaction transaction =
+        Transaction.builder()
+            .childId(subAccount.getId())
+            .accountId(subAccount.getAccountId())
+            .amount(String.valueOf(coinReward))
+            .oldAmount(String.valueOf(currentBalance))
+            .newAmount(String.valueOf(subAccount.getCoin()))
+            .description(description)
+            .type(TransactionType.CREDIT)
+            .category(TransactionCategory.COIN)
+            .createdAt(LocalDateTime.now())
+            .build();
+    transactionService.createTransaction(transaction);
+  }
+
+  public void updateCoinForTask(SubAccount subAccount, Task task) {
     if (task.getCoinReward() == 0) return;
 
-    int currentBalance = updateCoin(subAccount, task.getCoinReward(), isAdd);
+    int currentBalance = updateCoin(subAccount, task.getCoinReward(), true);
 
     Transaction transaction =
         Transaction.builder()
@@ -52,10 +72,10 @@ public class CoinService {
             .oldAmount(String.valueOf(currentBalance))
             .newAmount(String.valueOf(subAccount.getCoin()))
             .description(task.getDescription())
-            .type(isAdd ? TransactionType.CREDIT : TransactionType.DEBIT)
+            .type(TransactionType.CREDIT)
             .category(TransactionCategory.COIN)
             .createdAt(LocalDateTime.now())
             .build();
-    transactionRepository.save(transaction);
+    transactionService.createTransaction(transaction);
   }
 }
