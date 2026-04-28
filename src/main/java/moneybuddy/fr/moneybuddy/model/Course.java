@@ -29,7 +29,9 @@ public class Course {
   private String image_url;
   private String title;
   private int readTime;
+
   private int order;
+  private int level;
   private int coinReward;
 
   @JsonIgnore @DBRef @Builder.Default private Map<String, Ressource> ressource = new HashMap<>();

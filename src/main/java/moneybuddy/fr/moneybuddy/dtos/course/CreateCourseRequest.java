@@ -33,4 +33,10 @@ public class CreateCourseRequest {
 
   @NotNull(message = "Image is mandatory")
   private MultipartFile file;
+
+  @PositiveOrZero(message = "CoinReward has to be >= 0")
+  private int coinReward;
+
+  @PositiveOrZero(message = "Level has to be >= 0")
+  private int level;
 }

@@ -14,6 +14,7 @@ import moneybuddy.fr.moneybuddy.exception.ChapterNotFound;
 import moneybuddy.fr.moneybuddy.exception.CourseNotFoundException;
 import moneybuddy.fr.moneybuddy.model.Chapter;
 import moneybuddy.fr.moneybuddy.model.Course;
+import moneybuddy.fr.moneybuddy.model.enums.SubAccountRole;
 import moneybuddy.fr.moneybuddy.repository.ChapterRepository;
 import moneybuddy.fr.moneybuddy.repository.CourseRepository;
 import moneybuddy.fr.moneybuddy.repository.QuizRepository;
@@ -86,6 +87,11 @@ public class CourseService {
 
     String image_url = cloudflareService.uploadImage(req.getFile());
     course.setImage_url(image_url);
+
+    if (chapter.getSubAccountRole().equals(SubAccountRole.CHILD)) {
+      course.setCoinReward(req.getCoinReward());
+      course.setLevel(req.getLevel());
+    }
 
     courseRepository.save(course);
     chapterService.addCourseToChapter(chapter, course);
