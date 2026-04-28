@@ -40,7 +40,10 @@ public class ProgressOrchestratorService {
 
     if (status == CompletedCourse.COMPLETED) {
       if (subAccount.getRole() == SubAccountRole.CHILD)
-        coinService.updateCoin(subAccount, course.getCoinReward(), true);
+        coinService.updateCoinForCourseOrChapter(
+            subAccount,
+            course.getCoinReward(),
+            String.format("Cours %s complété !", course.getTitle()));
 
       completeChapter(subAccount, course.getChapterId());
     }
@@ -54,6 +57,9 @@ public class ProgressOrchestratorService {
     userProgressService.markChapterAsCompleted(subAccount, chapter);
 
     if (subAccount.getRole() == SubAccountRole.CHILD)
-      coinService.updateCoin(subAccount, chapter.getCoinReward(), true);
+      coinService.updateCoinForCourseOrChapter(
+          subAccount,
+          chapter.getCoinReward(),
+          String.format("Chapitre %s complété !", chapter.getTitle()));
   }
 }

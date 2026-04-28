@@ -197,7 +197,7 @@ public class TaskService {
 
     if (req.isDone()) {
       incomeService.increaseSubAccountIncome(subAccount, task.getMoneyReward(), task);
-      coinService.updateCoinForTask(subAccount, task, true);
+      coinService.updateCoinForTask(subAccount, task);
       task.setStatus(TaskStatus.COMPLETED);
     }
 

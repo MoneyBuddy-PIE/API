@@ -54,6 +54,7 @@ public class IncomeService {
             .description(income.getTask().getDescription())
             .incomeId(income.getId())
             .build();
+
     transactionService.createTransaction(transaction);
   }
 

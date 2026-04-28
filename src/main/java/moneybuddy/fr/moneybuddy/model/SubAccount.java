@@ -42,6 +42,7 @@ public class SubAccount {
   @Builder.Default private BigDecimal money = BigDecimal.ZERO.setScale(2);
   @Builder.Default private BigDecimal income = BigDecimal.ZERO.setScale(2);
   @Builder.Default private int coin = 0;
+  @Builder.Default private int energy = 5;
 
   @Builder.Default private String iconStyle = "bottts-neutral";
   @Builder.Default private String iconName = "Mason";
