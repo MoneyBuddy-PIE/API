@@ -121,9 +121,6 @@ public class ChapterService {
       throws FileUploadException, JsonMappingException, JsonProcessingException {
     Chapter chapter = getTotalChapter(chapterId);
 
-    chapter.setOrder(Optional.ofNullable(req.getOrder()).orElse(chapter.getOrder()));
-    chapter.setLevel(Optional.ofNullable(req.getLevel()).orElse(chapter.getLevel()));
-    chapter.setCoinReward(Optional.ofNullable(req.getCoinReward()).orElse(chapter.getCoinReward()));
     chapter.setLocked(Optional.ofNullable(req.isLocked()).orElse(chapter.isLocked()));
 
     if (!req.getTitle().isEmpty()) chapter.setTitle(req.getTitle());
@@ -136,6 +133,14 @@ public class ChapterService {
       cloudflareService.remove(chapter.getImage_url());
       chapter.setImage_url(image_url);
     }
+
+    if (req.getSubAccountRole().equals(SubAccountRole.CHILD)) {
+      chapter.setOrder(Optional.ofNullable(req.getOrder()).orElse(chapter.getOrder()));
+      chapter.setLevel(Optional.ofNullable(req.getLevel()).orElse(chapter.getLevel()));
+      chapter.setCoinReward(
+          Optional.ofNullable(req.getCoinReward()).orElse(chapter.getCoinReward()));
+    }
+
     return chapterRepository.save(chapter);
   }
 }

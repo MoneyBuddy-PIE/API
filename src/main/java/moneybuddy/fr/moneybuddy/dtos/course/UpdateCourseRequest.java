@@ -15,8 +15,14 @@ public class UpdateCourseRequest {
   @PositiveOrZero(message = "Readtime has to be > 0")
   private int readTime;
 
+  @PositiveOrZero(message = "Level has to be >= 0")
+  private int level;
+
   @PositiveOrZero(message = "Order has to be >= 0")
   private int order;
+
+  @PositiveOrZero(message = "coinReward has to be >= 0")
+  private int coinReward;
 
   private MultipartFile file;
 }

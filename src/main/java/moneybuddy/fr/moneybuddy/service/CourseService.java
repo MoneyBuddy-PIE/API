@@ -104,7 +104,6 @@ public class CourseService {
     Course course = getById(courseId);
 
     course.setReadTime(Optional.ofNullable(req.getReadTime()).orElse(course.getReadTime()));
-    course.setOrder(Optional.ofNullable(req.getOrder()).orElse(course.getOrder()));
     course.setLocked(Optional.ofNullable(req.isLocked()).orElse(course.isLocked()));
 
     if (!req.getTitle().isEmpty()) course.setTitle(req.getTitle());
@@ -114,6 +113,10 @@ public class CourseService {
       cloudflareService.remove(course.getImage_url());
       course.setImage_url(image_url);
     }
+
+    course.setOrder(Optional.ofNullable(req.getOrder()).orElse(course.getOrder()));
+    course.setLevel(Optional.ofNullable(req.getLevel()).orElse(course.getLevel()));
+    course.setCoinReward(Optional.ofNullable(req.getCoinReward()).orElse(course.getCoinReward()));
 
     courseRepository.save(course);
     return course;
