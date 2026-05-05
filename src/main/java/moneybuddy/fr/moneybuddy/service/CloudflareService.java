@@ -32,6 +32,7 @@ public class CloudflareService {
     DeleteObjectRequest deleteRequest =
         DeleteObjectRequest.builder().bucket(bucket_name).key(id).build();
     s3.deleteObject(deleteRequest);
+    System.out.println("Image delete : " + id);
   }
 
   public String uploadImage(MultipartFile file) throws FileUploadException {

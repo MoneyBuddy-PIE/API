@@ -129,9 +129,15 @@ public class QuizService {
     Quiz quiz = getById(quizId);
     Section section = getSection(quiz.getSectionId());
 
-    section.getQuiz().remove(quizId);
-    sectionRepository.save(section);
+    if (!quiz.getOptions().isEmpty() && QuizType.IMAGES.equals(quiz.getQuizType())) {
+      for (String option : quiz.getOptionsAsList()) {
+        cloudflareService.remove(option);
+      }
+    }
 
     quizRepository.delete(quiz);
+
+    section.getQuiz().remove(quizId);
+    sectionRepository.save(section);
   }
 }
