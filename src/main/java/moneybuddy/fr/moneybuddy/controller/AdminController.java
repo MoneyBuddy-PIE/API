@@ -206,14 +206,20 @@ public class AdminController {
   }
 
   // Quizzes
-  @PostMapping("/courses/sections/quizzes")
-  public ResponseEntity<Quiz> createQuiz(@Valid @RequestBody CreateQuizRequest req) {
+  @PostMapping(
+      value = "/courses/sections/quizzes",
+      consumes = org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE)
+  public ResponseEntity<Quiz> createQuiz(@Valid @ModelAttribute CreateQuizRequest req)
+      throws FileUploadException, JsonMappingException, JsonProcessingException {
     return ResponseEntity.status(HttpStatus.CREATED).body(quizService.createQuiz(req));
   }
 
-  @PutMapping("/courses/sections/quizzes/{quizId}")
+  @PutMapping(
+      value = "/courses/sections/quizzes/{quizId}",
+      consumes = org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<Quiz> updateQuiz(
-      @Valid @RequestBody UpdateQuizRequest req, @PathVariable String quizId) {
+      @Valid @ModelAttribute UpdateQuizRequest req, @PathVariable String quizId)
+      throws FileUploadException, JsonMappingException, JsonProcessingException {
     return ResponseEntity.status(HttpStatus.ACCEPTED).body(quizService.updateQuiz(quizId, req));
   }
 
