@@ -27,7 +27,6 @@ public class CreateChapterRequest {
   @PositiveOrZero(message = "Order must be positive or zero")
   private Integer order;
 
-  @PositiveOrZero(message = "Level must be positive or zero")
   private Integer level;
 
   @PositiveOrZero(message = "CoinReward must be positive or zero")
